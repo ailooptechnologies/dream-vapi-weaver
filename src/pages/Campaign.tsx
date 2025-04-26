@@ -62,6 +62,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils";
+import FileUpload from '@/components/FileUpload';
 
 interface CampaignFormValues {
   name: string;
@@ -78,6 +79,8 @@ interface CampaignFormValues {
   trainingData: string;
   trainingImages: string[];
   callLogs: CallLog[];
+  trainingFiles: File[];
+  trainingUrls: string[];
 }
 
 interface CallLog {
@@ -105,6 +108,7 @@ const Campaign = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLog, setSelectedLog] = useState<CallLog | null>(null);
   const [showSummaryDialog, setShowSummaryDialog] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   // Sample data (in a real app, this would come from API calls)
   const agents = [
@@ -134,6 +138,8 @@ const Campaign = () => {
       trainingData: '',
       trainingImages: [],
       callLogs: [],
+      trainingFiles: [],
+      trainingUrls: [],
     },
   });
 
@@ -288,6 +294,12 @@ const Campaign = () => {
     const minutes = Math.floor(duration / 60);
     const seconds = duration % 60;
     return `${minutes}m ${seconds}s`;
+  };
+
+  // Add file handling functions
+  const handleFileSelect = (files: File[]) => {
+    setSelectedFiles(prev => [...prev, ...files]);
+    form.setValue('trainingFiles', files);
   };
 
   return (
@@ -585,10 +597,12 @@ const Campaign = () => {
                                     <Calendar
                                       mode="single"
                                       selected={field.value}
-                                      onSelect={field.onChange}
+                                      onSelect={(date) => {
+                                        field.onChange(date);
+                                        form.setValue('scheduledDate', date);
+                                      }}
                                       disabled={(date) => date < new Date()}
                                       initialFocus
-                                      className={cn("p-3 pointer-events-auto")}
                                     />
                                   </PopoverContent>
                                 </Popover>
@@ -652,15 +666,62 @@ const Campaign = () => {
                           </FormItem>
                         )}
                       />
-                      
-                      {/* Add image upload section here */}
+
+                      <FormField
+                        control={form.control}
+                        name="trainingUrls"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Training URLs</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Enter URLs (one per line) for additional training data..."
+                                className="min-h-[100px]"
+                                {...field}
+                                onChange={(e) => field.onChange(e.target.value.split('\n').filter(Boolean))}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Enter one URL per line for additional training materials
+                            </FormDescription>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormItem>
+                        <FormLabel>Upload Training Files</FormLabel>
+                        <FileUpload onFilesSelected={handleFileSelect} />
+                        {selectedFiles.length > 0 && (
+                          <div className="mt-2 space-y-1">
+                            {selectedFiles.map((file, index) => (
+                              <div key={index} className="flex items-center justify-between text-sm">
+                                <span>{file.name}</span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newFiles = selectedFiles.filter((_, i) => i !== index);
+                                    setSelectedFiles(newFiles);
+                                    form.setValue('trainingFiles', newFiles);
+                                  }}
+                                >
+                                  Remove
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <FormDescription>
+                          Upload PDFs, documents, images, or videos to train the AI agent
+                        </FormDescription>
+                      </FormItem>
                     </TabsContent>
 
                     <TabsContent value="logs" className="space-y-4">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-2">
                           <Input
-                            placeholder="Search calls..."
+                            placeholder="Search by bot name or phone number..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-[300px]"
@@ -670,7 +731,7 @@ const Campaign = () => {
                               <SelectValue placeholder="Filter by status" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="all">All Statuses</SelectItem>
+                              <SelectItem value="">All Statuses</SelectItem>
                               <SelectItem value="connected">Connected</SelectItem>
                               <SelectItem value="disconnected">Disconnected</SelectItem>
                               <SelectItem value="busy">Busy</SelectItem>
@@ -696,7 +757,7 @@ const Campaign = () => {
                           <TableBody>
                             {callLogs
                               .filter(log => 
-                                (filterStatus === 'all' || log.status === filterStatus) &&
+                                (filterStatus === '' || log.status === filterStatus) &&
                                 (log.botName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                                  log.phoneNumber.includes(searchQuery))
                               )
@@ -884,59 +945,4 @@ const Campaign = () => {
             <h3 className="font-medium mb-2">No Campaigns Created</h3>
             <p className="text-sm text-muted-foreground mb-4">Create your first campaign to start making calls</p>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Your First Campaign
-                </Button>
-              </DialogTrigger>
-            </Dialog>
-          </div>
-        )}
-      </div>
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the selected campaign.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Call Summary Dialog */}
-      <Dialog open={showSummaryDialog} onOpenChange={setShowSummaryDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Call Summary</DialogTitle>
-            <DialogDescription>Summary of the call</DialogDescription>
-          </DialogHeader>
-          {selectedLog && (
-            <div>
-              <p><strong>Bot:</strong> {selectedLog.botName}</p>
-              <p><strong>Number:</strong> {selectedLog.phoneNumber}</p>
-              <p><strong>Status:</strong> {selectedLog.status}</p>
-              <p><strong>Duration:</strong> {formatDuration(selectedLog.duration)}</p>
-              <p><strong>Date:</strong> {format(selectedLog.timestamp, 'PPpp')}</p>
-              <p><strong>Summary:</strong> {selectedLog.summary}</p>
-            </div>
-          )}
-          <DialogFooter>
-            <Button onClick={() => setShowSummaryDialog(false)}>Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-};
-
-export default Campaign;
+              <Dialog
