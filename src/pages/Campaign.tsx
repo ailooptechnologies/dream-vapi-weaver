@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -350,7 +351,6 @@ const Campaign = () => {
                       <TabsTrigger value="agents">Agents & Contacts</TabsTrigger>
                       <TabsTrigger value="settings">Settings</TabsTrigger>
                       <TabsTrigger value="training">Training</TabsTrigger>
-                      <TabsTrigger value="logs">Logs</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="basic" className="space-y-4">
@@ -603,6 +603,7 @@ const Campaign = () => {
                                       }}
                                       disabled={(date) => date < new Date()}
                                       initialFocus
+                                      className={cn("p-3 pointer-events-auto")}
                                     />
                                   </PopoverContent>
                                 </Popover>
@@ -677,7 +678,7 @@ const Campaign = () => {
                               <Textarea 
                                 placeholder="Enter URLs (one per line) for additional training data..."
                                 className="min-h-[100px]"
-                                {...field}
+                                value={Array.isArray(field.value) ? field.value.join('\n') : ''}
                                 onChange={(e) => field.onChange(e.target.value.split('\n').filter(Boolean))}
                               />
                             </FormControl>
@@ -715,81 +716,6 @@ const Campaign = () => {
                           Upload PDFs, documents, images, or videos to train the AI agent
                         </FormDescription>
                       </FormItem>
-                    </TabsContent>
-
-                    <TabsContent value="logs" className="space-y-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center space-x-2">
-                          <Input
-                            placeholder="Search by bot name or phone number..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-[300px]"
-                          />
-                          <Select value={filterStatus} onValueChange={setFilterStatus}>
-                            <SelectTrigger className="w-[180px]">
-                              <SelectValue placeholder="Filter by status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="">All Statuses</SelectItem>
-                              <SelectItem value="connected">Connected</SelectItem>
-                              <SelectItem value="disconnected">Disconnected</SelectItem>
-                              <SelectItem value="busy">Busy</SelectItem>
-                              <SelectItem value="no-answer">No Answer</SelectItem>
-                              <SelectItem value="failed">Failed</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
-                      <div className="rounded-md border">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Bot</TableHead>
-                              <TableHead>Number</TableHead>
-                              <TableHead>Status</TableHead>
-                              <TableHead>Duration</TableHead>
-                              <TableHead>Date</TableHead>
-                              <TableHead>Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {callLogs
-                              .filter(log => 
-                                (filterStatus === '' || log.status === filterStatus) &&
-                                (log.botName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                 log.phoneNumber.includes(searchQuery))
-                              )
-                              .map(log => (
-                                <TableRow key={log.id}>
-                                  <TableCell>{log.botName}</TableCell>
-                                  <TableCell>{log.phoneNumber}</TableCell>
-                                  <TableCell>
-                                    <Badge variant={getBadgeVariant(log.status)}>
-                                      {log.status}
-                                    </Badge>
-                                  </TableCell>
-                                  <TableCell>{formatDuration(log.duration)}</TableCell>
-                                  <TableCell>{format(log.timestamp, 'PPpp')}</TableCell>
-                                  <TableCell>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => {
-                                        // Show call summary in a dialog
-                                        setSelectedLog(log);
-                                        setShowSummaryDialog(true);
-                                      }}
-                                    >
-                                      View Summary
-                                    </Button>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                          </TableBody>
-                        </Table>
-                      </div>
                     </TabsContent>
                   </Tabs>
                   
@@ -944,5 +870,69 @@ const Campaign = () => {
             <MessageSquare className="h-8 w-8 mb-4 text-muted-foreground" />
             <h3 className="font-medium mb-2">No Campaigns Created</h3>
             <p className="text-sm text-muted-foreground mb-4">Create your first campaign to start making calls</p>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <Dialog
+            <DialogTrigger asChild onClick={() => setIsDialogOpen(true)}>
+              <Button className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Create Campaign
+              </Button>
+            </DialogTrigger>
+          </div>
+        )}
+
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Campaign</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this campaign? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <Dialog open={showSummaryDialog} onOpenChange={setShowSummaryDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Call Summary</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {selectedLog && (
+                <>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="font-medium">Bot:</div>
+                    <div>{selectedLog.botName}</div>
+                    <div className="font-medium">Phone Number:</div>
+                    <div>{selectedLog.phoneNumber}</div>
+                    <div className="font-medium">Time:</div>
+                    <div>{format(selectedLog.timestamp, 'PPpp')}</div>
+                    <div className="font-medium">Duration:</div>
+                    <div>{formatDuration(selectedLog.duration)}</div>
+                    <div className="font-medium">Status:</div>
+                    <div>
+                      <Badge variant={getBadgeVariant(selectedLog.status)}>
+                        {selectedLog.status}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="pt-4 border-t">
+                    <div className="font-medium mb-2">Summary:</div>
+                    <p className="text-sm whitespace-pre-wrap">{selectedLog.summary}</p>
+                  </div>
+                </>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </div>
+  );
+};
+
+export default Campaign;
+
