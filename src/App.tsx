@@ -11,6 +11,7 @@ import Campaign from "./pages/Campaign";
 import AIAgents from "./pages/AIAgents";
 import PhoneNumbers from "./pages/PhoneNumbers";
 import ProviderKeys from "./pages/ProviderKeys";
+import CustomModels from "./pages/CustomModels";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/ai-agents" element={<AIAgents />} />
           <Route path="/phone-numbers" element={<PhoneNumbers />} />
           <Route path="/provider-keys" element={<ProviderKeys />} />
+          <Route path="/custom-models" element={<CustomModels />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
