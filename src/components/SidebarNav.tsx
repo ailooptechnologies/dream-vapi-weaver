@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ChevronDown, Home, Bot, Workflow, Phone, Wrench, File, Users, Key, HelpCircle } from 'lucide-react';
 
 const SidebarNav = () => {
@@ -8,6 +8,8 @@ const SidebarNav = () => {
     build: true,
     test: false
   });
+  
+  const location = useLocation();
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections({
@@ -44,7 +46,12 @@ const SidebarNav = () => {
       </div>
 
       <nav className="flex-1 overflow-y-auto p-2">
-        <Link to="/dashboard" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors">
+        <Link 
+          to="/dashboard" 
+          className={`flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors ${
+            location.pathname === '/dashboard' ? 'bg-primary/10 text-primary' : ''
+          }`}
+        >
           <Home className="h-4 w-4" />
           <span className="text-sm">Overview</span>
         </Link>
@@ -60,31 +67,66 @@ const SidebarNav = () => {
           
           {expandedSections.build && (
             <div className="space-y-1 mt-1">
-              <Link to="/dashboard" className="flex items-center gap-3 px-3 py-2 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+              <Link 
+                to="/dashboard" 
+                className={`flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors ${
+                  location.pathname === '/dashboard' ? 'bg-primary/10 text-primary' : ''
+                }`}
+              >
                 <Bot className="h-4 w-4" />
                 <span className="text-sm">Assistants</span>
               </Link>
-              <Link to="/workflows" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors">
+              <Link 
+                to="/workflows" 
+                className={`flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors ${
+                  location.pathname === '/workflows' ? 'bg-primary/10 text-primary' : ''
+                }`}
+              >
                 <Workflow className="h-4 w-4" />
                 <span className="text-sm">Workflows</span>
               </Link>
-              <Link to="/phone-numbers" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors">
+              <Link 
+                to="/phone-numbers" 
+                className={`flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors ${
+                  location.pathname === '/phone-numbers' ? 'bg-primary/10 text-primary' : ''
+                }`}
+              >
                 <Phone className="h-4 w-4" />
                 <span className="text-sm">Phone Numbers</span>
               </Link>
-              <Link to="/tools" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors">
+              <Link 
+                to="/tools" 
+                className={`flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors ${
+                  location.pathname === '/tools' ? 'bg-primary/10 text-primary' : ''
+                }`}
+              >
                 <Wrench className="h-4 w-4" />
                 <span className="text-sm">Tools</span>
               </Link>
-              <Link to="/files" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors">
+              <Link 
+                to="/files" 
+                className={`flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors ${
+                  location.pathname === '/files' ? 'bg-primary/10 text-primary' : ''
+                }`}
+              >
                 <File className="h-4 w-4" />
                 <span className="text-sm">Files</span>
               </Link>
-              <Link to="/squads" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors">
+              <Link 
+                to="/squads" 
+                className={`flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors ${
+                  location.pathname === '/squads' ? 'bg-primary/10 text-primary' : ''
+                }`}
+              >
                 <Users className="h-4 w-4" />
                 <span className="text-sm">Squads</span>
               </Link>
-              <Link to="/provider-keys" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors">
+              <Link 
+                to="/provider-keys" 
+                className={`flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors ${
+                  location.pathname === '/provider-keys' ? 'bg-primary/10 text-primary' : ''
+                }`}
+              >
                 <Key className="h-4 w-4" />
                 <span className="text-sm">Provider Keys</span>
               </Link>
@@ -125,7 +167,12 @@ const SidebarNav = () => {
       </nav>
 
       <div className="p-2 mt-auto">
-        <Link to="/help" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors">
+        <Link 
+          to="/help" 
+          className={`flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors ${
+            location.pathname === '/help' ? 'bg-primary/10 text-primary' : ''
+          }`}
+        >
           <HelpCircle className="h-4 w-4" />
           <span className="text-sm">Help</span>
         </Link>
