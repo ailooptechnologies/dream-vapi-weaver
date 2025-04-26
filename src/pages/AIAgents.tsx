@@ -1,14 +1,19 @@
-
 import React, { useState, useEffect } from 'react';
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, Bot, Plus, Pencil, Trash2, Activity, Volume2, Mic, MessageSquare } from "lucide-react";
+import { Menu, Plus, Pencil, Trash2, Copy, CheckCircle } from "lucide-react";
 import SidebarNav from '@/components/SidebarNav';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { 
   Card, 
   CardContent, 
@@ -42,21 +47,37 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
+import { Slider } from "@/components/ui/slider"
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
-interface AIAgentFormValues {
+interface AIAgentFormData {
   name: string;
-  description: string;
   phoneNumber: string;
-  defaultPrompt: string;
-  sttModel: string;
-  ttsModel: string;
-  nluModel: string;
-  voice: string;
+  description: string;
+  sttProvider: string;
+  ttsProvider: string;
+  nluProvider: string;
   language: string;
-  maxDuration: number;
+  voice: string;
+  personality: string;
+  responseTime: number;
+  maxCallDuration: number;
+  status: 'active' | 'inactive';
+  customParameters: Record<string, string>;
 }
 
 const AIAgents = () => {
@@ -65,69 +86,72 @@ const AIAgents = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAgentId, setEditingAgentId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [agentToDelete, setAgentToDelete] = useState<string | null>(null);
-  
-  // Sample data for models and voices
-  const [customModels, setCustomModels] = useState({
-    stt: [{ id: 'stt-1', name: 'Default STT Model' }],
-    tts: [{ id: 'tts-1', name: 'Default TTS Model' }],
-    nlu: [{ id: 'nlu-1', name: 'Default NLU Model' }]
-  });
+  const [selectedAgentForDeletion, setSelectedAgentForDeletion] = useState<string | null>(null);
 
-  const voices = [
-    { id: 'voice-1', name: 'Aria', gender: 'Female' },
-    { id: 'voice-2', name: 'Roger', gender: 'Male' },
-    { id: 'voice-3', name: 'Sarah', gender: 'Female' },
-    { id: 'voice-4', name: 'George', gender: 'Male' },
+  // Sample data (in a real app, this would come from API calls)
+  const sttProviders = [
+    { id: 'stt-1', name: 'Google STT' },
+    { id: 'stt-2', name: 'AssemblyAI' },
+    { id: 'stt-3', name: 'Deepgram' },
+  ];
+
+  const ttsProviders = [
+    { id: 'tts-1', name: 'Google TTS' },
+    { id: 'tts-2', name: 'ElevenLabs' },
+    { id: 'tts-3', name: 'Azure TTS' },
+  ];
+
+  const nluProviders = [
+    { id: 'nlu-1', name: 'Dialogflow' },
+    { id: 'nlu-2', name: 'Rasa' },
+    { id: 'nlu-3', name: 'Luis' },
   ];
 
   const languages = [
-    { value: 'en-US', name: 'English (US)' },
-    { value: 'en-GB', name: 'English (UK)' },
-    { value: 'es-ES', name: 'Spanish (Spain)' },
-    { value: 'fr-FR', name: 'French (France)' },
-    { value: 'de-DE', name: 'German (Germany)' },
+    { id: 'lang-1', name: 'English' },
+    { id: 'lang-2', name: 'Spanish' },
+    { id: 'lang-3', name: 'French' },
   ];
 
-  // Fetch custom models (in a real app, this would be an API call)
-  useEffect(() => {
-    // Simulating API fetch
-    const mockFetchModels = () => {
-      return {
-        stt: [
-          { id: 'stt-1', name: 'OpenAI Whisper' },
-          { id: 'stt-2', name: 'Google Cloud STT' },
-          { id: 'stt-3', name: 'Deepgram' },
-        ],
-        tts: [
-          { id: 'tts-1', name: 'ElevenLabs Multilingual v2' },
-          { id: 'tts-2', name: 'Google WaveNet' },
-          { id: 'tts-3', name: 'Amazon Polly Neural' },
-        ],
-        nlu: [
-          { id: 'nlu-1', name: 'GPT-4' },
-          { id: 'nlu-2', name: 'Claude 3 Opus' },
-          { id: 'nlu-3', name: 'Mistral Large' },
-        ]
-      };
-    };
-    
-    setCustomModels(mockFetchModels());
-  }, []);
+  const voices = [
+    { id: 'voice-1', name: 'John (English)' },
+    { id: 'voice-2', name: 'Isabella (Spanish)' },
+    { id: 'voice-3', name: 'Pierre (French)' },
+  ];
 
-  const form = useForm<AIAgentFormValues>({
+  const formSchema = z.object({
+    name: z.string().min(2, 'Name must be at least 2 characters'),
+    phoneNumber: z.string(),
+    description: z.string(),
+    sttProvider: z.string(),
+    ttsProvider: z.string(),
+    nluProvider: z.string(),
+    language: z.string(),
+    voice: z.string(),
+    personality: z.string(),
+    responseTime: z.number().min(1).max(10),
+    maxCallDuration: z.number().min(60),
+    status: z.enum(['active', 'inactive']),
+    customParameters: z.record(z.string())
+  })
+  
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      description: '',
       phoneNumber: '',
-      defaultPrompt: '',
-      sttModel: '',
-      ttsModel: '',
-      nluModel: '',
+      description: '',
+      sttProvider: '',
+      ttsProvider: '',
+      nluProvider: '',
+      language: '',
       voice: '',
-      language: 'en-US',
-      maxDuration: 300,
-    }
+      personality: '',
+      responseTime: 3,
+      maxCallDuration: 300,
+      status: 'inactive',
+      customParameters: {},
+    },
   });
 
   const resetAndCloseDialog = () => {
@@ -136,45 +160,28 @@ const AIAgents = () => {
     setEditingAgentId(null);
   };
 
-  const onSubmit = (data: AIAgentFormValues) => {
-    const sttModel = customModels.stt.find(model => model.id === data.sttModel);
-    const ttsModel = customModels.tts.find(model => model.id === data.ttsModel);
-    const nluModel = customModels.nlu.find(model => model.id === data.nluModel);
-    const selectedVoice = voices.find(v => v.id === data.voice);
-    const selectedLanguage = languages.find(l => l.value === data.language);
-
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
     if (editingAgentId) {
       setAgents(agents.map(agent => 
         agent.id === editingAgentId ? { 
           ...agent, 
-          ...data, 
-          sttModelName: sttModel?.name,
-          ttsModelName: ttsModel?.name, 
-          nluModelName: nluModel?.name,
-          voiceName: selectedVoice?.name,
-          languageName: selectedLanguage?.name,
+          ...data,
         } : agent
       ));
       toast({
-        title: "Agent updated",
-        description: "AI agent has been updated successfully."
+        title: "AI Agent updated",
+        description: "AI Agent has been updated successfully."
       });
     } else {
       const newAgent = {
         id: crypto.randomUUID(),
         ...data,
-        sttModelName: sttModel?.name,
-        ttsModelName: ttsModel?.name,
-        nluModelName: nluModel?.name,
-        voiceName: selectedVoice?.name,
-        languageName: selectedLanguage?.name,
-        status: 'inactive',
         createdAt: new Date().toISOString(),
       };
       setAgents([...agents, newAgent]);
       toast({
-        title: "Agent created",
-        description: "New AI agent has been created successfully."
+        title: "AI Agent created",
+        description: "New AI Agent has been created successfully."
       });
     }
     resetAndCloseDialog();
@@ -185,15 +192,18 @@ const AIAgents = () => {
     if (agent) {
       form.reset({
         name: agent.name,
-        description: agent.description,
         phoneNumber: agent.phoneNumber,
-        defaultPrompt: agent.defaultPrompt,
-        sttModel: agent.sttModel,
-        ttsModel: agent.ttsModel,
-        nluModel: agent.nluModel,
-        voice: agent.voice,
+        description: agent.description,
+        sttProvider: agent.sttProvider,
+        ttsProvider: agent.ttsProvider,
+        nluProvider: agent.nluProvider,
         language: agent.language,
-        maxDuration: agent.maxDuration,
+        voice: agent.voice,
+        personality: agent.personality,
+        responseTime: agent.responseTime,
+        maxCallDuration: agent.maxCallDuration,
+        status: agent.status,
+        customParameters: agent.customParameters,
       });
       setEditingAgentId(agentId);
       setIsDialogOpen(true);
@@ -201,34 +211,59 @@ const AIAgents = () => {
   };
 
   const handleDeleteClick = (agentId: string) => {
-    setAgentToDelete(agentId);
+    setSelectedAgentForDeletion(agentId);
     setDeleteDialogOpen(true);
   };
 
   const handleDeleteConfirm = () => {
-    if (agentToDelete) {
-      setAgents(agents.filter(a => a.id !== agentToDelete));
+    if (selectedAgentForDeletion) {
+      setAgents(agents.filter(a => a.id !== selectedAgentForDeletion));
       toast({
-        title: "Agent deleted",
-        description: "The AI agent has been removed."
+        title: "AI Agent deleted",
+        description: "The AI Agent has been removed."
       });
       setDeleteDialogOpen(false);
-      setAgentToDelete(null);
+      setSelectedAgentForDeletion(null);
     }
   };
 
-  const toggleAgentStatus = (agentId: string) => {
-    setAgents(agents.map(agent => {
-      if (agent.id === agentId) {
-        const newStatus = agent.status === 'active' ? 'inactive' : 'active';
-        toast({
-          title: `Agent ${newStatus}`,
-          description: `Agent has been ${newStatus === 'active' ? 'activated' : 'deactivated'}.`
-        });
-        return { ...agent, status: newStatus };
-      }
-      return agent;
-    }));
+  const handleStatusChange = (agentId: string, newStatus: string) => {
+    setAgents(agents.map(agent => 
+      agent.id === agentId ? { ...agent, status: newStatus } : agent
+    ));
+    
+    toast({
+      title: `AI Agent ${newStatus === 'active' ? 'activated' : 'deactivated'}`,
+      description: `AI Agent has been ${newStatus === 'active' ? 'activated' : 'deactivated'}.`
+    });
+  };
+
+  const handleDuplicate = (agentId: string) => {
+    const agentToDuplicate = agents.find(a => a.id === agentId);
+    if (agentToDuplicate) {
+      const duplicatedAgent = {
+        ...agentToDuplicate,
+        id: crypto.randomUUID(),
+        name: `${agentToDuplicate.name} (Copy)`,
+        createdAt: new Date().toISOString(),
+      };
+      setAgents([...agents, duplicatedAgent]);
+      toast({
+        title: "AI Agent duplicated",
+        description: "AI Agent has been duplicated successfully."
+      });
+    }
+  };
+
+  const getStatusBadgeClass = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-green-800';
+      case 'inactive':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
   return (
@@ -254,259 +289,289 @@ const AIAgents = () => {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-2xl font-bold">AI Agents</h1>
-            <p className="text-muted-foreground">Create and manage your voice AI agents</p>
+            <p className="text-muted-foreground">Manage your AI agents</p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="flex items-center gap-2">
                 <Plus className="h-4 w-4" />
-                Create Agent
+                Create AI Agent
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{editingAgentId ? "Edit AI Agent" : "Create New AI Agent"}</DialogTitle>
                 <DialogDescription>
-                  {editingAgentId ? "Update your AI agent details." : "Set up a new AI voice agent."}
+                  {editingAgentId ? "Update your AI agent details." : "Set up a new AI agent."}
                 </DialogDescription>
               </DialogHeader>
               
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <Tabs defaultValue="basic" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 mb-4">
-                      <TabsTrigger value="basic">Basic Info</TabsTrigger>
-                      <TabsTrigger value="models">Models & Voice</TabsTrigger>
-                    </TabsList>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Agent Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., Sales Agent" {...field} required />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     
-                    <TabsContent value="basic" className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Agent Name</FormLabel>
+                    <FormField
+                      control={form.control}
+                      name="phoneNumber"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone Number</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., +15551234567" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Describe the agent's purpose..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="sttProvider"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>STT Provider</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                              <Input placeholder="e.g., Support Assistant" {...field} required />
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select STT Provider" />
+                              </SelectTrigger>
                             </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Description</FormLabel>
-                            <FormControl>
-                              <Textarea placeholder="Describe the agent's purpose..." {...field} />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="phoneNumber"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Phone Number</FormLabel>
-                            <FormControl>
-                              <Input placeholder="+1234567890" {...field} />
-                            </FormControl>
-                            <FormDescription>
-                              Optional dedicated phone number for this agent
-                            </FormDescription>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="defaultPrompt"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Default Prompt</FormLabel>
-                            <FormControl>
-                              <Textarea 
-                                placeholder="Instructions for the AI agent..." 
-                                className="min-h-[150px]"
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormDescription>
-                              Default prompt to use when creating campaigns with this agent
-                            </FormDescription>
-                          </FormItem>
-                        )}
-                      />
-                    </TabsContent>
+                            <SelectContent>
+                              {sttProviders.map(provider => (
+                                <SelectItem key={provider.id} value={provider.id}>{provider.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     
-                    <TabsContent value="models" className="space-y-4">
-                      <div className="grid grid-cols-1 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="nluModel"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>NLU Model</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select NLU model" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {customModels.nlu.map(model => (
-                                    <SelectItem key={model.id} value={model.id}>
-                                      {model.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormDescription>
-                                Natural Language Understanding model for text generation
-                              </FormDescription>
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
-                          name="sttModel"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>STT Model</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select STT model" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {customModels.stt.map(model => (
-                                    <SelectItem key={model.id} value={model.id}>
-                                      {model.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormDescription>
-                                Speech-to-Text model for understanding user speech
-                              </FormDescription>
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
-                          name="ttsModel"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>TTS Model</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select TTS model" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {customModels.tts.map(model => (
-                                    <SelectItem key={model.id} value={model.id}>
-                                      {model.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormDescription>
-                                Text-to-Speech model for agent's voice
-                              </FormDescription>
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
-                          name="voice"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Voice</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select voice" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {voices.map(voice => (
-                                    <SelectItem key={voice.id} value={voice.id}>
-                                      {voice.name} ({voice.gender})
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormDescription>
-                                Voice for the AI agent
-                              </FormDescription>
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
-                          name="language"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Language</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select language" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {languages.map(lang => (
-                                    <SelectItem key={lang.value} value={lang.value}>
-                                      {lang.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
-                          name="maxDuration"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Max Call Duration (seconds)</FormLabel>
-                              <FormControl>
-                                <Input 
-                                  type="number" 
-                                  min="60" 
-                                  {...field} 
-                                  onChange={(e) => field.onChange(parseInt(e.target.value))}
-                                />
-                              </FormControl>
-                              <FormDescription>
-                                Maximum duration for calls with this agent
-                              </FormDescription>
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </TabsContent>
-                  </Tabs>
+                    <FormField
+                      control={form.control}
+                      name="ttsProvider"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>TTS Provider</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select TTS Provider" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {ttsProviders.map(provider => (
+                                <SelectItem key={provider.id} value={provider.id}>{provider.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="nluProvider"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>NLU Provider</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select NLU Provider" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {nluProviders.map(provider => (
+                                <SelectItem key={provider.id} value={provider.id}>{provider.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="language"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Language</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select Language" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {languages.map(language => (
+                                <SelectItem key={language.id} value={language.id}>{language.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="voice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Voice</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select Voice" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {voices.map(voice => (
+                                <SelectItem key={voice.id} value={voice.id}>{voice.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <FormField
+                    control={form.control}
+                    name="personality"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Personality</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Friendly, Professional" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="responseTime"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Response Time (seconds)</FormLabel>
+                          <FormControl>
+                            <Slider
+                              defaultValue={[field.value]}
+                              max={10}
+                              min={1}
+                              step={1}
+                              onValueChange={(value) => field.onChange(value[0])}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Adjust the agent's response time.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="maxCallDuration"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Max Call Duration (seconds)</FormLabel>
+                          <FormControl>
+                            <Input type="number" min="60" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Maximum duration for each call.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="customParameters"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Custom Parameters</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="e.g., {'param1': 'value1', 'param2': 'value2'}" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Additional parameters for advanced configuration.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-md border p-4 space-y-0">
+                        <div className="space-y-0.5">
+                          <FormLabel>Status</FormLabel>
+                          <FormDescription>
+                            Set the agent's status to active or inactive.
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value === 'active'}
+                            onCheckedChange={(checked) => field.onChange(checked ? 'active' : 'inactive')}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   
                   <DialogFooter>
                     <Button type="button" variant="outline" onClick={resetAndCloseDialog}>
                       Cancel
                     </Button>
                     <Button type="submit">
-                      {editingAgentId ? "Update Agent" : "Create Agent"}
+                      {editingAgentId ? "Update AI Agent" : "Create AI Agent"}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -516,85 +581,79 @@ const AIAgents = () => {
         </div>
 
         {agents.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {agents.map((agent) => (
-              <Card key={agent.id} className="overflow-hidden">
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-1">
-                      <CardTitle>{agent.name}</CardTitle>
-                      <CardDescription className="line-clamp-1">{agent.description}</CardDescription>
-                    </div>
-                    <Badge className={agent.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
-                      {agent.status === 'active' ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="pb-2">
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-y-2 text-sm">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <MessageSquare className="h-4 w-4" />
-                        <span>NLU Model</span>
+          <div className="space-y-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Phone Number</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {agents.map((agent) => (
+                  <TableRow key={agent.id}>
+                    <TableCell>{agent.name}</TableCell>
+                    <TableCell>{agent.phoneNumber || 'N/A'}</TableCell>
+                    <TableCell>
+                      <Badge className={`${getStatusBadgeClass(agent.status)} px-2 py-1`}>
+                        {agent.status.charAt(0).toUpperCase() + agent.status.slice(1)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button size="sm" variant="outline" onClick={() => handleEdit(agent.id)}>
+                          <Pencil className="h-4 w-4 mr-1" />
+                          Edit
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => handleDuplicate(agent.id)}>
+                          <Copy className="h-4 w-4 mr-1" />
+                          Duplicate
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="outline" className="text-destructive">
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Delete
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the AI Agent.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeleteClick(agent.id)} className="bg-destructive text-destructive-foreground">
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                        {agent.status === 'inactive' ? (
+                          <Button size="sm" onClick={() => handleStatusChange(agent.id, 'active')}>
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Activate
+                          </Button>
+                        ) : (
+                          <Button size="sm" variant="outline" onClick={() => handleStatusChange(agent.id, 'inactive')}>
+                            Deactivate
+                          </Button>
+                        )}
                       </div>
-                      <div className="font-medium">{agent.nluModelName || 'Not set'}</div>
-                      
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Mic className="h-4 w-4" />
-                        <span>STT Model</span>
-                      </div>
-                      <div className="font-medium">{agent.sttModelName || 'Not set'}</div>
-                      
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Volume2 className="h-4 w-4" />
-                        <span>TTS Model</span>
-                      </div>
-                      <div className="font-medium">{agent.ttsModelName || 'Not set'}</div>
-                      
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Activity className="h-4 w-4" />
-                        <span>Voice</span>
-                      </div>
-                      <div className="font-medium">{agent.voiceName || 'Default'} ({agent.languageName || 'English'})</div>
-                    </div>
-                    
-                    {agent.phoneNumber && (
-                      <div className="text-sm">
-                        <span className="text-muted-foreground">Phone: </span>
-                        <span className="font-medium">{agent.phoneNumber}</span>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-                
-                <CardFooter className="border-t pt-4 flex justify-between">
-                  <div className="space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(agent.id)}>
-                      <Pencil className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                    <Button variant="outline" size="sm" className="text-destructive" onClick={() => handleDeleteClick(agent.id)}>
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Delete
-                    </Button>
-                  </div>
-                  <Button 
-                    size="sm" 
-                    variant={agent.status === 'active' ? "outline" : "default"}
-                    onClick={() => toggleAgentStatus(agent.id)}
-                  >
-                    {agent.status === 'active' ? 'Deactivate' : 'Activate'}
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         ) : (
           <div className="border rounded-lg p-6 flex flex-col items-center justify-center text-center min-h-[200px]">
-            <Bot className="h-8 w-8 mb-4 text-muted-foreground" />
             <h3 className="font-medium mb-2">No AI Agents Created</h3>
-            <p className="text-sm text-muted-foreground mb-4">Create your first AI agent to start making calls</p>
+            <p className="text-sm text-muted-foreground mb-4">Create your first AI agent to start automating calls</p>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button>
@@ -606,24 +665,6 @@ const AIAgents = () => {
           </div>
         )}
       </div>
-
-      {/* Delete confirmation dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the selected AI agent.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };

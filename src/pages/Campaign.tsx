@@ -1,6 +1,3 @@
-
-// Updating Campaign.tsx to add calendar for scheduling and enhanced management options
-
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -56,6 +53,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { cn } from "@/lib/utils";
 
 interface CampaignFormValues {
   name: string;
@@ -68,6 +74,21 @@ interface CampaignFormValues {
   schedule: string;
   scheduledDate?: Date;
   scheduledTime?: string;
+  script: string;
+  trainingData: string;
+  trainingImages: string[];
+  callLogs: CallLog[];
+}
+
+interface CallLog {
+  id: string;
+  botId: string;
+  botName: string;
+  phoneNumber: string;
+  status: 'connected' | 'disconnected' | 'busy' | 'no-answer' | 'failed';
+  duration: number;
+  timestamp: Date;
+  summary: string;
 }
 
 const Campaign = () => {
@@ -78,6 +99,12 @@ const Campaign = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedCampaignForDeletion, setSelectedCampaignForDeletion] = useState<string | null>(null);
   const [date, setDate] = useState<Date>();
+  
+  const [callLogs, setCallLogs] = useState<CallLog[]>([]);
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedLog, setSelectedLog] = useState<CallLog | null>(null);
+  const [showSummaryDialog, setShowSummaryDialog] = useState(false);
 
   // Sample data (in a real app, this would come from API calls)
   const agents = [
@@ -103,6 +130,10 @@ const Campaign = () => {
       maxConcurrentCalls: '5',
       schedule: 'immediate',
       scheduledTime: '09:00',
+      script: '',
+      trainingData: '',
+      trainingImages: [],
+      callLogs: [],
     },
   });
 
@@ -185,6 +216,10 @@ const Campaign = () => {
         schedule: campaign.schedule,
         scheduledDate,
         scheduledTime,
+        script: campaign.script,
+        trainingData: campaign.trainingData,
+        trainingImages: campaign.trainingImages,
+        callLogs: campaign.callLogs,
       });
       setEditingCampaignId(campaignId);
       setIsDialogOpen(true);
@@ -232,6 +267,29 @@ const Campaign = () => {
     }
   };
 
+  const getBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'connected':
+        return 'success';
+      case 'disconnected':
+        return 'destructive';
+      case 'busy':
+        return 'secondary';
+      case 'no-answer':
+        return 'warning';
+      case 'failed':
+        return 'destructive';
+      default:
+        return 'default';
+    }
+  };
+
+  const formatDuration = (duration: number) => {
+    const minutes = Math.floor(duration / 60);
+    const seconds = duration % 60;
+    return `${minutes}m ${seconds}s`;
+  };
+
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       {/* Desktop Sidebar */}
@@ -275,10 +333,12 @@ const Campaign = () => {
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <Tabs defaultValue="basic" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 mb-4">
+                    <TabsList className="grid w-full grid-cols-4 mb-4">
                       <TabsTrigger value="basic">Basic Info</TabsTrigger>
                       <TabsTrigger value="agents">Agents & Contacts</TabsTrigger>
                       <TabsTrigger value="settings">Settings</TabsTrigger>
+                      <TabsTrigger value="training">Training</TabsTrigger>
+                      <TabsTrigger value="logs">Logs</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="basic" className="space-y-4">
@@ -507,9 +567,10 @@ const Campaign = () => {
                                     <FormControl>
                                       <Button
                                         variant={"outline"}
-                                        className={`w-full pl-3 text-left font-normal ${
+                                        className={cn(
+                                          "w-full pl-3 text-left font-normal",
                                           !field.value && "text-muted-foreground"
-                                        }`}
+                                        )}
                                       >
                                         {field.value ? (
                                           format(field.value, "PPP")
@@ -527,6 +588,7 @@ const Campaign = () => {
                                       onSelect={field.onChange}
                                       disabled={(date) => date < new Date()}
                                       initialFocus
+                                      className={cn("p-3 pointer-events-auto")}
                                     />
                                   </PopoverContent>
                                 </Popover>
@@ -554,6 +616,119 @@ const Campaign = () => {
                           />
                         </div>
                       )}
+                    </TabsContent>
+
+                    <TabsContent value="training" className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="script"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Campaign Script</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Enter the script for AI agents..."
+                                className="min-h-[200px]"
+                                {...field}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="trainingData"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Training Data</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Enter training data and context..."
+                                className="min-h-[150px]"
+                                {...field}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      {/* Add image upload section here */}
+                    </TabsContent>
+
+                    <TabsContent value="logs" className="space-y-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-2">
+                          <Input
+                            placeholder="Search calls..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-[300px]"
+                          />
+                          <Select value={filterStatus} onValueChange={setFilterStatus}>
+                            <SelectTrigger className="w-[180px]">
+                              <SelectValue placeholder="Filter by status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Statuses</SelectItem>
+                              <SelectItem value="connected">Connected</SelectItem>
+                              <SelectItem value="disconnected">Disconnected</SelectItem>
+                              <SelectItem value="busy">Busy</SelectItem>
+                              <SelectItem value="no-answer">No Answer</SelectItem>
+                              <SelectItem value="failed">Failed</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="rounded-md border">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Bot</TableHead>
+                              <TableHead>Number</TableHead>
+                              <TableHead>Status</TableHead>
+                              <TableHead>Duration</TableHead>
+                              <TableHead>Date</TableHead>
+                              <TableHead>Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {callLogs
+                              .filter(log => 
+                                (filterStatus === 'all' || log.status === filterStatus) &&
+                                (log.botName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                 log.phoneNumber.includes(searchQuery))
+                              )
+                              .map(log => (
+                                <TableRow key={log.id}>
+                                  <TableCell>{log.botName}</TableCell>
+                                  <TableCell>{log.phoneNumber}</TableCell>
+                                  <TableCell>
+                                    <Badge variant={getBadgeVariant(log.status)}>
+                                      {log.status}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell>{formatDuration(log.duration)}</TableCell>
+                                  <TableCell>{format(log.timestamp, 'PPpp')}</TableCell>
+                                  <TableCell>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        // Show call summary in a dialog
+                                        setSelectedLog(log);
+                                        setShowSummaryDialog(true);
+                                      }}
+                                    >
+                                      View Summary
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                          </TableBody>
+                        </Table>
+                      </div>
                     </TabsContent>
                   </Tabs>
                   
@@ -737,6 +912,29 @@ const Campaign = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Call Summary Dialog */}
+      <Dialog open={showSummaryDialog} onOpenChange={setShowSummaryDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Call Summary</DialogTitle>
+            <DialogDescription>Summary of the call</DialogDescription>
+          </DialogHeader>
+          {selectedLog && (
+            <div>
+              <p><strong>Bot:</strong> {selectedLog.botName}</p>
+              <p><strong>Number:</strong> {selectedLog.phoneNumber}</p>
+              <p><strong>Status:</strong> {selectedLog.status}</p>
+              <p><strong>Duration:</strong> {formatDuration(selectedLog.duration)}</p>
+              <p><strong>Date:</strong> {format(selectedLog.timestamp, 'PPpp')}</p>
+              <p><strong>Summary:</strong> {selectedLog.summary}</p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setShowSummaryDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
