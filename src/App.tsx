@@ -15,6 +15,7 @@ import ProviderKeys from "./pages/ProviderKeys";
 import CustomModels from "./pages/CustomModels";
 import TelephonyProviders from "./pages/TelephonyProviders";
 import AuthGuard from "./components/AuthGuard";
+import Help from "./pages/Help";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,11 @@ const App = () => (
           <Route path="/telephony-providers" element={
             <AuthGuard>
               <TelephonyProviders />
+            </AuthGuard>
+          } />
+          <Route path="/help" element={
+            <AuthGuard>
+              <Help />
             </AuthGuard>
           } />
           
