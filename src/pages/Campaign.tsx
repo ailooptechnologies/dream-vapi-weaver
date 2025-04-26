@@ -870,12 +870,14 @@ const Campaign = () => {
             <MessageSquare className="h-8 w-8 mb-4 text-muted-foreground" />
             <h3 className="font-medium mb-2">No Campaigns Created</h3>
             <p className="text-sm text-muted-foreground mb-4">Create your first campaign to start making calls</p>
-            <DialogTrigger asChild onClick={() => setIsDialogOpen(true)}>
-              <Button className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Create Campaign
-              </Button>
-            </DialogTrigger>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="flex items-center gap-2" onClick={() => setIsDialogOpen(true)}>
+                  <Plus className="h-4 w-4" />
+                  Create Campaign
+                </Button>
+              </DialogTrigger>
+            </Dialog>
           </div>
         )}
 
@@ -935,4 +937,3 @@ const Campaign = () => {
 };
 
 export default Campaign;
-
