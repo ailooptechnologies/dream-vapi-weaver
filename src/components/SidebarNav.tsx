@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronDown, Home, Bot, Workflow, Phone, Tool, File, Users, Key, HelpCircle } from 'lucide-react';
+import { ChevronDown, Home, Bot, Workflow, Phone, Wrench, File, Users, Key, HelpCircle } from 'lucide-react';
 
 const SidebarNav = () => {
   const [expandedSections, setExpandedSections] = useState({
@@ -73,7 +73,7 @@ const SidebarNav = () => {
                 <span className="text-sm">Phone Numbers</span>
               </Link>
               <Link to="/tools" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors">
-                <Tool className="h-4 w-4" />
+                <Wrench className="h-4 w-4" />
                 <span className="text-sm">Tools</span>
               </Link>
               <Link to="/files" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors">
