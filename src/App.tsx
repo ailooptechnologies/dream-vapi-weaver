@@ -7,11 +7,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
+import Campaign from "./pages/Campaign";
+import AIAgents from "./pages/AIAgents";
 import PhoneNumbers from "./pages/PhoneNumbers";
-import Tools from "./pages/Tools";
-import Files from "./pages/Files";
 import ProviderKeys from "./pages/ProviderKeys";
-import Help from "./pages/Help";
 
 const queryClient = new QueryClient();
 
@@ -24,11 +23,10 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/campaign" element={<Campaign />} />
+          <Route path="/ai-agents" element={<AIAgents />} />
           <Route path="/phone-numbers" element={<PhoneNumbers />} />
-          <Route path="/tools" element={<Tools />} />
-          <Route path="/files" element={<Files />} />
           <Route path="/provider-keys" element={<ProviderKeys />} />
-          <Route path="/help" element={<Help />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

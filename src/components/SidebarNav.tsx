@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ChevronDown, Home, Bot, Phone, Wrench, File, Key, HelpCircle } from 'lucide-react';
+import { ChevronDown, Home, Bot, Phone, Wrench, File, Key, HelpCircle, MessageSquare } from 'lucide-react';
 
 const SidebarNav = () => {
   const [expandedSections, setExpandedSections] = useState({
@@ -67,13 +67,22 @@ const SidebarNav = () => {
           {expandedSections.build && (
             <div className="space-y-1 mt-1">
               <Link 
-                to="/dashboard" 
+                to="/campaign" 
                 className={`flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors ${
-                  location.pathname === '/dashboard' ? 'bg-primary/10 text-primary' : ''
+                  location.pathname === '/campaign' ? 'bg-primary/10 text-primary' : ''
+                }`}
+              >
+                <MessageSquare className="h-4 w-4" />
+                <span className="text-sm">Campaign</span>
+              </Link>
+              <Link 
+                to="/ai-agents" 
+                className={`flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors ${
+                  location.pathname === '/ai-agents' ? 'bg-primary/10 text-primary' : ''
                 }`}
               >
                 <Bot className="h-4 w-4" />
-                <span className="text-sm">Assistants</span>
+                <span className="text-sm">AI Agents</span>
               </Link>
               <Link 
                 to="/phone-numbers" 
