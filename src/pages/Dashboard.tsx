@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, BarChart2, Users, MessageSquare, Settings } from "lucide-react";
+import { Menu, BarChart2, Users } from "lucide-react";
 import SidebarNav from '@/components/SidebarNav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 

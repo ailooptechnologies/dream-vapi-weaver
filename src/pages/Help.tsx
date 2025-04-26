@@ -92,6 +92,7 @@ const Help = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedItems, setExpandedItems] = useState<{[key: string]: boolean}>({});
   const [activeTab, setActiveTab] = useState('guides');
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const toggleItemExpansion = (sectionTitle: string, itemTitle: string) => {
     const key = `${sectionTitle}-${itemTitle}`;
@@ -119,7 +120,7 @@ const Help = () => {
     : faqItems;
 
   const handleLiveChat = () => {
-    window.open('https://calendly.com/your-company/live-chat', '_blank');
+    setIsChatOpen(true);
   };
 
   const handleEmailSupport = () => {
@@ -284,6 +285,34 @@ const Help = () => {
             </Card>
           </div>
         </div>
+
+        {/* Live Chat Sheet */}
+        <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
+          <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+            <div className="h-full flex flex-col">
+              <div className="flex items-center gap-2 pb-4 mb-4 border-b">
+                <MessageSquare className="h-5 w-5" />
+                <h3 className="font-semibold text-lg">Live Support Chat</h3>
+              </div>
+              
+              <div className="flex-1 overflow-auto p-4 bg-muted/10 rounded-md mb-4">
+                <div className="text-center text-muted-foreground">
+                  <p>Welcome to our support chat!</p>
+                  <p>A support agent will be with you shortly.</p>
+                </div>
+              </div>
+
+              <div className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  placeholder="Type your message..."
+                  className="flex-1 px-3 py-2 rounded-md border"
+                />
+                <Button>Send</Button>
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </div>
   );
