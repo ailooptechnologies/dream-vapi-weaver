@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -118,6 +117,14 @@ const Help = () => {
         item.answer.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : faqItems;
+
+  const handleLiveChat = () => {
+    window.open('https://calendly.com/your-company/live-chat', '_blank');
+  };
+
+  const handleEmailSupport = () => {
+    window.location.href = 'mailto:support@your-company.com';
+  };
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -250,8 +257,8 @@ const Help = () => {
                 <CardDescription>Get in touch with our support team for personalized assistance.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Button variant="outline" className="flex items-center justify-start gap-2 h-auto py-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Button variant="outline" className="flex items-center justify-start gap-2 h-auto py-3" onClick={handleLiveChat}>
                     <MessageSquare className="h-5 w-5 text-primary" />
                     <div className="text-left">
                       <div className="font-medium">Live Chat</div>
@@ -259,19 +266,11 @@ const Help = () => {
                     </div>
                   </Button>
                   
-                  <Button variant="outline" className="flex items-center justify-start gap-2 h-auto py-3">
+                  <Button variant="outline" className="flex items-center justify-start gap-2 h-auto py-3" onClick={handleEmailSupport}>
                     <Mail className="h-5 w-5 text-primary" />
                     <div className="text-left">
                       <div className="font-medium">Email Support</div>
                       <div className="text-xs text-muted-foreground">Get help via email</div>
-                    </div>
-                  </Button>
-                  
-                  <Button variant="outline" className="flex items-center justify-start gap-2 h-auto py-3">
-                    <FileText className="h-5 w-5 text-primary" />
-                    <div className="text-left">
-                      <div className="font-medium">Documentation</div>
-                      <div className="text-xs text-muted-foreground">Browse technical guides</div>
                     </div>
                   </Button>
                 </div>
@@ -280,7 +279,7 @@ const Help = () => {
                 <div className="text-sm text-muted-foreground">
                   Our support team is available Monday through Friday, 9am-5pm PT
                 </div>
-                <Button className="w-full">Contact Support</Button>
+                <Button className="w-full" onClick={handleEmailSupport}>Contact Support</Button>
               </CardFooter>
             </Card>
           </div>

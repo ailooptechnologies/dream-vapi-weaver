@@ -1,6 +1,3 @@
-
-// Update ProviderKeys.tsx to add provider creation functionality
-
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -45,6 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 interface ProviderKey {
   id: string;
@@ -52,6 +50,7 @@ interface ProviderKey {
   key: string;
   type: 'nlu' | 'tts' | 'stt';
   provider: string;
+  status: 'active' | 'inactive';
   createdAt: string;
 }
 
@@ -59,6 +58,7 @@ interface ProviderKeyFormValues {
   name: string;
   key: string;
   provider: string;
+  status: 'active' | 'inactive';
 }
 
 const ProviderKeys = () => {
@@ -75,6 +75,7 @@ const ProviderKeys = () => {
       name: '',
       key: '',
       provider: '',
+      status: 'active',
     }
   });
 
@@ -116,6 +117,7 @@ const ProviderKeys = () => {
       key: data.key,
       type: activeTab,
       provider: data.provider,
+      status: data.status || 'active',
       createdAt: new Date().toISOString()
     };
 
@@ -144,6 +146,7 @@ const ProviderKeys = () => {
       name: key.name,
       key: key.key,
       provider: key.provider,
+      status: key.status,
     });
     setEditingKeyId(key.id);
     setIsDialogOpen(true);
@@ -177,6 +180,22 @@ const ProviderKeys = () => {
   const getProviderLabel = (provider: string) => {
     const options = getProviderOptions();
     return options.find(opt => opt.value === provider)?.label || provider;
+  };
+
+  const toggleKeyStatus = (keyId: string) => {
+    setProviderKeys(prevKeys =>
+      prevKeys.map(key => {
+        if (key.id === keyId) {
+          const newStatus = key.status === 'active' ? 'inactive' : 'active';
+          toast({
+            title: `API Key ${newStatus}`,
+            description: `${key.name} has been ${newStatus}.`
+          });
+          return { ...key, status: newStatus };
+        }
+        return key;
+      })
+    );
   };
 
   return (
@@ -300,6 +319,27 @@ const ProviderKeys = () => {
                         </FormItem>
                       )}
                     />
+
+                    <FormField
+                      control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">Status</FormLabel>
+                            <FormDescription>
+                              Enable or disable the API key
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value === 'active'}
+                              onCheckedChange={(checked) => field.onChange(checked ? 'active' : 'inactive')}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
                     
                     <DialogFooter>
                       <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
@@ -321,8 +361,16 @@ const ProviderKeys = () => {
                 {filteredKeys.map((key) => (
                   <Card key={key.id}>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-lg">{key.name}</CardTitle>
-                      <CardDescription>{getProviderLabel(key.provider)}</CardDescription>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <CardTitle className="text-lg">{key.name}</CardTitle>
+                          <CardDescription>{getProviderLabel(key.provider)}</CardDescription>
+                        </div>
+                        <Switch
+                          checked={key.status === 'active'}
+                          onCheckedChange={() => toggleKeyStatus(key.id)}
+                        />
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center">
@@ -333,6 +381,9 @@ const ProviderKeys = () => {
                           className="font-mono" 
                         />
                       </div>
+                      <p className={`text-sm mt-2 ${key.status === 'active' ? 'text-green-500' : 'text-red-500'}`}>
+                        Status: {key.status === 'active' ? 'Active' : 'Inactive'}
+                      </p>
                     </CardContent>
                     <CardFooter className="flex justify-end gap-2">
                       <Button variant="outline" size="sm" onClick={() => handleEditKey(key)}>
@@ -366,8 +417,16 @@ const ProviderKeys = () => {
                 {filteredKeys.map((key) => (
                   <Card key={key.id}>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-lg">{key.name}</CardTitle>
-                      <CardDescription>{getProviderLabel(key.provider)}</CardDescription>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <CardTitle className="text-lg">{key.name}</CardTitle>
+                          <CardDescription>{getProviderLabel(key.provider)}</CardDescription>
+                        </div>
+                        <Switch
+                          checked={key.status === 'active'}
+                          onCheckedChange={() => toggleKeyStatus(key.id)}
+                        />
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center">
@@ -378,6 +437,9 @@ const ProviderKeys = () => {
                           className="font-mono" 
                         />
                       </div>
+                      <p className={`text-sm mt-2 ${key.status === 'active' ? 'text-green-500' : 'text-red-500'}`}>
+                        Status: {key.status === 'active' ? 'Active' : 'Inactive'}
+                      </p>
                     </CardContent>
                     <CardFooter className="flex justify-end gap-2">
                       <Button variant="outline" size="sm" onClick={() => handleEditKey(key)}>
@@ -411,8 +473,16 @@ const ProviderKeys = () => {
                 {filteredKeys.map((key) => (
                   <Card key={key.id}>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-lg">{key.name}</CardTitle>
-                      <CardDescription>{getProviderLabel(key.provider)}</CardDescription>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <CardTitle className="text-lg">{key.name}</CardTitle>
+                          <CardDescription>{getProviderLabel(key.provider)}</CardDescription>
+                        </div>
+                        <Switch
+                          checked={key.status === 'active'}
+                          onCheckedChange={() => toggleKeyStatus(key.id)}
+                        />
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center">
@@ -423,6 +493,9 @@ const ProviderKeys = () => {
                           className="font-mono" 
                         />
                       </div>
+                      <p className={`text-sm mt-2 ${key.status === 'active' ? 'text-green-500' : 'text-red-500'}`}>
+                        Status: {key.status === 'active' ? 'Active' : 'Inactive'}
+                      </p>
                     </CardContent>
                     <CardFooter className="flex justify-end gap-2">
                       <Button variant="outline" size="sm" onClick={() => handleEditKey(key)}>
