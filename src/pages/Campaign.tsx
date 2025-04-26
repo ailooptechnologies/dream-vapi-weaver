@@ -101,7 +101,7 @@ const Campaign = () => {
   const [date, setDate] = useState<Date>();
   
   const [callLogs, setCallLogs] = useState<CallLog[]>([]);
-  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterStatus, setFilterStatus] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLog, setSelectedLog] = useState<CallLog | null>(null);
   const [showSummaryDialog, setShowSummaryDialog] = useState(false);
@@ -270,13 +270,13 @@ const Campaign = () => {
   const getBadgeVariant = (status: string) => {
     switch (status) {
       case 'connected':
-        return 'success';
+        return 'secondary'; // Changed from 'success' to 'secondary'
       case 'disconnected':
         return 'destructive';
       case 'busy':
         return 'secondary';
       case 'no-answer':
-        return 'warning';
+        return 'outline'; // Changed from 'warning' to 'outline'
       case 'failed':
         return 'destructive';
       default:

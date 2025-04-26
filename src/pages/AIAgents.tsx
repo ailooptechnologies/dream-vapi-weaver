@@ -77,7 +77,7 @@ interface AIAgentFormData {
   responseTime: number;
   maxCallDuration: number;
   status: 'active' | 'inactive';
-  customParameters: Record<string, string>;
+  customParameters: string; // Changed from Record<string, string> to string
 }
 
 const AIAgents = () => {
@@ -132,7 +132,7 @@ const AIAgents = () => {
     responseTime: z.number().min(1).max(10),
     maxCallDuration: z.number().min(60),
     status: z.enum(['active', 'inactive']),
-    customParameters: z.record(z.string())
+    customParameters: z.string() // Changed from Record<string, string> to string
   })
   
   const form = useForm<z.infer<typeof formSchema>>({
@@ -150,7 +150,7 @@ const AIAgents = () => {
       responseTime: 3,
       maxCallDuration: 300,
       status: 'inactive',
-      customParameters: {},
+      customParameters: '', // Changed from {} to ''
     },
   });
 
@@ -161,11 +161,29 @@ const AIAgents = () => {
   };
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
+    // For customParameters, we can parse it if it's provided as a JSON string
+    let parsedCustomParameters = {};
+    
+    try {
+      if (data.customParameters) {
+        parsedCustomParameters = JSON.parse(data.customParameters);
+      }
+    } catch (e) {
+      console.error("Failed to parse custom parameters:", e);
+      toast({
+        title: "Invalid custom parameters",
+        description: "Please provide valid JSON format for custom parameters.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (editingAgentId) {
       setAgents(agents.map(agent => 
         agent.id === editingAgentId ? { 
           ...agent, 
           ...data,
+          customParameters: parsedCustomParameters
         } : agent
       ));
       toast({
@@ -176,6 +194,7 @@ const AIAgents = () => {
       const newAgent = {
         id: crypto.randomUUID(),
         ...data,
+        customParameters: parsedCustomParameters,
         createdAt: new Date().toISOString(),
       };
       setAgents([...agents, newAgent]);
@@ -190,6 +209,12 @@ const AIAgents = () => {
   const handleEdit = (agentId: string) => {
     const agent = agents.find(a => a.id === agentId);
     if (agent) {
+      // Convert customParameters object back to string for the form
+      const customParametersString = 
+        typeof agent.customParameters === 'object' && agent.customParameters !== null
+          ? JSON.stringify(agent.customParameters, null, 2)
+          : '';
+      
       form.reset({
         name: agent.name,
         phoneNumber: agent.phoneNumber,
@@ -203,7 +228,7 @@ const AIAgents = () => {
         responseTime: agent.responseTime,
         maxCallDuration: agent.maxCallDuration,
         status: agent.status,
-        customParameters: agent.customParameters,
+        customParameters: customParametersString,
       });
       setEditingAgentId(agentId);
       setIsDialogOpen(true);
@@ -534,10 +559,13 @@ const AIAgents = () => {
                       <FormItem>
                         <FormLabel>Custom Parameters</FormLabel>
                         <FormControl>
-                          <Textarea placeholder="e.g., {'param1': 'value1', 'param2': 'value2'}" {...field} />
+                          <Textarea 
+                            placeholder="e.g., {'param1': 'value1', 'param2': 'value2'}" 
+                            {...field} 
+                          />
                         </FormControl>
                         <FormDescription>
-                          Additional parameters for advanced configuration.
+                          Add custom parameters in JSON format
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
