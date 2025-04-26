@@ -3,10 +3,13 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bot, Phone, MessageSquare, Mic, Volume2, Zap, Shield, BarChart2, Users } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 import NavigationHeader from '@/components/NavigationHeader';
 import Footer from '@/components/Footer';
 
 const Features = () => {
+  const navigate = useNavigate();
+
   const features = [
     {
       title: "AI Voice Agents",
@@ -109,6 +112,14 @@ const Features = () => {
     }
   ];
 
+  const handleStartFreeTrial = () => {
+    navigate('/register');
+  };
+
+  const handleContactSales = () => {
+    navigate('/register');
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <NavigationHeader />
@@ -123,8 +134,8 @@ const Features = () => {
             Explore our comprehensive suite of features designed to help you build, deploy, and manage sophisticated voice AI applications.
           </p>
           <div className="flex gap-4 justify-center">
-            <Button size="lg">Start Free Trial</Button>
-            <Button size="lg" variant="outline">Contact Sales</Button>
+            <Button size="lg" onClick={handleStartFreeTrial}>Start Free Trial</Button>
+            <Button size="lg" variant="outline" onClick={handleContactSales}>Contact Sales</Button>
           </div>
         </section>
 

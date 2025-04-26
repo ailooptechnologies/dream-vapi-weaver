@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Bot, Headphones, MessageCircle, Speech } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import VoiceAgent from "@/components/VoiceAgent";
@@ -11,6 +10,15 @@ import SoundWaveAnimation from "@/components/SoundWaveAnimation";
 
 const Index = () => {
   const [demoActive, setDemoActive] = useState(false);
+  const navigate = useNavigate();
+
+  const handleGetStartedFree = () => {
+    navigate('/register');
+  };
+
+  const handleScheduleDemo = () => {
+    navigate('/register');  // This could be changed to a contact page if you create one
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -29,8 +37,8 @@ const Index = () => {
                 Create intelligent voice experiences with our powerful Voice AI platform. Build, test, and deploy voice agents that understand natural language.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Button size="lg">Get Started Free</Button>
-                <Button size="lg" variant="outline">View Documentation</Button>
+                <Button size="lg" onClick={handleGetStartedFree}>Get Started Free</Button>
+                <Button size="lg" variant="outline" onClick={handleScheduleDemo}>Schedule a Demo</Button>
               </div>
             </div>
             <div className="flex-1 relative">
