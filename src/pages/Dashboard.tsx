@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { useAssistantStore } from '@/store/useAssistantStore';
 import AssistantConfig from '@/components/AssistantConfig';
 import { toast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
   const { selectedAssistant, assistants, setSelectedAssistant } = useAssistantStore();
@@ -120,7 +120,7 @@ const Dashboard = () => {
               </CardContent>
               <CardFooter className="pt-0">
                 <Button variant="ghost" size="sm" className="w-full" asChild>
-                  <a href="/campaign">View Campaigns</a>
+                  <Link to="/campaign">View Campaigns</Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -172,7 +172,7 @@ const Dashboard = () => {
               </CardContent>
               <CardFooter className="pt-0">
                 <Button variant="ghost" size="sm" className="w-full" asChild>
-                  <a href="/ai-agents">Manage Agents</a>
+                  <Link to="/ai-agents">Manage Agents</Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -198,7 +198,7 @@ const Dashboard = () => {
               </CardContent>
               <CardFooter className="pt-0">
                 <Button variant="ghost" size="sm" className="w-full" asChild>
-                  <a href="/phone-numbers">Manage Contacts</a>
+                  <Link to="/phone-numbers">Manage Contacts</Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -221,7 +221,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardFooter className="pt-2">
                 <Button size="sm" className="w-full" asChild>
-                  <a href="/campaign">Create Campaign</a>
+                  <Link to="/campaign">Create Campaign</Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -238,7 +238,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardFooter className="pt-2">
                 <Button size="sm" className="w-full" asChild>
-                  <a href="/ai-agents">New Agent</a>
+                  <Link to="/ai-agents">New Agent</Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -246,16 +246,16 @@ const Dashboard = () => {
             <Card>
               <CardHeader className="pb-2 flex flex-row items-center space-y-0">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                  <MessageSquare className="h-5 w-5 text-primary" />
+                  <Key className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">View Analytics</CardTitle>
-                  <CardDescription>Review campaign performance</CardDescription>
+                  <CardTitle className="text-lg">Configure Keys</CardTitle>
+                  <CardDescription>Manage provider keys</CardDescription>
                 </div>
               </CardHeader>
               <CardFooter className="pt-2">
-                <Button size="sm" className="w-full">
-                  Open Analytics
+                <Button size="sm" className="w-full" asChild>
+                  <Link to="/provider-keys">Manage Keys</Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -278,7 +278,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardFooter className="pt-2">
                 <Button size="sm" variant="outline" className="w-full" asChild>
-                  <a href="/custom-models">Configure</a>
+                  <Link to="/custom-models">Configure</Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -295,7 +295,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardFooter className="pt-2">
                 <Button size="sm" variant="outline" className="w-full" asChild>
-                  <a href="/custom-models">Configure</a>
+                  <Link to="/custom-models">Configure</Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -312,7 +312,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardFooter className="pt-2">
                 <Button size="sm" variant="outline" className="w-full" asChild>
-                  <a href="/custom-models">Configure</a>
+                  <Link to="/custom-models">Configure</Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -329,7 +329,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardFooter className="pt-2">
                 <Button size="sm" variant="outline" className="w-full" asChild>
-                  <a href="/provider-keys">Manage Keys</a>
+                  <Link to="/provider-keys">Manage Keys</Link>
                 </Button>
               </CardFooter>
             </Card>

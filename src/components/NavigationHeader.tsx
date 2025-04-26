@@ -43,20 +43,21 @@ const NavigationHeader: React.FC = () => {
           <Link to="/features" className="text-foreground/80 hover:text-foreground transition-colors">
             Features
           </Link>
-          <Link to="/dashboard" className="text-foreground/80 hover:text-foreground transition-colors">
-            Dashboard
-          </Link>
-          <Link to="/docs" className="text-foreground/80 hover:text-foreground transition-colors">
-            Documentation
-          </Link>
           <Link to="/pricing" className="text-foreground/80 hover:text-foreground transition-colors">
             Pricing
+          </Link>
+          <Link to="/dashboard" className="text-foreground/80 hover:text-foreground transition-colors">
+            Dashboard
           </Link>
         </nav>
 
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm">Sign In</Button>
-          <Button size="sm">Get Started</Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/login">Sign In</Link>
+          </Button>
+          <Button size="sm" asChild>
+            <Link to="/register">Get Started</Link>
+          </Button>
         </div>
       </div>
     </header>
