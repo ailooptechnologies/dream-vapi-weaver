@@ -1,15 +1,47 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Search, Menu, ChevronDown, ExternalLink, Play, MessageSquare, PenTool } from "lucide-react";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import SidebarNav from '@/components/SidebarNav';
 import AssistantCard from '@/components/AssistantCard';
 import ConfigSection from '@/components/ConfigSection';
+import { useAssistantStore } from '@/store/useAssistantStore';
+import AssistantConfig from '@/components/AssistantConfig';
+import { toast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
-  const [selectedAssistant, setSelectedAssistant] = useState<string | null>("Riley");
+  const { selectedAssistant, assistants, setSelectedAssistant } = useAssistantStore();
+
+  const handleCreateAssistant = () => {
+    const newAssistant = {
+      id: crypto.randomUUID(),
+      name: "New Assistant",
+      description: "Description",
+      firstMessage: "Hello, how can I help you?",
+      provider: "openai",
+      model: "gpt-4"
+    };
+    setSelectedAssistant(newAssistant);
+    toast({
+      title: "Assistant created",
+      description: "New assistant has been created successfully."
+    });
+  };
+
+  const handleTest = () => {
+    toast({
+      title: "Test started",
+      description: "Testing the assistant configuration..."
+    });
+  };
+
+  const handlePublish = () => {
+    toast({
+      title: "Published",
+      description: "Assistant has been published successfully."
+    });
+  };
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
@@ -21,7 +53,7 @@ const Dashboard = () => {
       {/* Mobile Sidebar */}
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="md:hidden absolute top-4 left-4 z-50">
+          <Button variant="ghost" size="icon" className="md:hidden absolute top-4 left-4">
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
@@ -30,7 +62,6 @@ const Dashboard = () => {
         </SheetContent>
       </Sheet>
       
-      {/* Main Content */}
       <div className="flex-1">
         {/* Top Navigation */}
         <header className="border-b py-3 px-6">
@@ -53,142 +84,99 @@ const Dashboard = () => {
         <div className="flex">
           {/* Assistant List */}
           <div className="w-64 p-4 border-r">
-            <Button className="w-full mb-4 flex items-center gap-2 bg-primary">
+            <Button 
+              className="w-full mb-4 flex items-center gap-2"
+              onClick={handleCreateAssistant}
+            >
               <span>Create Assistant</span>
             </Button>
             
-            <AssistantCard 
-              name="Riley"
-              description="Elliot"
-              isSelected={selectedAssistant === "Riley"}
-              onClick={() => setSelectedAssistant("Riley")}
-            />
+            {assistants.map(assistant => (
+              <AssistantCard 
+                key={assistant.id}
+                name={assistant.name}
+                description={assistant.description}
+                isSelected={selectedAssistant?.id === assistant.id}
+                onClick={() => setSelectedAssistant(assistant)}
+              />
+            ))}
           </div>
 
           {/* Assistant Configuration */}
           <div className="flex-1 p-6">
-            <div className="flex justify-between items-center mb-8">
-              <div>
-                <h2 className="text-2xl font-bold">Riley</h2>
-                <p className="text-sm text-muted-foreground">c139d93-7a62-4c6b-8bd4-ab59603f15f4</p>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="flex items-center gap-1">
-                  <PenTool className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="sm" className="flex items-center gap-1">
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
-                <Button size="sm" className="flex items-center gap-1">
-                  <Play className="h-4 w-4" />
-                  <span>Test</span>
-                </Button>
-                <Button variant="outline" size="sm" className="flex items-center gap-1">
-                  <MessageSquare className="h-4 w-4" />
-                  <span>Chat</span>
-                </Button>
-                <Button className="flex items-center gap-1">
-                  <span>Talk to Assistant</span>
-                </Button>
-                <Button className="bg-primary flex items-center gap-1">
-                  <span>Publish</span>
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex gap-4 mb-8">
-              <Button variant="outline" className="flex gap-2">
-                Model
-              </Button>
-              <Button variant="outline" className="flex gap-2">
-                Transcriber
-              </Button>
-              <Button variant="outline" className="flex gap-2">
-                Voice
-              </Button>
-              <Button variant="outline" className="flex gap-2">
-                Tools
-              </Button>
-              <Button variant="outline" className="flex gap-2">
-                Analysis
-              </Button>
-              <Button variant="outline" className="flex gap-2">
-                Advanced
-              </Button>
-            </div>
-
-            <div className="space-y-4">
-              <ConfigSection 
-                title="Privacy"
-                description="This section allows you to configure the privacy settings for the assistant."
-              />
-              
-              <ConfigSection 
-                title="Start Speaking Plan"
-                description="This is the plan for when the assistant should start talking."
-              />
-              
-              <ConfigSection 
-                title="Voicemail Detection"
-                description="Configure how the assistant detects and handles voicemail."
-              />
-              
-              <ConfigSection 
-                title="Stop Speaking Plan"
-                description="This is the plan for when the assistant should stop talking."
-              />
-              
-              <ConfigSection 
-                title="Call Timeout Settings"
-                description="Configure when the assistant should end a call based on silence or duration."
-              />
-              
-              <ConfigSection 
-                title="Predefined Functions"
-                description="We've pre-built functions for common use cases. You can enable them and configure them below."
-              />
-              
-              <ConfigSection 
-                title="Custom Functions"
-                description="Define your custom functions here to enhance your assistant's capabilities. You can use your own code or tools like Pipedream or Make for the setup."
-              />
-              
-              <ConfigSection 
-                title="Voice Configuration"
-                description="Select a voice from the list, or sync your voice library if it's missing. If errors persist, enable custom voice and add a voice ID."
-              />
-              
-              <ConfigSection 
-                title="Model"
-                description="Configure the behavior of the assistant."
-              >
-                <div className="space-y-4 mt-4">
+            {selectedAssistant && (
+              <>
+                <div className="flex justify-between items-center mb-8">
                   <div>
-                    <label className="block text-sm font-medium mb-1">First Message</label>
-                    <textarea 
-                      className="w-full h-20 p-2 border rounded-md bg-background"
-                      defaultValue="Thank you for calling Wellness Partners. This is Riley, your scheduling assistant."
-                    />
+                    <h2 className="text-2xl font-bold">{selectedAssistant.name}</h2>
+                    <p className="text-sm text-muted-foreground">{selectedAssistant.id}</p>
                   </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Provider</label>
-                      <select className="w-full p-2 border rounded-md bg-background">
-                        <option>openai</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Model</label>
-                      <select className="w-full p-2 border rounded-md bg-background">
-                        <option>gpt-4o</option>
-                      </select>
-                    </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="flex items-center gap-1">
+                      <PenTool className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex items-center gap-1">
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" className="flex items-center gap-1" onClick={handleTest}>
+                      <Play className="h-4 w-4" />
+                      <span>Test</span>
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex items-center gap-1">
+                      <MessageSquare className="h-4 w-4" />
+                      <span>Chat</span>
+                    </Button>
+                    <Button className="flex items-center gap-1" onClick={handlePublish}>
+                      <span>Publish</span>
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-              </ConfigSection>
-            </div>
+
+                <div className="flex gap-4 mb-8">
+                  <Button variant="outline">Model</Button>
+                  <Button variant="outline">Transcriber</Button>
+                  <Button variant="outline">Voice</Button>
+                  <Button variant="outline">Tools</Button>
+                  <Button variant="outline">Analysis</Button>
+                  <Button variant="outline">Advanced</Button>
+                </div>
+
+                <div className="space-y-4">
+                  <ConfigSection 
+                    title="Model"
+                    description="Configure the behavior of the assistant."
+                  >
+                    <AssistantConfig />
+                  </ConfigSection>
+                  
+                  <ConfigSection 
+                    title="Privacy"
+                    description="This section allows you to configure the privacy settings for the assistant."
+                  />
+                  
+                  <ConfigSection 
+                    title="Start Speaking Plan"
+                    description="This is the plan for when the assistant should start talking."
+                  />
+                  
+                  <ConfigSection 
+                    title="Voicemail Detection"
+                    description="Configure how the assistant detects and handles voicemail."
+                  />
+                  
+                  <ConfigSection 
+                    title="Stop Speaking Plan"
+                    description="This is the plan for when the assistant should stop talking."
+                  />
+                  
+                  <ConfigSection 
+                    title="Call Timeout Settings"
+                    description="Configure when the assistant should end a call based on silence or duration."
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
