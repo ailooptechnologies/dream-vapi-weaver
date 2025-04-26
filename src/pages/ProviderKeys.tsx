@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, Key, MessageSquare, Mic, Volume2, Plus, Trash2, Pencil } from "lucide-react";
+import { Menu, Key, MessageSquare, Mic, Volume2, Plus, Trash2, Pencil, CheckCircle } from "lucide-react";
 import SidebarNav from '@/components/SidebarNav';
 import { Input } from "@/components/ui/input";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
@@ -43,6 +43,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 
 interface ProviderKey {
   id: string;
@@ -113,9 +114,10 @@ const ProviderKeys = () => {
   const handleStatusToggle = (keyId: string) => {
     setProviderKeys(providerKeys.map(key => {
       if (key.id === keyId) {
+        const newStatus = key.status === 'active' ? 'inactive' : 'active';
         return {
           ...key,
-          status: key.status === 'active' ? 'inactive' : 'active'
+          status: newStatus
         };
       }
       return key;
@@ -370,11 +372,9 @@ const ProviderKeys = () => {
                           <CardTitle className="text-lg">{key.name}</CardTitle>
                           <CardDescription>{getProviderLabel(key.provider)}</CardDescription>
                         </div>
-                        <Switch 
-                          checked={key.status === 'active'}
-                          onCheckedChange={() => handleStatusToggle(key.id)}
-                          className="ml-2"
-                        />
+                        <Badge className={key.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                          {key.status === 'active' ? 'Active' : 'Inactive'}
+                        </Badge>
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -387,14 +387,27 @@ const ProviderKeys = () => {
                         />
                       </div>
                     </CardContent>
-                    <CardFooter className="flex justify-end gap-2">
-                      <Button variant="outline" size="sm" onClick={() => handleEditKey(key)}>
-                        <Pencil className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
-                      <Button variant="outline" size="sm" className="text-destructive" onClick={() => handleDeleteKey(key.id)}>
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Delete
+                    <CardFooter className="border-t pt-4 flex justify-between">
+                      <div className="space-x-2">
+                        <Button variant="outline" size="sm" onClick={() => handleEditKey(key)}>
+                          <Pencil className="h-4 w-4 mr-1" />
+                          Edit
+                        </Button>
+                        <Button variant="outline" size="sm" className="text-destructive" onClick={() => handleDeleteKey(key.id)}>
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        variant={key.status === 'active' ? "outline" : "default"}
+                        onClick={() => handleStatusToggle(key.id)}
+                      >
+                        {key.status === 'active' ? (
+                          <>Deactivate</>
+                        ) : (
+                          <><CheckCircle className="h-4 w-4 mr-1" />Activate</>
+                        )}
                       </Button>
                     </CardFooter>
                   </Card>
@@ -424,11 +437,9 @@ const ProviderKeys = () => {
                           <CardTitle className="text-lg">{key.name}</CardTitle>
                           <CardDescription>{getProviderLabel(key.provider)}</CardDescription>
                         </div>
-                        <Switch 
-                          checked={key.status === 'active'}
-                          onCheckedChange={() => handleStatusToggle(key.id)}
-                          className="ml-2"
-                        />
+                        <Badge className={key.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                          {key.status === 'active' ? 'Active' : 'Inactive'}
+                        </Badge>
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -441,14 +452,27 @@ const ProviderKeys = () => {
                         />
                       </div>
                     </CardContent>
-                    <CardFooter className="flex justify-end gap-2">
-                      <Button variant="outline" size="sm" onClick={() => handleEditKey(key)}>
-                        <Pencil className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
-                      <Button variant="outline" size="sm" className="text-destructive" onClick={() => handleDeleteKey(key.id)}>
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Delete
+                    <CardFooter className="border-t pt-4 flex justify-between">
+                      <div className="space-x-2">
+                        <Button variant="outline" size="sm" onClick={() => handleEditKey(key)}>
+                          <Pencil className="h-4 w-4 mr-1" />
+                          Edit
+                        </Button>
+                        <Button variant="outline" size="sm" className="text-destructive" onClick={() => handleDeleteKey(key.id)}>
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        variant={key.status === 'active' ? "outline" : "default"}
+                        onClick={() => handleStatusToggle(key.id)}
+                      >
+                        {key.status === 'active' ? (
+                          <>Deactivate</>
+                        ) : (
+                          <><CheckCircle className="h-4 w-4 mr-1" />Activate</>
+                        )}
                       </Button>
                     </CardFooter>
                   </Card>
@@ -478,11 +502,9 @@ const ProviderKeys = () => {
                           <CardTitle className="text-lg">{key.name}</CardTitle>
                           <CardDescription>{getProviderLabel(key.provider)}</CardDescription>
                         </div>
-                        <Switch 
-                          checked={key.status === 'active'}
-                          onCheckedChange={() => handleStatusToggle(key.id)}
-                          className="ml-2"
-                        />
+                        <Badge className={key.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                          {key.status === 'active' ? 'Active' : 'Inactive'}
+                        </Badge>
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -495,14 +517,27 @@ const ProviderKeys = () => {
                         />
                       </div>
                     </CardContent>
-                    <CardFooter className="flex justify-end gap-2">
-                      <Button variant="outline" size="sm" onClick={() => handleEditKey(key)}>
-                        <Pencil className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
-                      <Button variant="outline" size="sm" className="text-destructive" onClick={() => handleDeleteKey(key.id)}>
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Delete
+                    <CardFooter className="border-t pt-4 flex justify-between">
+                      <div className="space-x-2">
+                        <Button variant="outline" size="sm" onClick={() => handleEditKey(key)}>
+                          <Pencil className="h-4 w-4 mr-1" />
+                          Edit
+                        </Button>
+                        <Button variant="outline" size="sm" className="text-destructive" onClick={() => handleDeleteKey(key.id)}>
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        variant={key.status === 'active' ? "outline" : "default"}
+                        onClick={() => handleStatusToggle(key.id)}
+                      >
+                        {key.status === 'active' ? (
+                          <>Deactivate</>
+                        ) : (
+                          <><CheckCircle className="h-4 w-4 mr-1" />Activate</>
+                        )}
                       </Button>
                     </CardFooter>
                   </Card>
