@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { 
+  Sheet, 
+  SheetContent, 
+  SheetTrigger, 
+  SheetHeader,  // Add this import
+  SheetTitle,   // Add this import
+  SheetDescription // Add this import
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu, HelpCircle, Search, Mail, MessageSquare } from "lucide-react";
 import SidebarNav from '@/components/SidebarNav';
