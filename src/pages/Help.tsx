@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -92,7 +93,6 @@ const Help = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedItems, setExpandedItems] = useState<{[key: string]: boolean}>({});
   const [activeTab, setActiveTab] = useState('guides');
-  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const toggleItemExpansion = (sectionTitle: string, itemTitle: string) => {
     const key = `${sectionTitle}-${itemTitle}`;
@@ -118,14 +118,6 @@ const Help = () => {
         item.answer.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : faqItems;
-
-  const handleLiveChat = () => {
-    setIsChatOpen(true);
-  };
-
-  const handleEmailSupport = () => {
-    window.location.href = 'mailto:support@your-company.com';
-  };
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -258,8 +250,8 @@ const Help = () => {
                 <CardDescription>Get in touch with our support team for personalized assistance.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Button variant="outline" className="flex items-center justify-start gap-2 h-auto py-3" onClick={handleLiveChat}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Button variant="outline" className="flex items-center justify-start gap-2 h-auto py-3">
                     <MessageSquare className="h-5 w-5 text-primary" />
                     <div className="text-left">
                       <div className="font-medium">Live Chat</div>
@@ -267,11 +259,19 @@ const Help = () => {
                     </div>
                   </Button>
                   
-                  <Button variant="outline" className="flex items-center justify-start gap-2 h-auto py-3" onClick={handleEmailSupport}>
+                  <Button variant="outline" className="flex items-center justify-start gap-2 h-auto py-3">
                     <Mail className="h-5 w-5 text-primary" />
                     <div className="text-left">
                       <div className="font-medium">Email Support</div>
                       <div className="text-xs text-muted-foreground">Get help via email</div>
+                    </div>
+                  </Button>
+                  
+                  <Button variant="outline" className="flex items-center justify-start gap-2 h-auto py-3">
+                    <FileText className="h-5 w-5 text-primary" />
+                    <div className="text-left">
+                      <div className="font-medium">Documentation</div>
+                      <div className="text-xs text-muted-foreground">Browse technical guides</div>
                     </div>
                   </Button>
                 </div>
@@ -280,39 +280,11 @@ const Help = () => {
                 <div className="text-sm text-muted-foreground">
                   Our support team is available Monday through Friday, 9am-5pm PT
                 </div>
-                <Button className="w-full" onClick={handleEmailSupport}>Contact Support</Button>
+                <Button className="w-full">Contact Support</Button>
               </CardFooter>
             </Card>
           </div>
         </div>
-
-        {/* Live Chat Sheet */}
-        <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
-          <SheetContent side="right" className="w-[400px] sm:w-[540px]">
-            <div className="h-full flex flex-col">
-              <div className="flex items-center gap-2 pb-4 mb-4 border-b">
-                <MessageSquare className="h-5 w-5" />
-                <h3 className="font-semibold text-lg">Live Support Chat</h3>
-              </div>
-              
-              <div className="flex-1 overflow-auto p-4 bg-muted/10 rounded-md mb-4">
-                <div className="text-center text-muted-foreground">
-                  <p>Welcome to our support chat!</p>
-                  <p>A support agent will be with you shortly.</p>
-                </div>
-              </div>
-
-              <div className="flex gap-2 items-center">
-                <input
-                  type="text"
-                  placeholder="Type your message..."
-                  className="flex-1 px-3 py-2 rounded-md border"
-                />
-                <Button>Send</Button>
-              </div>
-            </div>
-          </SheetContent>
-        </Sheet>
       </div>
     </div>
   );
