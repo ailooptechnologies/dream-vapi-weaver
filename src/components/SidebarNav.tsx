@@ -1,20 +1,61 @@
 
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { ChevronDown, Home, Bot, Phone, Key, HelpCircle, MessageSquare, Mic, Headphones, Volume2 } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { 
+  ChevronDown, 
+  Home, 
+  Bot, 
+  Phone, 
+  Key, 
+  HelpCircle, 
+  MessageSquare, 
+  Mic, 
+  Headphones, 
+  LogOut,
+  Plus,
+  Building
+} from 'lucide-react';
+import OrganizationDialog from './OrganizationDialog';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 const SidebarNav = () => {
   const [expandedSections, setExpandedSections] = useState({
-    build: true,
-    test: false
+    build: true
   });
   
   const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [orgDialogOpen, setOrgDialogOpen] = useState(false);
+  
+  // Get organization name from localStorage or use default
+  const organizationName = localStorage.getItem('organizationName') || 'My Organization';
+  const userEmail = localStorage.getItem('userEmail') || 'example@gmail.com';
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections({
       ...expandedSections,
       [section]: !expandedSections[section]
+    });
+  };
+
+  const handleCreateOrganization = (data: { name: string; description: string }) => {
+    // In a real app, this would create a new organization in the backend
+    localStorage.setItem('organizationName', data.name);
+    toast({
+      title: "Organization created",
+      description: `Switched to ${data.name}`
+    });
+    setOrgDialogOpen(false);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('isLoggedIn');
+    navigate('/login');
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out"
     });
   };
 
@@ -37,11 +78,22 @@ const SidebarNav = () => {
 
       <div className="p-4 border-b">
         <h2 className="text-sm font-semibold text-muted-foreground mb-2">ORGANIZATION</h2>
-        <div className="relative">
-          <select className="w-full py-2 pl-2 pr-8 bg-background border rounded-md text-sm">
-            <option>example@gmail.com</option>
-          </select>
-          <ChevronDown className="absolute right-2 top-2.5 h-4 w-4 pointer-events-none" />
+        <div className="flex flex-col space-y-2">
+          <div className="px-2 py-1 bg-slate-100 rounded-md text-sm font-medium flex items-center justify-between">
+            <div className="flex items-center">
+              <Building className="h-3 w-3 mr-2" />
+              <span className="truncate">{organizationName}</span>
+            </div>
+          </div>
+          <div className="px-2 py-1 text-xs text-muted-foreground">{userEmail}</div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full justify-start text-xs"
+            onClick={() => setOrgDialogOpen(true)}
+          >
+            <Plus className="h-3 w-3 mr-1" /> New Organization
+          </Button>
         </div>
       </div>
 
@@ -124,40 +176,9 @@ const SidebarNav = () => {
             </div>
           )}
         </div>
-
-        <div className="mt-4">
-          <button 
-            onClick={() => toggleSection('test')} 
-            className="flex items-center justify-between w-full px-3 py-2"
-          >
-            <span className="text-xs font-semibold text-muted-foreground">TEST</span>
-            <ChevronDown className={`h-4 w-4 transform transition-transform ${expandedSections.test ? 'rotate-180' : ''}`} />
-          </button>
-          
-          {expandedSections.test && (
-            <div className="space-y-1 mt-1">
-              <div className="px-3 py-2">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-teal-400"></div>
-                  <span className="text-sm">Vapi Free</span>
-                </div>
-                <div className="mt-2">
-                  <div className="font-bold">0</div>
-                  <div className="text-xs text-muted-foreground">/1000 free minutes used</div>
-                  <div className="h-2 w-full bg-gray-200 rounded-full mt-1">
-                    <div className="h-2 bg-teal-400 rounded-full" style={{ width: '0%' }}></div>
-                  </div>
-                </div>
-                <div className="text-xs mt-2 text-muted-foreground">
-                  Renews on May 1
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
       </nav>
 
-      <div className="p-2 mt-auto">
+      <div className="p-2 mt-auto border-t">
         <Link 
           to="/help" 
           className={`flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors ${
@@ -167,7 +188,21 @@ const SidebarNav = () => {
           <HelpCircle className="h-4 w-4" />
           <span className="text-sm">Help</span>
         </Link>
+        
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors w-full text-left"
+        >
+          <LogOut className="h-4 w-4" />
+          <span className="text-sm">Logout</span>
+        </button>
       </div>
+      
+      <OrganizationDialog 
+        open={orgDialogOpen} 
+        onOpenChange={setOrgDialogOpen} 
+        onCreateOrganization={handleCreateOrganization} 
+      />
     </div>
   );
 };

@@ -1,8 +1,10 @@
 
+// Updating Campaign.tsx to add calendar for scheduling and enhanced management options
+
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, Phone, Bot, MessageSquare, Calendar, Plus, Play, Pencil, Trash2, BarChart } from "lucide-react";
+import { Menu, Phone, Bot, MessageSquare, Calendar as CalendarIcon, Plus, Play, Pencil, Trash2, BarChart, Pause, CheckCircle } from "lucide-react";
 import SidebarNav from '@/components/SidebarNav';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,6 +35,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -47,6 +55,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { format } from "date-fns";
 
 interface CampaignFormValues {
   name: string;
@@ -57,6 +66,8 @@ interface CampaignFormValues {
   maxCallDuration: string;
   maxConcurrentCalls: string;
   schedule: string;
+  scheduledDate?: Date;
+  scheduledTime?: string;
 }
 
 const Campaign = () => {
@@ -66,6 +77,7 @@ const Campaign = () => {
   const [editingCampaignId, setEditingCampaignId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedCampaignForDeletion, setSelectedCampaignForDeletion] = useState<string | null>(null);
+  const [date, setDate] = useState<Date>();
 
   // Sample data (in a real app, this would come from API calls)
   const agents = [
@@ -90,8 +102,12 @@ const Campaign = () => {
       maxCallDuration: '300',
       maxConcurrentCalls: '5',
       schedule: 'immediate',
+      scheduledTime: '09:00',
     },
   });
+
+  // Watch the schedule type to conditionally show date/time pickers
+  const scheduleType = form.watch("schedule");
 
   const resetAndCloseDialog = () => {
     form.reset();
@@ -100,9 +116,23 @@ const Campaign = () => {
   };
 
   const onSubmit = (data: CampaignFormValues) => {
+    // Format the scheduled date and time if applicable
+    let scheduledDateTime = null;
+    if (data.schedule === 'scheduled' && data.scheduledDate) {
+      const timeString = data.scheduledTime || '00:00';
+      const [hours, minutes] = timeString.split(':').map(Number);
+      const scheduledDate = new Date(data.scheduledDate);
+      scheduledDate.setHours(hours, minutes);
+      scheduledDateTime = scheduledDate.toISOString();
+    }
+
     if (editingCampaignId) {
       setCampaigns(campaigns.map(campaign => 
-        campaign.id === editingCampaignId ? { ...campaign, ...data } : campaign
+        campaign.id === editingCampaignId ? { 
+          ...campaign, 
+          ...data,
+          scheduledDateTime 
+        } : campaign
       ));
       toast({
         title: "Campaign updated",
@@ -112,6 +142,7 @@ const Campaign = () => {
       const newCampaign = {
         id: crypto.randomUUID(),
         ...data,
+        scheduledDateTime,
         status: "draft",
         createdAt: new Date().toISOString(),
         stats: {
@@ -134,6 +165,15 @@ const Campaign = () => {
   const handleEdit = (campaignId: string) => {
     const campaign = campaigns.find(c => c.id === campaignId);
     if (campaign) {
+      // Parse scheduled date and time if they exist
+      let scheduledDate;
+      let scheduledTime = '09:00';
+      if (campaign.scheduledDateTime) {
+        const date = new Date(campaign.scheduledDateTime);
+        scheduledDate = date;
+        scheduledTime = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+      }
+
       form.reset({
         name: campaign.name,
         description: campaign.description,
@@ -143,6 +183,8 @@ const Campaign = () => {
         maxCallDuration: campaign.maxCallDuration,
         maxConcurrentCalls: campaign.maxConcurrentCalls,
         schedule: campaign.schedule,
+        scheduledDate,
+        scheduledTime,
       });
       setEditingCampaignId(campaignId);
       setIsDialogOpen(true);
@@ -172,8 +214,8 @@ const Campaign = () => {
     ));
     
     toast({
-      title: `Campaign ${newStatus}`,
-      description: `Campaign has been ${newStatus === 'active' ? 'activated' : newStatus === 'paused' ? 'paused' : 'completed'}.`
+      title: `Campaign ${newStatus === 'active' ? 'activated' : newStatus === 'paused' ? 'paused' : 'completed'}`,
+      description: `Campaign has been ${newStatus === 'active' ? 'activated' : newStatus === 'paused' ? 'paused' : 'marked as completed'}.`
     });
   };
 
@@ -451,6 +493,67 @@ const Campaign = () => {
                           </FormItem>
                         )}
                       />
+                      
+                      {scheduleType === 'scheduled' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="scheduledDate"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col">
+                                <FormLabel>Date</FormLabel>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <FormControl>
+                                      <Button
+                                        variant={"outline"}
+                                        className={`w-full pl-3 text-left font-normal ${
+                                          !field.value && "text-muted-foreground"
+                                        }`}
+                                      >
+                                        {field.value ? (
+                                          format(field.value, "PPP")
+                                        ) : (
+                                          <span>Pick a date</span>
+                                        )}
+                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                      </Button>
+                                    </FormControl>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0" align="start">
+                                    <Calendar
+                                      mode="single"
+                                      selected={field.value}
+                                      onSelect={field.onChange}
+                                      disabled={(date) => date < new Date()}
+                                      initialFocus
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                                <FormDescription>
+                                  The date to start the campaign
+                                </FormDescription>
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="scheduledTime"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Time</FormLabel>
+                                <FormControl>
+                                  <Input type="time" {...field} />
+                                </FormControl>
+                                <FormDescription>
+                                  The time to start the campaign
+                                </FormDescription>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
                     </TabsContent>
                   </Tabs>
                   
@@ -514,9 +617,14 @@ const Campaign = () => {
                     <div>
                       <h4 className="text-sm font-medium text-muted-foreground mb-2">Schedule</h4>
                       <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">
-                          {campaign.schedule === 'immediate' ? 'Start immediately' : 'Scheduled for later'}
+                          {campaign.schedule === 'immediate' ? 
+                            'Start immediately' : 
+                            campaign.scheduledDateTime ? 
+                              `Scheduled for ${format(new Date(campaign.scheduledDateTime), "PPP 'at' p")}` :
+                              'Scheduled for later'
+                          }
                         </span>
                       </div>
                     </div>
@@ -574,16 +682,19 @@ const Campaign = () => {
                     )}
                     {campaign.status === 'active' && (
                       <Button size="sm" variant="outline" onClick={() => handleStatusChange(campaign.id, 'paused')}>
+                        <Pause className="h-4 w-4 mr-1" />
                         Pause Campaign
                       </Button>
                     )}
                     {campaign.status === 'paused' && (
                       <Button size="sm" onClick={() => handleStatusChange(campaign.id, 'active')}>
+                        <Play className="h-4 w-4 mr-1" />
                         Resume Campaign
                       </Button>
                     )}
                     {(campaign.status === 'active' || campaign.status === 'paused') && (
                       <Button size="sm" variant="outline" onClick={() => handleStatusChange(campaign.id, 'completed')}>
+                        <CheckCircle className="h-4 w-4 mr-1" />
                         Mark as Completed
                       </Button>
                     )}

@@ -2,9 +2,12 @@
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, Mic, VolumeX, Volume2, Headphones, MessageSquare, Plus } from "lucide-react";
+import { Menu, Headphones, Mic, MessageSquare, Plus, Pencil, Trash2, CheckCircle } from "lucide-react";
 import SidebarNav from '@/components/SidebarNav';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
 import { 
   Card, 
   CardContent, 
@@ -13,15 +16,6 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
@@ -31,114 +25,197 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 
 interface ModelFormValues {
   name: string;
   provider: string;
   modelId: string;
-  apiKey: string;
-  language: string;
-  region: string;
-  quality?: string;
-  voice?: string;
-  speed?: string;
-  temperature?: string;
-  maxTokens?: string;
-  systemPrompt?: string;
+  apiEndpoint?: string;
+  description?: string;
+  parameters?: string;
+  type: 'stt' | 'tts' | 'nlu';
 }
 
 const CustomModels = () => {
-  // State for active models
-  const [activeSTTModel, setActiveSTTModel] = useState<string | null>(null);
-  const [activeTTSModel, setActiveTTSModel] = useState<string | null>(null);
-  const [activeNLUModel, setActiveNLUModel] = useState<string | null>(null);
   const { toast } = useToast();
-  
-  // Dialog states
-  const [sttDialogOpen, setSttDialogOpen] = useState(false);
-  const [ttsDialogOpen, setTtsDialogOpen] = useState(false);
-  const [nluDialogOpen, setNluDialogOpen] = useState(false);
-  
-  // Form
-  const sttForm = useForm<ModelFormValues>();
-  const ttsForm = useForm<ModelFormValues>();
-  const nluForm = useForm<ModelFormValues>();
-  
-  // Sample model data (in a real app, this would come from an API)
-  const [sttModels, setSttModels] = useState([
-    { id: 'whisper-1', name: 'Whisper v1', provider: 'OpenAI', accuracy: 'High' },
-    { id: 'deepgram-nova', name: 'Nova', provider: 'Deepgram', accuracy: 'Very High' },
-    { id: 'azure-stt', name: 'Azure Speech', provider: 'Microsoft', accuracy: 'Medium' },
-  ]);
-  
-  const [ttsModels, setTtsModels] = useState([
-    { id: 'eleven-multilingual', name: 'Multilingual v2', provider: 'ElevenLabs', quality: 'Premium' },
-    { id: 'azure-neural', name: 'Neural Voices', provider: 'Microsoft', quality: 'High' },
-    { id: 'gcp-wavenet', name: 'WaveNet', provider: 'Google', quality: 'High' },
-  ]);
-  
-  const [nluModels, setNluModels] = useState([
-    { id: 'gpt-4', name: 'GPT-4', provider: 'OpenAI', capability: 'Advanced' },
-    { id: 'claude-3', name: 'Claude 3', provider: 'Anthropic', capability: 'Advanced' },
-    { id: 'llama-70b', name: 'Llama 3 70B', provider: 'Meta', capability: 'High' },
-  ]);
+  const [activeTab, setActiveTab] = useState<'stt' | 'tts' | 'nlu'>('stt');
+  const [models, setModels] = useState<any[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingModelId, setEditingModelId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [modelToDelete, setModelToDelete] = useState<string | null>(null);
 
-  const handleAddSTTModel = (data: ModelFormValues) => {
-    const newModel = {
-      id: crypto.randomUUID(),
-      name: data.name,
-      provider: data.provider,
-      accuracy: data.quality || 'Medium'
-    };
-    setSttModels([...sttModels, newModel]);
-    setSttDialogOpen(false);
-    sttForm.reset();
-    toast({
-      title: "STT Model Added",
-      description: `${data.name} has been added to your models.`
-    });
+  // Provider options for each type of model
+  const providerOptions = {
+    stt: [
+      { value: 'whisper', label: 'OpenAI Whisper' },
+      { value: 'google', label: 'Google Cloud STT' },
+      { value: 'deepgram', label: 'Deepgram' },
+      { value: 'assembly', label: 'AssemblyAI' },
+    ],
+    tts: [
+      { value: 'elevenlabs', label: 'ElevenLabs' },
+      { value: 'google', label: 'Google Cloud TTS' },
+      { value: 'amazon', label: 'Amazon Polly' },
+      { value: 'microsoft', label: 'Microsoft Azure TTS' },
+    ],
+    nlu: [
+      { value: 'openai', label: 'OpenAI' },
+      { value: 'anthropic', label: 'Anthropic' },
+      { value: 'mistral', label: 'Mistral AI' },
+      { value: 'google', label: 'Google Gemini' },
+      { value: 'cohere', label: 'Cohere' },
+    ]
   };
 
-  const handleAddTTSModel = (data: ModelFormValues) => {
-    const newModel = {
-      id: crypto.randomUUID(),
-      name: data.name,
-      provider: data.provider,
-      quality: data.quality || 'Medium'
-    };
-    setTtsModels([...ttsModels, newModel]);
-    setTtsDialogOpen(false);
-    ttsForm.reset();
-    toast({
-      title: "TTS Model Added",
-      description: `${data.name} has been added to your models.`
-    });
+  const form = useForm<ModelFormValues>({
+    defaultValues: {
+      name: '',
+      provider: '',
+      modelId: '',
+      apiEndpoint: '',
+      description: '',
+      parameters: '',
+      type: 'stt',
+    }
+  });
+
+  const resetAndCloseDialog = () => {
+    form.reset();
+    setIsDialogOpen(false);
+    setEditingModelId(null);
   };
 
-  const handleAddNLUModel = (data: ModelFormValues) => {
-    const newModel = {
-      id: crypto.randomUUID(),
-      name: data.name,
-      provider: data.provider,
-      capability: data.quality || 'Medium'
-    };
-    setNluModels([...nluModels, newModel]);
-    setNluDialogOpen(false);
-    nluForm.reset();
-    toast({
-      title: "NLU Model Added",
-      description: `${data.name} has been added to your models.`
-    });
+  const onSubmit = (data: ModelFormValues) => {
+    const providerLabel = providerOptions[data.type].find(p => p.value === data.provider)?.label || data.provider;
+    
+    // Parse parameters if provided (should be valid JSON)
+    let parsedParameters = {};
+    try {
+      parsedParameters = data.parameters ? JSON.parse(data.parameters) : {};
+    } catch (e) {
+      toast({
+        title: "Invalid Parameters",
+        description: "The parameters must be valid JSON.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (editingModelId) {
+      setModels(models.map(model => 
+        model.id === editingModelId ? { 
+          ...model, 
+          ...data, 
+          providerLabel,
+          parameters: parsedParameters,
+        } : model
+      ));
+      toast({
+        title: "Model updated",
+        description: `${data.name} has been updated successfully.`
+      });
+    } else {
+      const newModel = {
+        id: crypto.randomUUID(),
+        ...data,
+        providerLabel,
+        parameters: parsedParameters,
+        createdAt: new Date().toISOString(),
+        status: 'active',
+      };
+      setModels([...models, newModel]);
+      toast({
+        title: "Model created",
+        description: `${data.name} has been created successfully.`
+      });
+    }
+    resetAndCloseDialog();
   };
 
-  const saveConfiguration = (type: 'stt' | 'tts' | 'nlu') => {
-    toast({
-      title: "Configuration Saved",
-      description: `Your ${type.toUpperCase()} settings have been saved successfully.`
-    });
+  const handleEdit = (modelId: string) => {
+    const model = models.find(m => m.id === modelId);
+    if (model) {
+      // Convert parameters back to string for editing
+      const parametersString = model.parameters ? JSON.stringify(model.parameters, null, 2) : '';
+      
+      setActiveTab(model.type);
+      form.reset({
+        ...model,
+        parameters: parametersString,
+      });
+      setEditingModelId(modelId);
+      setIsDialogOpen(true);
+    }
   };
+
+  const handleDeleteClick = (modelId: string) => {
+    setModelToDelete(modelId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (modelToDelete) {
+      setModels(models.filter(m => m.id !== modelToDelete));
+      toast({
+        title: "Model deleted",
+        description: "The model has been removed."
+      });
+      setDeleteDialogOpen(false);
+      setModelToDelete(null);
+    }
+  };
+
+  const toggleModelStatus = (modelId: string) => {
+    setModels(models.map(model => {
+      if (model.id === modelId) {
+        const newStatus = model.status === 'active' ? 'inactive' : 'active';
+        toast({
+          title: `Model ${newStatus === 'active' ? 'activated' : 'deactivated'}`,
+          description: `${model.name} has been ${newStatus === 'active' ? 'activated' : 'deactivated'}.`
+        });
+        return { ...model, status: newStatus };
+      }
+      return model;
+    }));
+  };
+
+  const openAddDialog = (type: 'stt' | 'tts' | 'nlu') => {
+    setActiveTab(type);
+    form.reset({ 
+      name: '',
+      provider: '',
+      modelId: '',
+      apiEndpoint: '',
+      description: '',
+      parameters: '',
+      type: type,
+    });
+    setEditingModelId(null);
+    setIsDialogOpen(true);
+  };
+
+  const filteredModels = models.filter(model => model.type === activeTab);
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
@@ -160,730 +237,411 @@ const CustomModels = () => {
       </Sheet>
 
       <div className="flex-1 p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">Custom Models</h1>
-          <p className="text-muted-foreground">Configure and manage your AI models for voice and language processing</p>
+        <div className="flex items-center gap-2 mb-6">
+          <Headphones className="h-6 w-6" />
+          <div>
+            <h1 className="text-2xl font-bold">Custom Models</h1>
+            <p className="text-muted-foreground">Manage your custom AI models for voice applications</p>
+          </div>
         </div>
 
-        <Tabs defaultValue="stt" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="stt" className="flex items-center gap-2">
-              <Mic className="h-4 w-4" />
-              <span>Speech-to-Text</span>
-            </TabsTrigger>
-            <TabsTrigger value="tts" className="flex items-center gap-2">
-              <Volume2 className="h-4 w-4" />
-              <span>Text-to-Speech</span>
-            </TabsTrigger>
-            <TabsTrigger value="nlu" className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              <span>Natural Language</span>
-            </TabsTrigger>
-          </TabsList>
-          
-          {/* Speech-to-Text Tab */}
-          <TabsContent value="stt">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Speech-to-Text Models</h2>
-              <Dialog open={sttDialogOpen} onOpenChange={setSttDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Custom STT Model
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Add STT Model</DialogTitle>
-                    <DialogDescription>
-                      Configure a new speech-to-text model for your application.
-                    </DialogDescription>
-                  </DialogHeader>
-                  
-                  <Form {...sttForm}>
-                    <form onSubmit={sttForm.handleSubmit(handleAddSTTModel)} className="space-y-4">
-                      <FormField
-                        control={sttForm.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Model Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter model name" {...field} required />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={sttForm.control}
-                        name="provider"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Provider</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select provider" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="OpenAI">OpenAI</SelectItem>
-                                <SelectItem value="Google">Google</SelectItem>
-                                <SelectItem value="Microsoft">Microsoft</SelectItem>
-                                <SelectItem value="Deepgram">Deepgram</SelectItem>
-                                <SelectItem value="Other">Other</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={sttForm.control}
-                        name="modelId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Model ID</FormLabel>
-                            <FormControl>
-                              <Input placeholder="e.g., whisper-1" {...field} />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={sttForm.control}
-                        name="language"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Language</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value || "en-US"}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select language" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="en-US">English (US)</SelectItem>
-                                <SelectItem value="en-GB">English (UK)</SelectItem>
-                                <SelectItem value="es">Spanish</SelectItem>
-                                <SelectItem value="fr">French</SelectItem>
-                                <SelectItem value="de">German</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={sttForm.control}
-                        name="quality"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Accuracy Level</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value || "High"}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select accuracy" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="Medium">Medium</SelectItem>
-                                <SelectItem value="High">High</SelectItem>
-                                <SelectItem value="Very High">Very High</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setSttDialogOpen(false)}>
-                          Cancel
-                        </Button>
-                        <Button type="submit">Add Model</Button>
-                      </DialogFooter>
-                    </form>
-                  </Form>
-                </DialogContent>
-              </Dialog>
-            </div>
+        <Tabs defaultValue="stt" value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
+          <div className="flex justify-between items-center mb-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="stt" className="flex items-center gap-2">
+                <Mic className="h-4 w-4" />
+                <span>Speech-to-Text</span>
+              </TabsTrigger>
+              <TabsTrigger value="tts" className="flex items-center gap-2">
+                <Headphones className="h-4 w-4" />
+                <span>Text-to-Speech</span>
+              </TabsTrigger>
+              <TabsTrigger value="nlu" className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4" />
+                <span>Natural Language</span>
+              </TabsTrigger>
+            </TabsList>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {sttModels.map((model) => (
-                <Card key={model.id} className={activeSTTModel === model.id ? 'border-primary' : ''}>
-                  <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-                    <div>
-                      <CardTitle className="text-base font-semibold">{model.name}</CardTitle>
-                      <CardDescription>{model.provider}</CardDescription>
-                    </div>
-                    <Mic className="h-5 w-5 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent className="py-2">
-                    <div className="text-sm">
-                      <span className="font-medium">Accuracy:</span> {model.accuracy}
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button 
-                      variant={activeSTTModel === model.id ? "secondary" : "outline"} 
-                      size="sm" 
-                      className="w-full"
-                      onClick={() => setActiveSTTModel(model.id)}
-                    >
-                      {activeSTTModel === model.id ? 'Selected' : 'Select Model'}
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={() => openAddDialog(activeTab)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add {activeTab.toUpperCase()} Model
+                </Button>
+              </DialogTrigger>
               
-              <Card className="border-dashed border-2">
-                <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-                  <div>
-                    <CardTitle className="text-base font-semibold">Custom STT Model</CardTitle>
-                    <CardDescription>Add your own model</CardDescription>
-                  </div>
-                  <Mic className="h-5 w-5 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="py-6">
-                  <div className="flex flex-col items-center justify-center text-center space-y-2">
-                    <Plus className="h-8 w-8 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Configure a custom STT model with your provider</p>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Dialog open={sttDialogOpen} onOpenChange={setSttDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="w-full">
-                        Add Custom Model
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>{editingModelId ? "Edit Model" : `Add ${activeTab.toUpperCase()} Model`}</DialogTitle>
+                  <DialogDescription>
+                    {editingModelId 
+                      ? "Update your custom model configuration." 
+                      : `Configure a new ${
+                          activeTab === 'stt' ? 'Speech-to-Text' : 
+                          activeTab === 'tts' ? 'Text-to-Speech' : 
+                          'Natural Language Understanding'
+                        } model.`
+                    }
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Model Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., Production Whisper" {...field} required />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="provider"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Provider</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select provider" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {providerOptions[activeTab].map(provider => (
+                                <SelectItem key={provider.value} value={provider.value}>
+                                  {provider.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="modelId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Model ID</FormLabel>
+                          <FormControl>
+                            <Input placeholder={
+                              activeTab === 'stt' ? 'e.g., whisper-1' : 
+                              activeTab === 'tts' ? 'e.g., eleven_monolingual_v1' : 
+                              'e.g., gpt-4'
+                            } {...field} required />
+                          </FormControl>
+                          <FormDescription>
+                            The specific model identifier used by the provider
+                          </FormDescription>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="apiEndpoint"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>API Endpoint (Optional)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., https://api.example.com/v1" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Custom endpoint if different from the provider default
+                          </FormDescription>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description (Optional)</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="Brief description of this model..." {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="parameters"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Parameters (Optional)</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder={`{\n  "temperature": 0.7,\n  "max_tokens": 2048\n}`} 
+                              className="font-mono text-sm"
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            JSON format of model parameters
+                          </FormDescription>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <DialogFooter>
+                      <Button type="button" variant="outline" onClick={resetAndCloseDialog}>
+                        Cancel
                       </Button>
-                    </DialogTrigger>
-                  </Dialog>
-                </CardFooter>
-              </Card>
-            </div>
-            
-            {activeSTTModel && (
-              <div className="mt-8 border rounded-lg p-4">
-                <h3 className="text-lg font-medium mb-4">Configure STT Settings</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">API Key</label>
-                    <Input type="password" placeholder="Enter API key" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Region</label>
-                    <Select defaultValue="us-west">
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select region" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="us-west">US West</SelectItem>
-                        <SelectItem value="us-east">US East</SelectItem>
-                        <SelectItem value="eu-west">EU West</SelectItem>
-                        <SelectItem value="asia">Asia Pacific</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Language</label>
-                    <Select defaultValue="en-US">
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select language" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="en-US">English (US)</SelectItem>
-                        <SelectItem value="en-GB">English (UK)</SelectItem>
-                        <SelectItem value="es">Spanish</SelectItem>
-                        <SelectItem value="fr">French</SelectItem>
-                        <SelectItem value="de">German</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Model Version</label>
-                    <Select defaultValue="latest">
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select version" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="latest">Latest</SelectItem>
-                        <SelectItem value="stable">Stable</SelectItem>
-                        <SelectItem value="legacy">Legacy</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="mt-4 flex justify-end">
-                  <Button onClick={() => saveConfiguration('stt')}>Save Configuration</Button>
-                </div>
+                      <Button type="submit">
+                        {editingModelId ? "Update Model" : "Add Model"}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+          </div>
+          
+          <TabsContent value="stt" className="space-y-4">
+            {filteredModels.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredModels.map((model) => (
+                  <Card key={model.id}>
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg">{model.name}</CardTitle>
+                          <CardDescription>{model.providerLabel}</CardDescription>
+                        </div>
+                        <Badge className={model.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                          {model.status === 'active' ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <div className="space-y-2">
+                        <div>
+                          <span className="text-sm font-medium">Model ID: </span>
+                          <code className="text-sm bg-muted p-1 rounded">{model.modelId}</code>
+                        </div>
+                        {model.apiEndpoint && (
+                          <div>
+                            <span className="text-sm font-medium">API Endpoint: </span>
+                            <code className="text-sm bg-muted p-1 rounded">{model.apiEndpoint}</code>
+                          </div>
+                        )}
+                        {model.description && (
+                          <div className="text-sm text-muted-foreground mt-2">{model.description}</div>
+                        )}
+                      </div>
+                    </CardContent>
+                    <CardFooter className="border-t pt-4 flex justify-between">
+                      <div className="space-x-2">
+                        <Button variant="outline" size="sm" onClick={() => handleEdit(model.id)}>
+                          <Pencil className="h-4 w-4 mr-1" />
+                          Edit
+                        </Button>
+                        <Button variant="outline" size="sm" className="text-destructive" onClick={() => handleDeleteClick(model.id)}>
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        variant={model.status === 'active' ? "outline" : "default"}
+                        onClick={() => toggleModelStatus(model.id)}
+                      >
+                        {model.status === 'active' ? (
+                          <>Deactivate</>
+                        ) : (
+                          <><CheckCircle className="h-4 w-4 mr-1" />Activate</>
+                        )}
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="border rounded-md p-6 text-center">
+                <Mic className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                <h3 className="font-medium mb-1">No STT Models</h3>
+                <p className="text-sm text-muted-foreground mb-4">Add your first Speech-to-Text model</p>
+                <Button onClick={() => openAddDialog('stt')}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add STT Model
+                </Button>
               </div>
             )}
           </TabsContent>
-          
-          {/* Text-to-Speech Tab */}
-          <TabsContent value="tts">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Text-to-Speech Models</h2>
-              <Dialog open={ttsDialogOpen} onOpenChange={setTtsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Custom TTS Model
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Add TTS Model</DialogTitle>
-                    <DialogDescription>
-                      Configure a new text-to-speech model for your application.
-                    </DialogDescription>
-                  </DialogHeader>
-                  
-                  <Form {...ttsForm}>
-                    <form onSubmit={ttsForm.handleSubmit(handleAddTTSModel)} className="space-y-4">
-                      <FormField
-                        control={ttsForm.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Model Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter model name" {...field} required />
-                            </FormControl>
-                          </FormItem>
+
+          <TabsContent value="tts" className="space-y-4">
+            {filteredModels.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredModels.map((model) => (
+                  <Card key={model.id}>
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg">{model.name}</CardTitle>
+                          <CardDescription>{model.providerLabel}</CardDescription>
+                        </div>
+                        <Badge className={model.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                          {model.status === 'active' ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <div className="space-y-2">
+                        <div>
+                          <span className="text-sm font-medium">Model ID: </span>
+                          <code className="text-sm bg-muted p-1 rounded">{model.modelId}</code>
+                        </div>
+                        {model.apiEndpoint && (
+                          <div>
+                            <span className="text-sm font-medium">API Endpoint: </span>
+                            <code className="text-sm bg-muted p-1 rounded">{model.apiEndpoint}</code>
+                          </div>
                         )}
-                      />
-                      
-                      <FormField
-                        control={ttsForm.control}
-                        name="provider"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Provider</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select provider" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="ElevenLabs">ElevenLabs</SelectItem>
-                                <SelectItem value="Google">Google</SelectItem>
-                                <SelectItem value="Amazon">Amazon</SelectItem>
-                                <SelectItem value="Microsoft">Microsoft</SelectItem>
-                                <SelectItem value="Other">Other</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormItem>
+                        {model.description && (
+                          <div className="text-sm text-muted-foreground mt-2">{model.description}</div>
                         )}
-                      />
-                      
-                      <FormField
-                        control={ttsForm.control}
-                        name="modelId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Model ID</FormLabel>
-                            <FormControl>
-                              <Input placeholder="e.g., eleven_multilingual_v2" {...field} />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={ttsForm.control}
-                        name="voice"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Voice</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select voice" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="female-1">Female Voice 1</SelectItem>
-                                <SelectItem value="female-2">Female Voice 2</SelectItem>
-                                <SelectItem value="male-1">Male Voice 1</SelectItem>
-                                <SelectItem value="male-2">Male Voice 2</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={ttsForm.control}
-                        name="quality"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Quality</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value || "High"}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select quality" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="Standard">Standard</SelectItem>
-                                <SelectItem value="High">High</SelectItem>
-                                <SelectItem value="Premium">Premium</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setTtsDialogOpen(false)}>
-                          Cancel
+                      </div>
+                    </CardContent>
+                    <CardFooter className="border-t pt-4 flex justify-between">
+                      <div className="space-x-2">
+                        <Button variant="outline" size="sm" onClick={() => handleEdit(model.id)}>
+                          <Pencil className="h-4 w-4 mr-1" />
+                          Edit
                         </Button>
-                        <Button type="submit">Add Model</Button>
-                      </DialogFooter>
-                    </form>
-                  </Form>
-                </DialogContent>
-              </Dialog>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {ttsModels.map((model) => (
-                <Card key={model.id} className={activeTTSModel === model.id ? 'border-primary' : ''}>
-                  <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-                    <div>
-                      <CardTitle className="text-base font-semibold">{model.name}</CardTitle>
-                      <CardDescription>{model.provider}</CardDescription>
-                    </div>
-                    <Headphones className="h-5 w-5 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent className="py-2">
-                    <div className="text-sm">
-                      <span className="font-medium">Quality:</span> {model.quality}
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button 
-                      variant={activeTTSModel === model.id ? "secondary" : "outline"} 
-                      size="sm" 
-                      className="w-full"
-                      onClick={() => setActiveTTSModel(model.id)}
-                    >
-                      {activeTTSModel === model.id ? 'Selected' : 'Select Model'}
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-              
-              <Card className="border-dashed border-2">
-                <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-                  <div>
-                    <CardTitle className="text-base font-semibold">Custom TTS Model</CardTitle>
-                    <CardDescription>Add your own model</CardDescription>
-                  </div>
-                  <Volume2 className="h-5 w-5 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="py-6">
-                  <div className="flex flex-col items-center justify-center text-center space-y-2">
-                    <Plus className="h-8 w-8 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Configure a custom TTS model with your provider</p>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Dialog open={ttsDialogOpen} onOpenChange={setTtsDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="w-full">
-                        Add Custom Model
+                        <Button variant="outline" size="sm" className="text-destructive" onClick={() => handleDeleteClick(model.id)}>
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        variant={model.status === 'active' ? "outline" : "default"}
+                        onClick={() => toggleModelStatus(model.id)}
+                      >
+                        {model.status === 'active' ? (
+                          <>Deactivate</>
+                        ) : (
+                          <><CheckCircle className="h-4 w-4 mr-1" />Activate</>
+                        )}
                       </Button>
-                    </DialogTrigger>
-                  </Dialog>
-                </CardFooter>
-              </Card>
-            </div>
-            
-            {activeTTSModel && (
-              <div className="mt-8 border rounded-lg p-4">
-                <h3 className="text-lg font-medium mb-4">Configure TTS Settings</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">API Key</label>
-                    <Input type="password" placeholder="Enter API key" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Voice</label>
-                    <Select defaultValue="female-1">
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select voice" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="female-1">Female Voice 1</SelectItem>
-                        <SelectItem value="female-2">Female Voice 2</SelectItem>
-                        <SelectItem value="male-1">Male Voice 1</SelectItem>
-                        <SelectItem value="male-2">Male Voice 2</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Language</label>
-                    <Select defaultValue="en-US">
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select language" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="en-US">English (US)</SelectItem>
-                        <SelectItem value="en-GB">English (UK)</SelectItem>
-                        <SelectItem value="es">Spanish</SelectItem>
-                        <SelectItem value="fr">French</SelectItem>
-                        <SelectItem value="de">German</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Speed</label>
-                    <Select defaultValue="1.0">
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select speed" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0.8">Slow (0.8x)</SelectItem>
-                        <SelectItem value="1.0">Normal (1.0x)</SelectItem>
-                        <SelectItem value="1.2">Fast (1.2x)</SelectItem>
-                        <SelectItem value="1.5">Very Fast (1.5x)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="mt-4 flex justify-end">
-                  <Button onClick={() => saveConfiguration('tts')}>Save Configuration</Button>
-                </div>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="border rounded-md p-6 text-center">
+                <Headphones className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                <h3 className="font-medium mb-1">No TTS Models</h3>
+                <p className="text-sm text-muted-foreground mb-4">Add your first Text-to-Speech model</p>
+                <Button onClick={() => openAddDialog('tts')}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add TTS Model
+                </Button>
               </div>
             )}
           </TabsContent>
-          
-          {/* Natural Language Understanding Tab */}
-          <TabsContent value="nlu">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Natural Language Models</h2>
-              <Dialog open={nluDialogOpen} onOpenChange={setNluDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Custom NLU Model
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Add NLU Model</DialogTitle>
-                    <DialogDescription>
-                      Configure a new natural language model for your application.
-                    </DialogDescription>
-                  </DialogHeader>
-                  
-                  <Form {...nluForm}>
-                    <form onSubmit={nluForm.handleSubmit(handleAddNLUModel)} className="space-y-4">
-                      <FormField
-                        control={nluForm.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Model Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter model name" {...field} required />
-                            </FormControl>
-                          </FormItem>
+
+          <TabsContent value="nlu" className="space-y-4">
+            {filteredModels.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredModels.map((model) => (
+                  <Card key={model.id}>
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg">{model.name}</CardTitle>
+                          <CardDescription>{model.providerLabel}</CardDescription>
+                        </div>
+                        <Badge className={model.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                          {model.status === 'active' ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <div className="space-y-2">
+                        <div>
+                          <span className="text-sm font-medium">Model ID: </span>
+                          <code className="text-sm bg-muted p-1 rounded">{model.modelId}</code>
+                        </div>
+                        {model.apiEndpoint && (
+                          <div>
+                            <span className="text-sm font-medium">API Endpoint: </span>
+                            <code className="text-sm bg-muted p-1 rounded">{model.apiEndpoint}</code>
+                          </div>
                         )}
-                      />
-                      
-                      <FormField
-                        control={nluForm.control}
-                        name="provider"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Provider</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select provider" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="OpenAI">OpenAI</SelectItem>
-                                <SelectItem value="Anthropic">Anthropic</SelectItem>
-                                <SelectItem value="Google">Google</SelectItem>
-                                <SelectItem value="Meta">Meta</SelectItem>
-                                <SelectItem value="Other">Other</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormItem>
+                        {model.description && (
+                          <div className="text-sm text-muted-foreground mt-2">{model.description}</div>
                         )}
-                      />
-                      
-                      <FormField
-                        control={nluForm.control}
-                        name="modelId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Model ID</FormLabel>
-                            <FormControl>
-                              <Input placeholder="e.g., gpt-4o" {...field} />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={nluForm.control}
-                        name="quality"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Capability</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value || "High"}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select capability" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="Standard">Standard</SelectItem>
-                                <SelectItem value="High">High</SelectItem>
-                                <SelectItem value="Advanced">Advanced</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={nluForm.control}
-                        name="systemPrompt"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Default System Prompt</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter default system prompt" {...field} />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setNluDialogOpen(false)}>
-                          Cancel
+                      </div>
+                    </CardContent>
+                    <CardFooter className="border-t pt-4 flex justify-between">
+                      <div className="space-x-2">
+                        <Button variant="outline" size="sm" onClick={() => handleEdit(model.id)}>
+                          <Pencil className="h-4 w-4 mr-1" />
+                          Edit
                         </Button>
-                        <Button type="submit">Add Model</Button>
-                      </DialogFooter>
-                    </form>
-                  </Form>
-                </DialogContent>
-              </Dialog>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {nluModels.map((model) => (
-                <Card key={model.id} className={activeNLUModel === model.id ? 'border-primary' : ''}>
-                  <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-                    <div>
-                      <CardTitle className="text-base font-semibold">{model.name}</CardTitle>
-                      <CardDescription>{model.provider}</CardDescription>
-                    </div>
-                    <MessageSquare className="h-5 w-5 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent className="py-2">
-                    <div className="text-sm">
-                      <span className="font-medium">Capability:</span> {model.capability}
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button 
-                      variant={activeNLUModel === model.id ? "secondary" : "outline"} 
-                      size="sm" 
-                      className="w-full"
-                      onClick={() => setActiveNLUModel(model.id)}
-                    >
-                      {activeNLUModel === model.id ? 'Selected' : 'Select Model'}
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-              
-              <Card className="border-dashed border-2">
-                <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-                  <div>
-                    <CardTitle className="text-base font-semibold">Custom NLU Model</CardTitle>
-                    <CardDescription>Add your own model</CardDescription>
-                  </div>
-                  <MessageSquare className="h-5 w-5 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="py-6">
-                  <div className="flex flex-col items-center justify-center text-center space-y-2">
-                    <Plus className="h-8 w-8 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Configure a custom NLU model with your provider</p>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Dialog open={nluDialogOpen} onOpenChange={setNluDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="w-full">
-                        Add Custom Model
+                        <Button variant="outline" size="sm" className="text-destructive" onClick={() => handleDeleteClick(model.id)}>
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        variant={model.status === 'active' ? "outline" : "default"}
+                        onClick={() => toggleModelStatus(model.id)}
+                      >
+                        {model.status === 'active' ? (
+                          <>Deactivate</>
+                        ) : (
+                          <><CheckCircle className="h-4 w-4 mr-1" />Activate</>
+                        )}
                       </Button>
-                    </DialogTrigger>
-                  </Dialog>
-                </CardFooter>
-              </Card>
-            </div>
-            
-            {activeNLUModel && (
-              <div className="mt-8 border rounded-lg p-4">
-                <h3 className="text-lg font-medium mb-4">Configure NLU Settings</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">API Key</label>
-                    <Input type="password" placeholder="Enter API key" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Temperature</label>
-                    <Select defaultValue="0.7">
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select temperature" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0.0">0.0 (Deterministic)</SelectItem>
-                        <SelectItem value="0.3">0.3 (Conservative)</SelectItem>
-                        <SelectItem value="0.7">0.7 (Balanced)</SelectItem>
-                        <SelectItem value="1.0">1.0 (Creative)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Max Tokens</label>
-                    <Select defaultValue="1024">
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select max tokens" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="512">512</SelectItem>
-                        <SelectItem value="1024">1024</SelectItem>
-                        <SelectItem value="2048">2048</SelectItem>
-                        <SelectItem value="4096">4096</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">System Prompt</label>
-                    <Input placeholder="Enter system prompt" />
-                  </div>
-                </div>
-                <div className="mt-4 flex justify-end">
-                  <Button onClick={() => saveConfiguration('nlu')}>Save Configuration</Button>
-                </div>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="border rounded-md p-6 text-center">
+                <MessageSquare className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                <h3 className="font-medium mb-1">No NLU Models</h3>
+                <p className="text-sm text-muted-foreground mb-4">Add your first Natural Language Understanding model</p>
+                <Button onClick={() => openAddDialog('nlu')}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add NLU Model
+                </Button>
               </div>
             )}
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This model will be permanently deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
