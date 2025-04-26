@@ -1,6 +1,3 @@
-
-// Update ProviderKeys.tsx to add provider creation functionality
-
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -45,6 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 interface ProviderKey {
   id: string;
@@ -53,12 +51,14 @@ interface ProviderKey {
   type: 'nlu' | 'tts' | 'stt';
   provider: string;
   createdAt: string;
+  status: 'active' | 'inactive';
 }
 
 interface ProviderKeyFormValues {
   name: string;
   key: string;
   provider: string;
+  status: 'active' | 'inactive';
 }
 
 const ProviderKeys = () => {
@@ -75,6 +75,7 @@ const ProviderKeys = () => {
       name: '',
       key: '',
       provider: '',
+      status: 'active',
     }
   });
 
@@ -109,6 +110,23 @@ const ProviderKeys = () => {
     }
   };
 
+  const handleStatusToggle = (keyId: string) => {
+    setProviderKeys(providerKeys.map(key => {
+      if (key.id === keyId) {
+        return {
+          ...key,
+          status: key.status === 'active' ? 'inactive' : 'active'
+        };
+      }
+      return key;
+    }));
+
+    toast({
+      title: "Status updated",
+      description: "The provider key status has been updated successfully."
+    });
+  };
+
   const handleAddKey = (data: ProviderKeyFormValues) => {
     const keyData: ProviderKey = {
       id: editingKeyId || crypto.randomUUID(),
@@ -116,6 +134,7 @@ const ProviderKeys = () => {
       key: data.key,
       type: activeTab,
       provider: data.provider,
+      status: 'active',
       createdAt: new Date().toISOString()
     };
 
@@ -144,6 +163,7 @@ const ProviderKeys = () => {
       name: key.name,
       key: key.key,
       provider: key.provider,
+      status: key.status,
     });
     setEditingKeyId(key.id);
     setIsDialogOpen(true);
@@ -301,6 +321,30 @@ const ProviderKeys = () => {
                       )}
                     />
                     
+                     <FormField
+                      control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Status</FormLabel>
+                          <FormControl>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select status" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="active">Active</SelectItem>
+                                <SelectItem value="inactive">Inactive</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormDescription>
+                            Set the status of the API key
+                          </FormDescription>
+                        </FormItem>
+                      )}
+                    />
+                    
                     <DialogFooter>
                       <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                         Cancel
@@ -321,8 +365,17 @@ const ProviderKeys = () => {
                 {filteredKeys.map((key) => (
                   <Card key={key.id}>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-lg">{key.name}</CardTitle>
-                      <CardDescription>{getProviderLabel(key.provider)}</CardDescription>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg">{key.name}</CardTitle>
+                          <CardDescription>{getProviderLabel(key.provider)}</CardDescription>
+                        </div>
+                        <Switch 
+                          checked={key.status === 'active'}
+                          onCheckedChange={() => handleStatusToggle(key.id)}
+                          className="ml-2"
+                        />
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center">
@@ -366,8 +419,17 @@ const ProviderKeys = () => {
                 {filteredKeys.map((key) => (
                   <Card key={key.id}>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-lg">{key.name}</CardTitle>
-                      <CardDescription>{getProviderLabel(key.provider)}</CardDescription>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg">{key.name}</CardTitle>
+                          <CardDescription>{getProviderLabel(key.provider)}</CardDescription>
+                        </div>
+                        <Switch 
+                          checked={key.status === 'active'}
+                          onCheckedChange={() => handleStatusToggle(key.id)}
+                          className="ml-2"
+                        />
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center">
@@ -411,8 +473,17 @@ const ProviderKeys = () => {
                 {filteredKeys.map((key) => (
                   <Card key={key.id}>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-lg">{key.name}</CardTitle>
-                      <CardDescription>{getProviderLabel(key.provider)}</CardDescription>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg">{key.name}</CardTitle>
+                          <CardDescription>{getProviderLabel(key.provider)}</CardDescription>
+                        </div>
+                        <Switch 
+                          checked={key.status === 'active'}
+                          onCheckedChange={() => handleStatusToggle(key.id)}
+                          className="ml-2"
+                        />
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center">
