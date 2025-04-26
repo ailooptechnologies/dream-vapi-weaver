@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ChevronDown, Home, Bot, Phone, Key, HelpCircle, MessageSquare, Mic, Headphones } from 'lucide-react';
+import { ChevronDown, Home, Bot, Phone, Key, HelpCircle, MessageSquare, Mic, Headphones, Volume2 } from 'lucide-react';
 
 const SidebarNav = () => {
   const [expandedSections, setExpandedSections] = useState({
@@ -111,6 +111,15 @@ const SidebarNav = () => {
               >
                 <Key className="h-4 w-4" />
                 <span className="text-sm">Provider Keys</span>
+              </Link>
+              <Link 
+                to="/telephony-providers" 
+                className={`flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors ${
+                  location.pathname === '/telephony-providers' ? 'bg-primary/10 text-primary' : ''
+                }`}
+              >
+                <Phone className="h-4 w-4" />
+                <span className="text-sm">Telephony Providers</span>
               </Link>
             </div>
           )}
