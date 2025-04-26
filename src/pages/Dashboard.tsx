@@ -127,32 +127,6 @@ const Dashboard = () => {
             
             <Card>
               <CardHeader className="pb-2">
-                <CardDescription>Total Calls</CardDescription>
-                <CardTitle className="text-3xl">{campaignStats.totalCalls}</CardTitle>
-              </CardHeader>
-              <CardContent className="pb-2">
-                <div className="flex justify-between text-sm">
-                  <div className="text-muted-foreground">Completed</div>
-                  <div>{campaignStats.completedCalls}</div>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <div className="text-muted-foreground">Success Rate</div>
-                  <div>{Math.round((campaignStats.completedCalls / campaignStats.totalCalls) * 100)}%</div>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <div className="text-muted-foreground">Avg Duration</div>
-                  <div>{campaignStats.avgDuration}</div>
-                </div>
-              </CardContent>
-              <CardFooter className="pt-0">
-                <Button variant="ghost" size="sm" className="w-full">
-                  View Call Records
-                </Button>
-              </CardFooter>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
                 <CardDescription>AI Agents</CardDescription>
                 <CardTitle className="text-3xl">{agentStats.total}</CardTitle>
               </CardHeader>
@@ -249,86 +223,12 @@ const Dashboard = () => {
                   <Key className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">Configure Keys</CardTitle>
+                  <CardTitle className="text-lg">Provider Keys</CardTitle>
                   <CardDescription>Manage provider keys</CardDescription>
                 </div>
               </CardHeader>
               <CardFooter className="pt-2">
                 <Button size="sm" className="w-full" asChild>
-                  <Link to="/provider-keys">Manage Keys</Link>
-                </Button>
-              </CardFooter>
-            </Card>
-          </div>
-        </div>
-        
-        {/* Configuration Status */}
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-4">System Configuration</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card>
-              <CardHeader className="pb-2 flex flex-row items-center space-y-0">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                  <Mic className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">Speech-to-Text</CardTitle>
-                  <CardDescription>Whisper v1 (Active)</CardDescription>
-                </div>
-              </CardHeader>
-              <CardFooter className="pt-2">
-                <Button size="sm" variant="outline" className="w-full" asChild>
-                  <Link to="/custom-models">Configure</Link>
-                </Button>
-              </CardFooter>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2 flex flex-row items-center space-y-0">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                  <Volume2 className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">Text-to-Speech</CardTitle>
-                  <CardDescription>ElevenLabs (Active)</CardDescription>
-                </div>
-              </CardHeader>
-              <CardFooter className="pt-2">
-                <Button size="sm" variant="outline" className="w-full" asChild>
-                  <Link to="/custom-models">Configure</Link>
-                </Button>
-              </CardFooter>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2 flex flex-row items-center space-y-0">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                  <MessageSquare className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">Language Model</CardTitle>
-                  <CardDescription>GPT-4 (Active)</CardDescription>
-                </div>
-              </CardHeader>
-              <CardFooter className="pt-2">
-                <Button size="sm" variant="outline" className="w-full" asChild>
-                  <Link to="/custom-models">Configure</Link>
-                </Button>
-              </CardFooter>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2 flex flex-row items-center space-y-0">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                  <Key className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">Provider Keys</CardTitle>
-                  <CardDescription>3 Keys Configured</CardDescription>
-                </div>
-              </CardHeader>
-              <CardFooter className="pt-2">
-                <Button size="sm" variant="outline" className="w-full" asChild>
                   <Link to="/provider-keys">Manage Keys</Link>
                 </Button>
               </CardFooter>
