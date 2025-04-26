@@ -1,0 +1,27 @@
+
+/* Sound wave animation styling */
+.latency-bar {
+  display: flex;
+  height: 8px;
+  width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.latency-bar-segment {
+  height: 100%;
+}
+
+/* Sound wave animation */
+.sound-wave {
+  display: flex;
+  align-items: center;
+  height: 30px;
+  gap: 2px;
+}
+
+.sound-wave-bar {
+  width: 4px;
+  background-color: hsl(var(--primary));
+  border-radius: 2px;
+}

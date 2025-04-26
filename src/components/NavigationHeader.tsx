@@ -43,6 +43,9 @@ const NavigationHeader: React.FC = () => {
           <Link to="/features" className="text-foreground/80 hover:text-foreground transition-colors">
             Features
           </Link>
+          <Link to="/dashboard" className="text-foreground/80 hover:text-foreground transition-colors">
+            Dashboard
+          </Link>
           <Link to="/docs" className="text-foreground/80 hover:text-foreground transition-colors">
             Documentation
           </Link>
