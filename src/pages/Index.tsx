@@ -17,7 +17,7 @@ const Index = () => {
   };
 
   const handleScheduleDemo = () => {
-    navigate('/register');  // This could be changed to a contact page if you create one
+    navigate('/contact');
   };
 
   return (
@@ -158,8 +158,8 @@ const Index = () => {
               Get started with VoiceAI today and transform how users interact with your applications.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Button size="lg">Start Free Trial</Button>
-              <Button size="lg" variant="outline">Schedule a Demo</Button>
+              <Button size="lg" onClick={handleGetStartedFree}>Start Free Trial</Button>
+              <Button size="lg" variant="outline" onClick={handleScheduleDemo}>Schedule a Demo</Button>
             </div>
           </div>
         </div>

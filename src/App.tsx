@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,6 +18,7 @@ import CustomModels from "./pages/CustomModels";
 import TelephonyProviders from "./pages/TelephonyProviders";
 import AuthGuard from "./components/AuthGuard";
 import Help from "./pages/Help";
+import ContactUs from "./pages/ContactUs";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +76,8 @@ const App = () => (
               <Help />
             </AuthGuard>
           } />
+          
+          <Route path="/contact" element={<ContactUs />} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>
