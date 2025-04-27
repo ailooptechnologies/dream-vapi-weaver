@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -927,4 +928,235 @@ const Campaign = () => {
                       <Trash2 className="h-4 w-4 mr-1" />
                       Delete
                     </Button>
-                    <Button size="sm"
+                    <Button size="sm" variant="outline" onClick={() => handleViewLogs(campaign.id)}>
+                      <List className="h-4 w-4 mr-1" />
+                      Call Logs
+                    </Button>
+                  </div>
+                  <div className="space-x-2">
+                    {campaign.status === 'active' ? (
+                      <Button size="sm" variant="outline" onClick={() => handleStatusChange(campaign.id, 'paused')}>
+                        <Pause className="h-4 w-4 mr-1" />
+                        Pause
+                      </Button>
+                    ) : campaign.status === 'paused' ? (
+                      <Button size="sm" variant="outline" onClick={() => handleStatusChange(campaign.id, 'active')}>
+                        <Play className="h-4 w-4 mr-1" />
+                        Resume
+                      </Button>
+                    ) : (
+                      <Button size="sm" onClick={() => handleStatusChange(campaign.id, 'active')}>
+                        <Play className="h-4 w-4 mr-1" />
+                        Start
+                      </Button>
+                    )}
+                    <Button size="sm" variant="outline" onClick={() => handleStatusChange(campaign.id, 'completed')}>
+                      <CheckCircle className="h-4 w-4 mr-1" />
+                      Complete
+                    </Button>
+                  </div>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 border rounded-lg bg-card/50">
+            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <Phone className="h-6 w-6 text-primary" />
+            </div>
+            <h2 className="text-xl font-semibold mb-2">No campaigns yet</h2>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              Create your first campaign to start making automated AI-powered calls to your contacts.
+            </p>
+            <Button onClick={() => setIsDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-1" />
+              Create First Campaign
+            </Button>
+          </div>
+        )}
+        
+        {/* Call Logs Dialog */}
+        <Dialog open={showCallLogsDialog} onOpenChange={setShowCallLogsDialog}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Call Logs</DialogTitle>
+              <DialogDescription>
+                View all call logs for this campaign
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              {/* Filters */}
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      placeholder="Search by phone number or agent..." 
+                      className="pl-8"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <SelectTrigger className="w-[180px]">
+                    <div className="flex items-center gap-2">
+                      <Filter className="h-4 w-4" />
+                      <SelectValue placeholder="Filter by status" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Statuses</SelectItem>
+                    <SelectItem value="connected">Connected</SelectItem>
+                    <SelectItem value="disconnected">Disconnected</SelectItem>
+                    <SelectItem value="busy">Busy</SelectItem>
+                    <SelectItem value="no-answer">No Answer</SelectItem>
+                    <SelectItem value="failed">Failed</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={filterBot} onValueChange={setFilterBot}>
+                  <SelectTrigger className="w-[180px]">
+                    <div className="flex items-center gap-2">
+                      <Bot className="h-4 w-4" />
+                      <SelectValue placeholder="Filter by agent" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Agents</SelectItem>
+                    {agents.map(agent => (
+                      <SelectItem key={agent.id} value={agent.id}>
+                        {agent.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Call Log Table */}
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Agent</TableHead>
+                      <TableHead>Number</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Duration</TableHead>
+                      <TableHead>Date & Time</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredLogs.length > 0 ? (
+                      filteredLogs.map((log) => (
+                        <TableRow key={log.id}>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center">
+                              <User className="h-4 w-4 mr-2" />
+                              {log.botName}
+                            </div>
+                          </TableCell>
+                          <TableCell>{log.phoneNumber}</TableCell>
+                          <TableCell>
+                            <Badge variant={getBadgeVariant(log.status)}>
+                              {log.status.charAt(0).toUpperCase() + log.status.slice(1)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{log.status !== 'no-answer' && log.status !== 'busy' ? formatDuration(log.duration) : '—'}</TableCell>
+                          <TableCell>{format(log.timestamp, "MMM d, yyyy h:mm a")}</TableCell>
+                          <TableCell className="text-right">
+                            <Button size="sm" variant="ghost" onClick={() => viewCallSummary(log)}>
+                              <MessageSquare className="h-4 w-4 mr-1" />
+                              Summary
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={6} className="h-24 text-center">
+                          No call logs found.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Call Summary Dialog */}
+        <Dialog open={showSummaryDialog} onOpenChange={setShowSummaryDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Call Summary</DialogTitle>
+              <DialogDescription>
+                Detailed information about this call
+              </DialogDescription>
+            </DialogHeader>
+            
+            {selectedLog && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-medium text-muted-foreground">Agent</h4>
+                    <p>{selectedLog.botName}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-muted-foreground">Phone Number</h4>
+                    <p>{selectedLog.phoneNumber}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-muted-foreground">Status</h4>
+                    <Badge variant={getBadgeVariant(selectedLog.status)}>
+                      {selectedLog.status.charAt(0).toUpperCase() + selectedLog.status.slice(1)}
+                    </Badge>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-muted-foreground">Duration</h4>
+                    <p>{selectedLog.status !== 'no-answer' && selectedLog.status !== 'busy' ? formatDuration(selectedLog.duration) : '—'}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-muted-foreground">Date & Time</h4>
+                    <p>{format(selectedLog.timestamp, "PPP 'at' p")}</p>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground mb-2">Call Summary</h4>
+                  <div className="p-4 border rounded-md bg-secondary/10">
+                    {selectedLog.summary || 'No summary available.'}
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <DialogFooter>
+              <Button onClick={() => setShowSummaryDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Delete Campaign Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the
+                campaign and all associated data.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setDeleteDialogOpen(false)}>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    </div>
+  );
+};
+
+export default Campaign;
