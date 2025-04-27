@@ -25,6 +25,8 @@ const OrganizationSwitcher = () => {
   const { toast } = useToast();
   const [organizations, setOrganizations] = useState<Organization[]>([
     { id: '1', name: 'Default Organization', isActive: true },
+    { id: '2', name: 'Marketing Team', isActive: false },
+    { id: '3', name: 'Sales Department', isActive: false },
   ]);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
@@ -38,10 +40,20 @@ const OrganizationSwitcher = () => {
 
     const org = organizations.find(o => o.id === orgId);
     if (org) {
+      // In a real app, this would switch the context to the selected organization
+      localStorage.setItem('currentOrganizationId', orgId);
+      localStorage.setItem('currentOrganizationName', org.name);
+      
       toast({
         title: "Organization Switched",
         description: `Switched to ${org.name}`
       });
+      
+      // Force a page reload to refresh all data based on the new organization
+      // In a real app, you might use a context provider to avoid the full reload
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     }
   };
 
@@ -53,6 +65,11 @@ const OrganizationSwitcher = () => {
     };
     setOrganizations([...organizations, newOrg]);
     setShowCreateDialog(false);
+    
+    toast({
+      title: "Organization Created",
+      description: `${data.name} has been created successfully.`
+    });
   };
 
   const activeOrg = organizations.find(org => org.isActive);
@@ -61,9 +78,9 @@ const OrganizationSwitcher = () => {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="w-52">
+          <Button variant="outline" className="w-full justify-start">
             <Building className="mr-2 h-4 w-4" />
-            {activeOrg?.name}
+            <span className="truncate flex-1 text-left">{activeOrg?.name}</span>
             <ChevronDown className="ml-auto h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
@@ -76,8 +93,10 @@ const OrganizationSwitcher = () => {
               onClick={() => handleSwitchOrg(org.id)}
               className="cursor-pointer"
             >
-              {org.name}
-              {org.isActive && <span className="ml-2 text-green-500">✓</span>}
+              <div className="flex items-center justify-between w-full">
+                <span className="truncate">{org.name}</span>
+                {org.isActive && <span className="ml-2 text-green-500">✓</span>}
+              </div>
             </DropdownMenuItem>
           ))}
           <DropdownMenuSeparator />

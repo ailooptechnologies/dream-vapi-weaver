@@ -1,8 +1,7 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, Phone, Bot, MessageSquare, Calendar as CalendarIcon, Plus, Play, Pencil, Trash2, BarChart, Pause, CheckCircle } from "lucide-react";
+import { Menu, Phone, Bot, MessageSquare, Calendar as CalendarIcon, Plus, Play, Pencil, Trash2, BarChart, Pause, CheckCircle, List, Filter, Search, User } from "lucide-react";
 import SidebarNav from '@/components/SidebarNav';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -106,10 +105,82 @@ const Campaign = () => {
   
   const [callLogs, setCallLogs] = useState<CallLog[]>([]);
   const [filterStatus, setFilterStatus] = useState('');
+  const [filterBot, setFilterBot] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLog, setSelectedLog] = useState<CallLog | null>(null);
   const [showSummaryDialog, setShowSummaryDialog] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [selectedCampaignForLogs, setSelectedCampaignForLogs] = useState<string | null>(null);
+  const [showCallLogsDialog, setShowCallLogsDialog] = useState(false);
+  
+  useEffect(() => {
+    // Simulate loading call logs for demo
+    if (selectedCampaignForLogs) {
+      const mockCallLogs: CallLog[] = [
+        {
+          id: '1',
+          botId: 'agent-1',
+          botName: 'Customer Support Agent',
+          phoneNumber: '+1 (555) 123-4567',
+          status: 'connected',
+          duration: 185,
+          timestamp: new Date(2023, 3, 15, 10, 30),
+          summary: 'Customer inquired about product features. Agent explained the subscription options and recommended the premium plan. Customer showed interest and requested a follow-up call next week.'
+        },
+        {
+          id: '2',
+          botId: 'agent-2',
+          botName: 'Sales Agent',
+          phoneNumber: '+1 (555) 234-5678',
+          status: 'disconnected',
+          duration: 45,
+          timestamp: new Date(2023, 3, 15, 11, 15),
+          summary: 'Call disconnected after initial greeting. Customer seemed interested but had poor connection.'
+        },
+        {
+          id: '3',
+          botId: 'agent-1',
+          botName: 'Customer Support Agent',
+          phoneNumber: '+1 (555) 345-6789',
+          status: 'no-answer',
+          duration: 0,
+          timestamp: new Date(2023, 3, 15, 13, 45),
+          summary: 'No answer after 6 rings. Voice message left about the promotional offer.'
+        },
+        {
+          id: '4',
+          botId: 'agent-3',
+          botName: 'Appointment Scheduler',
+          phoneNumber: '+1 (555) 456-7890',
+          status: 'connected',
+          duration: 240,
+          timestamp: new Date(2023, 3, 16, 9, 30),
+          summary: 'Successfully scheduled appointment for product demo on Friday at 2 PM. Customer expressed high interest in the enterprise solution. Follow-up email with details was sent.'
+        },
+        {
+          id: '5',
+          botId: 'agent-2',
+          botName: 'Sales Agent',
+          phoneNumber: '+1 (555) 567-8901',
+          status: 'busy',
+          duration: 0,
+          timestamp: new Date(2023, 3, 16, 14, 0),
+          summary: 'Line was busy. Scheduled for automatic callback in 2 hours.'
+        },
+        {
+          id: '6',
+          botId: 'agent-3',
+          botName: 'Appointment Scheduler',
+          phoneNumber: '+1 (555) 678-9012',
+          status: 'failed',
+          duration: 3,
+          timestamp: new Date(2023, 3, 16, 16, 15),
+          summary: 'Call failed due to technical issues. System will retry automatically tomorrow.'
+        }
+      ];
+      setCallLogs(mockCallLogs);
+    }
+  }, [selectedCampaignForLogs]);
 
   // Sample data (in a real app, this would come from API calls)
   const agents = [
@@ -301,6 +372,29 @@ const Campaign = () => {
   const handleFileSelect = (files: File[]) => {
     setSelectedFiles(prev => [...prev, ...files]);
     form.setValue('trainingFiles', files);
+  };
+  
+  const handleViewLogs = (campaignId: string) => {
+    setSelectedCampaignForLogs(campaignId);
+    setShowCallLogsDialog(true);
+  };
+  
+  // Filter logs based on search and filters
+  const filteredLogs = callLogs.filter(log => {
+    const matchesSearch = searchQuery === '' || 
+      log.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      log.botName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      log.summary.toLowerCase().includes(searchQuery.toLowerCase());
+      
+    const matchesStatus = filterStatus === '' || log.status === filterStatus;
+    const matchesBot = filterBot === '' || log.botId === filterBot;
+    
+    return matchesSearch && matchesStatus && matchesBot;
+  });
+  
+  const viewCallSummary = (log: CallLog) => {
+    setSelectedLog(log);
+    setShowSummaryDialog(true);
   };
 
   return (
@@ -833,107 +927,4 @@ const Campaign = () => {
                       <Trash2 className="h-4 w-4 mr-1" />
                       Delete
                     </Button>
-                  </div>
-                  
-                  <div className="space-x-2">
-                    {campaign.status === 'draft' && (
-                      <Button size="sm" onClick={() => handleStatusChange(campaign.id, 'active')}>
-                        <Play className="h-4 w-4 mr-1" />
-                        Start Campaign
-                      </Button>
-                    )}
-                    {campaign.status === 'active' && (
-                      <Button size="sm" variant="outline" onClick={() => handleStatusChange(campaign.id, 'paused')}>
-                        <Pause className="h-4 w-4 mr-1" />
-                        Pause Campaign
-                      </Button>
-                    )}
-                    {campaign.status === 'paused' && (
-                      <Button size="sm" onClick={() => handleStatusChange(campaign.id, 'active')}>
-                        <Play className="h-4 w-4 mr-1" />
-                        Resume Campaign
-                      </Button>
-                    )}
-                    {(campaign.status === 'active' || campaign.status === 'paused') && (
-                      <Button size="sm" variant="outline" onClick={() => handleStatusChange(campaign.id, 'completed')}>
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Mark as Completed
-                      </Button>
-                    )}
-                  </div>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="border rounded-lg p-6 flex flex-col items-center justify-center text-center min-h-[200px]">
-            <MessageSquare className="h-8 w-8 mb-4 text-muted-foreground" />
-            <h3 className="font-medium mb-2">No Campaigns Created</h3>
-            <p className="text-sm text-muted-foreground mb-4">Create your first campaign to start making calls</p>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button className="flex items-center gap-2" onClick={() => setIsDialogOpen(true)}>
-                  <Plus className="h-4 w-4" />
-                  Create Campaign
-                </Button>
-              </DialogTrigger>
-            </Dialog>
-          </div>
-        )}
-
-        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Campaign</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete this campaign? This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground">
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        <Dialog open={showSummaryDialog} onOpenChange={setShowSummaryDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Call Summary</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              {selectedLog && (
-                <>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="font-medium">Bot:</div>
-                    <div>{selectedLog.botName}</div>
-                    <div className="font-medium">Phone Number:</div>
-                    <div>{selectedLog.phoneNumber}</div>
-                    <div className="font-medium">Time:</div>
-                    <div>{format(selectedLog.timestamp, 'PPpp')}</div>
-                    <div className="font-medium">Duration:</div>
-                    <div>{formatDuration(selectedLog.duration)}</div>
-                    <div className="font-medium">Status:</div>
-                    <div>
-                      <Badge variant={getBadgeVariant(selectedLog.status)}>
-                        {selectedLog.status}
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="pt-4 border-t">
-                    <div className="font-medium mb-2">Summary:</div>
-                    <p className="text-sm whitespace-pre-wrap">{selectedLog.summary}</p>
-                  </div>
-                </>
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-    </div>
-  );
-};
-
-export default Campaign;
+                    <Button size="sm"

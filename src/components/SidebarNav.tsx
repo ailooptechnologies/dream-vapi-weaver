@@ -13,15 +13,19 @@ import {
   Headphones, 
   LogOut,
   Plus,
-  Building
+  Building,
+  User,
+  Settings
 } from 'lucide-react';
 import OrganizationDialog from './OrganizationDialog';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import OrganizationSwitcher from './OrganizationSwitcher';
 
 const SidebarNav = () => {
   const [expandedSections, setExpandedSections] = useState({
-    build: true
+    build: true,
+    account: false
   });
   
   const location = useLocation();
@@ -29,8 +33,7 @@ const SidebarNav = () => {
   const { toast } = useToast();
   const [orgDialogOpen, setOrgDialogOpen] = useState(false);
   
-  // Get organization name from localStorage or use default
-  const organizationName = localStorage.getItem('organizationName') || 'My Organization';
+  // Get user info from localStorage or use default
   const userEmail = localStorage.getItem('userEmail') || 'example@gmail.com';
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -79,21 +82,8 @@ const SidebarNav = () => {
       <div className="p-4 border-b">
         <h2 className="text-sm font-semibold text-muted-foreground mb-2">ORGANIZATION</h2>
         <div className="flex flex-col space-y-2">
-          <div className="px-2 py-1 bg-slate-100 rounded-md text-sm font-medium flex items-center justify-between">
-            <div className="flex items-center">
-              <Building className="h-3 w-3 mr-2" />
-              <span className="truncate">{organizationName}</span>
-            </div>
-          </div>
+          <OrganizationSwitcher />
           <div className="px-2 py-1 text-xs text-muted-foreground">{userEmail}</div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="w-full justify-start text-xs"
-            onClick={() => setOrgDialogOpen(true)}
-          >
-            <Plus className="h-3 w-3 mr-1" /> New Organization
-          </Button>
         </div>
       </div>
 
@@ -172,6 +162,40 @@ const SidebarNav = () => {
               >
                 <Phone className="h-4 w-4" />
                 <span className="text-sm">Telephony Providers</span>
+              </Link>
+            </div>
+          )}
+        </div>
+        
+        {/* Account Section */}
+        <div className="mt-4">
+          <button 
+            onClick={() => toggleSection('account')} 
+            className="flex items-center justify-between w-full px-3 py-2"
+          >
+            <span className="text-xs font-semibold text-muted-foreground">ACCOUNT</span>
+            <ChevronDown className={`h-4 w-4 transform transition-transform ${expandedSections.account ? 'rotate-180' : ''}`} />
+          </button>
+          
+          {expandedSections.account && (
+            <div className="space-y-1 mt-1">
+              <Link 
+                to="/profile" 
+                className={`flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors ${
+                  location.pathname === '/profile' ? 'bg-primary/10 text-primary' : ''
+                }`}
+              >
+                <User className="h-4 w-4" />
+                <span className="text-sm">Profile</span>
+              </Link>
+              <Link 
+                to="/settings" 
+                className={`flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors ${
+                  location.pathname === '/settings' ? 'bg-primary/10 text-primary' : ''
+                }`}
+              >
+                <Settings className="h-4 w-4" />
+                <span className="text-sm">Settings</span>
               </Link>
             </div>
           )}
