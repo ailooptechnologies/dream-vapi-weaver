@@ -35,6 +35,7 @@ const OrganizationDialog = ({ open, onOpenChange, onCreateOrganization }: Organi
   const handleSubmit = (data: OrganizationFormValues) => {
     onCreateOrganization(data);
     form.reset();
+    onOpenChange(false);
   };
 
   return (

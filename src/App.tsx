@@ -1,5 +1,5 @@
 
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -29,6 +29,14 @@ function App() {
       localStorage.setItem('organizations', JSON.stringify([defaultOrg]));
       localStorage.setItem('currentOrganizationId', defaultOrg.id);
       localStorage.setItem('currentOrganizationName', defaultOrg.name);
+    } else {
+      // Ensure there's always a currentOrganizationId
+      const orgs = JSON.parse(storedOrgs);
+      const activeOrg = orgs.find((org: any) => org.isActive) || orgs[0];
+      if (activeOrg) {
+        localStorage.setItem('currentOrganizationId', activeOrg.id);
+        localStorage.setItem('currentOrganizationName', activeOrg.name);
+      }
     }
   }, []);
 

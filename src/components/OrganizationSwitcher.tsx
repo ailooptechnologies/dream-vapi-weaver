@@ -11,14 +11,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Building, ChevronDown, Plus } from "lucide-react";
-import { Dialog } from "@/components/ui/dialog";
-import OrganizationDialog from './OrganizationDialog';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import OrganizationDialog from './OrganizationDialog';
 
 interface Organization {
   id: string;
   name: string;
+  description?: string;
   isActive: boolean;
 }
 
@@ -38,6 +38,8 @@ const OrganizationSwitcher = () => {
       const defaultOrg = { id: '1', name: 'Default Organization', isActive: true };
       setOrganizations([defaultOrg]);
       localStorage.setItem('organizations', JSON.stringify([defaultOrg]));
+      localStorage.setItem('currentOrganizationId', defaultOrg.id);
+      localStorage.setItem('currentOrganizationName', defaultOrg.name);
     }
   }, []);
 
@@ -61,8 +63,8 @@ const OrganizationSwitcher = () => {
         description: `Switched to ${org.name}`
       });
       
-      // Force a navigation to refresh the UI with the new organization context
-      navigate(0);
+      // Force a refresh to update the UI context
+      window.location.reload();
     }
   };
 
@@ -70,13 +72,13 @@ const OrganizationSwitcher = () => {
     const newOrg = {
       id: crypto.randomUUID(),
       name: data.name,
+      description: data.description,
       isActive: false
     };
     
     const updatedOrgs = [...organizations, newOrg];
     setOrganizations(updatedOrgs);
     localStorage.setItem('organizations', JSON.stringify(updatedOrgs));
-    setShowCreateDialog(false);
     
     toast({
       title: "Organization Created",
