@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Search, Menu, ChevronDown, ExternalLink, Play, MessageSquare, PenTool, Phone, Bot, Volume2, Mic, Key } from "lucide-react";
+import { Menu, ChevronDown, ExternalLink, Play, MessageSquare, PenTool, Phone, Bot, Volume2, Mic, Key } from "lucide-react";
 import SidebarNav from '@/components/SidebarNav';
 import AssistantCard from '@/components/AssistantCard';
 import ConfigSection from '@/components/ConfigSection';
@@ -49,17 +50,12 @@ const Dashboard = () => {
     total: 5,
     active: 2,
     completed: 2,
-    draft: 1,
-    totalCalls: 1250,
-    completedCalls: 980,
-    avgDuration: '3:24',
+    draft: 1
   };
   
   const agentStats = {
     total: 8,
     active: 5,
-    totalCallsHandled: 1250,
-    avgCallDuration: '3:24',
     topPerformer: 'Customer Support Agent',
   };
   
@@ -98,7 +94,7 @@ const Dashboard = () => {
         {/* Campaign Stats */}
         <div className="mb-6">
           <h2 className="text-xl font-semibold mb-4">Campaign Performance</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Card>
               <CardHeader className="pb-2">
                 <CardDescription>Campaigns</CardDescription>
@@ -134,10 +130,6 @@ const Dashboard = () => {
                 <div className="flex justify-between text-sm">
                   <div className="text-muted-foreground">Active</div>
                   <div>{agentStats.active}</div>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <div className="text-muted-foreground">Calls Handled</div>
-                  <div>{agentStats.totalCallsHandled}</div>
                 </div>
                 <div className="flex justify-between text-sm">
                   <div className="text-muted-foreground">Top Performer</div>
@@ -182,7 +174,7 @@ const Dashboard = () => {
         {/* Quick Actions */}
         <div className="mb-6">
           <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <Card>
               <CardHeader className="pb-2 flex flex-row items-center space-y-0">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
