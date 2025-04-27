@@ -1,60 +1,72 @@
 
-import React from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { useToast } from "@/hooks/use-toast";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useForm } from 'react-hook-form';
+import { useToast } from '@/hooks/use-toast';
 
-const organizationSchema = z.object({
-  name: z.string().min(1, "Organization name is required"),
-  description: z.string().optional(),
-});
-
-type OrganizationFormValues = z.infer<typeof organizationSchema>;
-
-interface OrganizationDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onCreateOrganization: (data: OrganizationFormValues) => void;
+interface OrganizationFormValues {
+  name: string;
+  description?: string;
 }
 
-const OrganizationDialog = ({ open, onOpenChange, onCreateOrganization }: OrganizationDialogProps) => {
+const OrganizationDialog = ({ onOrgCreated }: { onOrgCreated?: () => void }) => {
+  const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
+  
   const form = useForm<OrganizationFormValues>({
-    resolver: zodResolver(organizationSchema),
     defaultValues: {
       name: '',
       description: '',
     },
   });
 
-  // Reset form when dialog opens/closes
-  React.useEffect(() => {
-    if (!open) {
-      form.reset();
-    }
-  }, [open, form]);
-
-  const handleSubmit = (data: OrganizationFormValues) => {
-    onCreateOrganization(data);
+  const onSubmit = (data: OrganizationFormValues) => {
+    // Store the new organization in localStorage to persist it
+    const orgs = JSON.parse(localStorage.getItem('organizations') || '[]');
+    const newOrg = {
+      id: crypto.randomUUID(),
+      ...data,
+      createdAt: new Date().toISOString(),
+    };
+    orgs.push(newOrg);
+    localStorage.setItem('organizations', JSON.stringify(orgs));
+    
+    // Set as current organization
+    localStorage.setItem('currentOrganization', JSON.stringify(newOrg));
+    
+    toast({
+      title: 'Organization created',
+      description: 'Your new organization has been created successfully.',
+    });
+    
+    // Reset form and close dialog
     form.reset();
+    setIsOpen(false);
+    
+    // Notify parent component
+    if (onOrgCreated) {
+      onOrgCreated();
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">Create Organization</Button>
+      </DialogTrigger>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Create New Organization</DialogTitle>
           <DialogDescription>
-            Create a new organization with its own environment and settings.
+            Add a new organization to manage your campaigns and resources.
           </DialogDescription>
         </DialogHeader>
+
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="name"
@@ -62,12 +74,12 @@ const OrganizationDialog = ({ open, onOpenChange, onCreateOrganization }: Organi
                 <FormItem>
                   <FormLabel>Organization Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. Acme Corp" {...field} />
+                    <Input {...field} placeholder="Enter organization name" required />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="description"
@@ -75,14 +87,17 @@ const OrganizationDialog = ({ open, onOpenChange, onCreateOrganization }: Organi
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input placeholder="Brief description of your organization" {...field} />
+                    <Input {...field} placeholder="Brief description of the organization" />
                   </FormControl>
-                  <FormMessage />
+                  <FormDescription>
+                    Optional: Add a short description for your organization
+                  </FormDescription>
                 </FormItem>
               )}
             />
+
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit">Create Organization</Button>
