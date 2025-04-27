@@ -27,6 +27,7 @@ const OrganizationSwitcher = () => {
   const navigate = useNavigate();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [dropdownKey, setDropdownKey] = useState(Date.now()); // Add a key to force re-render
 
   // Load organizations from localStorage on component mount
   useEffect(() => {
@@ -84,13 +85,16 @@ const OrganizationSwitcher = () => {
       title: "Organization Created",
       description: `${data.name} has been created successfully.`
     });
+    
+    // Force dropdown to re-render by updating key
+    setDropdownKey(Date.now());
   };
 
   const activeOrg = organizations.find(org => org.isActive) || organizations[0];
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu key={dropdownKey}>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="w-full justify-start">
             <Building className="mr-2 h-4 w-4" />
