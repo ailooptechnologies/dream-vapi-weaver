@@ -13,7 +13,6 @@ const Campaign = () => {
   const dispatch = useDispatch();
   const campaignData = useSelector((state: RootState) => state.campaign);
   const [loading, setLoading] = useState(false);
-  
   const [activeTab, setActiveTab] = useState("basic-info");
   
   const tabs = [
@@ -31,24 +30,10 @@ const Campaign = () => {
 
   const handleTabAction = (currentTab: string) => {
     if (currentTab === "confirmation") {
-      handleCreateCampaign();
+      navigate('/campaign/testing');
     } else {
       const nextTab = getNextTab(currentTab);
       setActiveTab(nextTab);
-    }
-  };
-
-  const handleCreateCampaign = async () => {
-    try {
-      setLoading(true);
-      const response = await createCampaign(campaignData);
-      toast.success('Campaign created successfully!');
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Error creating campaign:', error);
-      toast.error('Failed to create campaign. Please try again.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -63,13 +48,14 @@ const Campaign = () => {
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="basic-info">Basic Info</TabsTrigger>
-          <TabsTrigger value="target-audience">Target Audience</TabsTrigger>
-          <TabsTrigger value="script">Script</TabsTrigger>
-          <TabsTrigger value="schedule">Schedule</TabsTrigger>
-          <TabsTrigger value="confirmation">Confirmation</TabsTrigger>
+          {tabs.map((tab) => (
+            <TabsTrigger key={tab} value={tab}>
+              {tab.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
+        {/* Basic Info Tab */}
         <TabsContent value="basic-info">
           <div className="space-y-4">
             <div>
@@ -100,6 +86,7 @@ const Campaign = () => {
           </div>
         </TabsContent>
 
+        {/* Target Audience Tab */}
         <TabsContent value="target-audience">
           <div className="space-y-4">
             <div>
@@ -147,6 +134,7 @@ const Campaign = () => {
           </div>
         </TabsContent>
 
+        {/* Script Tab */}
         <TabsContent value="script">
           <div className="space-y-4">
             <div>
@@ -177,6 +165,7 @@ const Campaign = () => {
           </div>
         </TabsContent>
 
+        {/* Schedule Tab */}
         <TabsContent value="schedule">
           <div className="space-y-4">
             <div>
@@ -219,6 +208,7 @@ const Campaign = () => {
           </div>
         </TabsContent>
 
+        {/* Confirmation Tab */}
         <TabsContent value="confirmation">
           <div className="space-y-4">
             <h2 className="text-xl font-semibold">Campaign Summary</h2>
@@ -234,7 +224,7 @@ const Campaign = () => {
           </div>
           <div className="flex justify-end mt-4">
             <Button onClick={() => handleTabAction("confirmation")}>
-              Create Campaign
+              Test Campaign
             </Button>
           </div>
         </TabsContent>
