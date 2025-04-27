@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu, User, Mail, Building, Phone, Save, Image } from "lucide-react";
@@ -33,16 +33,26 @@ interface SecurityFormValues {
 const Profile = () => {
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  
+  // Get profile data from localStorage or use defaults
+  useEffect(() => {
+    const savedProfile = localStorage.getItem('userProfile');
+    if (savedProfile) {
+      const profileData = JSON.parse(savedProfile);
+      profileForm.reset(profileData);
+    }
+  }, []);
 
   const profileForm = useForm<ProfileFormValues>({
     defaultValues: {
       firstName: 'John',
       lastName: 'Doe',
-      email: 'john.doe@example.com',
+      email: localStorage.getItem('userEmail') || 'john.doe@example.com',
       phone: '+1 (555) 123-4567',
       title: 'Product Manager',
       bio: 'Product enthusiast with 5+ years of experience in SaaS.',
-      avatarUrl: '',
+      avatarUrl: localStorage.getItem('userAvatar') || '',
     },
   });
 
@@ -55,11 +65,24 @@ const Profile = () => {
   });
 
   const handleProfileSubmit = (data: ProfileFormValues) => {
-    // In a real application, this would save data to the server
-    toast({
-      title: "Profile updated",
-      description: "Your profile has been updated successfully."
-    });
+    setSaving(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      // Save profile data to localStorage
+      localStorage.setItem('userProfile', JSON.stringify(data));
+      localStorage.setItem('userEmail', data.email);
+      localStorage.setItem('userName', `${data.firstName} ${data.lastName}`);
+      if (data.avatarUrl) {
+        localStorage.setItem('userAvatar', data.avatarUrl);
+      }
+      
+      setSaving(false);
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been updated successfully."
+      });
+    }, 1000);
   };
 
   const handleSecuritySubmit = (data: SecurityFormValues) => {
@@ -73,24 +96,31 @@ const Profile = () => {
       return;
     }
     
-    // In a real application, this would update password in the database
-    toast({
-      title: "Password updated",
-      description: "Your password has been updated successfully."
-    });
+    setSaving(true);
     
-    securityForm.reset({
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
-    });
+    // Simulate API call
+    setTimeout(() => {
+      setSaving(false);
+      toast({
+        title: "Password updated",
+        description: "Your password has been updated successfully."
+      });
+      
+      securityForm.reset({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
+    }, 1000);
   };
 
   const simulateUpload = () => {
     setUploading(true);
     setTimeout(() => {
       setUploading(false);
-      profileForm.setValue('avatarUrl', 'https://api.dicebear.com/7.x/avataaars/svg?seed=John');
+      const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${profileForm.getValues('firstName')}-${Date.now()}`;
+      profileForm.setValue('avatarUrl', avatarUrl);
+      localStorage.setItem('userAvatar', avatarUrl);
       toast({
         title: "Avatar uploaded",
         description: "Your profile picture has been updated."
@@ -252,9 +282,9 @@ const Profile = () => {
                       )}
                     />
 
-                    <Button type="submit" className="flex gap-2">
+                    <Button type="submit" className="flex gap-2" disabled={saving}>
                       <Save className="h-4 w-4" />
-                      Save Changes
+                      {saving ? "Saving..." : "Save Changes"}
                     </Button>
                   </form>
                 </Form>
@@ -313,9 +343,9 @@ const Profile = () => {
                       )}
                     />
                     
-                    <Button type="submit" className="flex gap-2">
+                    <Button type="submit" className="flex gap-2" disabled={saving}>
                       <Save className="h-4 w-4" />
-                      Update Password
+                      {saving ? "Updating..." : "Update Password"}
                     </Button>
                   </form>
                 </Form>

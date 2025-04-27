@@ -12,6 +12,7 @@ import PhoneNumbers from "./pages/PhoneNumbers";
 import CustomModels from "./pages/CustomModels";
 import ProviderKeys from "./pages/ProviderKeys";
 import Campaign from "./pages/Campaign";
+import CampaignTesting from "./pages/CampaignTesting";
 import Help from "./pages/Help";
 import NotFound from "./pages/NotFound";
 import AuthGuard from "./components/AuthGuard";
@@ -61,6 +62,7 @@ function App() {
       <Route path="/custom-models" element={<AuthGuard><CustomModels /></AuthGuard>} />
       <Route path="/provider-keys" element={<AuthGuard><ProviderKeys /></AuthGuard>} />
       <Route path="/campaign" element={<AuthGuard><Campaign /></AuthGuard>} />
+      <Route path="/campaign/testing" element={<AuthGuard><CampaignTesting /></AuthGuard>} />
       <Route path="/telephony-providers" element={<AuthGuard><TelephonyProviders /></AuthGuard>} />
       <Route path="/help" element={<AuthGuard><Help /></AuthGuard>} />
       <Route path="/profile" element={<AuthGuard><Profile /></AuthGuard>} />
