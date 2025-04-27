@@ -65,8 +65,8 @@ const OrganizationSwitcher = () => {
         description: `Switched to ${org.name}`
       });
       
-      // Force a refresh to update the UI context
-      window.location.reload();
+      // Force a re-render without requiring a full page reload
+      setRefreshKey(Date.now());
     }
   };
 

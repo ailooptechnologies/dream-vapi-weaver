@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, Phone, Bot, MessageSquare, Calendar as CalendarIcon, Plus, Play, Pencil, Trash2, BarChart, Pause, CheckCircle, List, Filter, Search, User } from "lucide-react";
+import { Menu, Phone, Bot, MessageSquare, Calendar as CalendarIcon, Plus, Play, Pencil, Trash2, BarChart, Pause, CheckCircle, List, Filter, Search, User, FileExport } from "lucide-react";
 import SidebarNav from '@/components/SidebarNav';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -63,6 +63,7 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils";
 import FileUpload from '@/components/FileUpload';
+import { useNavigate } from 'react-router-dom';
 
 interface CampaignFormValues {
   name: string;
@@ -96,6 +97,7 @@ interface CallLog {
 
 const Campaign = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCampaignId, setEditingCampaignId] = useState<string | null>(null);
@@ -104,8 +106,8 @@ const Campaign = () => {
   const [date, setDate] = useState<Date>();
   
   const [callLogs, setCallLogs] = useState<CallLog[]>([]);
-  const [filterStatus, setFilterStatus] = useState('');
-  const [filterBot, setFilterBot] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterBot, setFilterBot] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLog, setSelectedLog] = useState<CallLog | null>(null);
   const [showSummaryDialog, setShowSummaryDialog] = useState(false);
@@ -265,8 +267,12 @@ const Campaign = () => {
       setCampaigns([...campaigns, newCampaign]);
       toast({
         title: "Campaign created",
-        description: "New campaign has been created successfully."
+        description: "Campaign has been created successfully."
       });
+      
+      // Automatically navigate to testing page for the new campaign
+      localStorage.setItem('currentCampaign', JSON.stringify(newCampaign));
+      navigate('/campaign/testing');
     }
     resetAndCloseDialog();
   };
@@ -379,6 +385,57 @@ const Campaign = () => {
     setShowCallLogsDialog(true);
   };
   
+  // New function to export call logs as CSV
+  const exportCallLogs = () => {
+    if (!filteredLogs.length) {
+      toast({
+        title: "No logs to export",
+        description: "There are no call logs matching your filters to export.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Create CSV header row
+    const headers = ['Agent', 'Phone Number', 'Status', 'Duration', 'Date & Time', 'Summary'];
+    
+    // Create CSV data rows
+    const csvData = filteredLogs.map(log => [
+      log.botName,
+      log.phoneNumber,
+      log.status,
+      log.status !== 'no-answer' && log.status !== 'busy' ? formatDuration(log.duration) : '—',
+      format(log.timestamp, "MMM d, yyyy h:mm a"),
+      log.summary
+    ]);
+    
+    // Combine header and data
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+    
+    // Create blob and download link
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    
+    // Set up download attributes
+    link.setAttribute('href', url);
+    link.setAttribute('download', `call-logs-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    link.style.display = 'none';
+    
+    // Append to document, trigger download and clean up
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Export successful",
+      description: "Call logs have been exported to CSV successfully."
+    });
+  };
+  
   // Filter logs based on search and filters
   const filteredLogs = callLogs.filter(log => {
     const matchesSearch = searchQuery === '' || 
@@ -386,8 +443,8 @@ const Campaign = () => {
       log.botName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       log.summary.toLowerCase().includes(searchQuery.toLowerCase());
       
-    const matchesStatus = filterStatus === '' || log.status === filterStatus;
-    const matchesBot = filterBot === '' || log.botId === filterBot;
+    const matchesStatus = filterStatus === 'all' || log.status === filterStatus;
+    const matchesBot = filterBot === 'all' || log.botId === filterBot;
     
     return matchesSearch && matchesStatus && matchesBot;
   });
@@ -987,7 +1044,7 @@ const Campaign = () => {
             </DialogHeader>
             
             <div className="space-y-4">
-              {/* Filters */}
+              {/* Filters and Export Button */}
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1">
                   <div className="relative">
@@ -1032,6 +1089,14 @@ const Campaign = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                <Button 
+                  onClick={exportCallLogs} 
+                  variant="outline"
+                  className="md:ml-auto"
+                >
+                  <FileExport className="h-4 w-4 mr-2" />
+                  Export CSV
+                </Button>
               </div>
               
               {/* Call Log Table */}
