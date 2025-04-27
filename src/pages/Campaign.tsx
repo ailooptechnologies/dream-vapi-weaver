@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, Phone, Bot, MessageSquare, Calendar as CalendarIcon, Plus, Play, Pencil, Trash2, BarChart, Pause, CheckCircle, List, Filter, Search, User, FileExport } from "lucide-react";
+import { Menu, Phone, Bot, MessageSquare, Calendar as CalendarIcon, Plus, Play, Pencil, Trash2, BarChart, Pause, CheckCircle, List, Filter, Search, User, FileText } from "lucide-react";
 import SidebarNav from '@/components/SidebarNav';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -1094,7 +1094,7 @@ const Campaign = () => {
                   variant="outline"
                   className="md:ml-auto"
                 >
-                  <FileExport className="h-4 w-4 mr-2" />
+                  <FileText className="h-4 w-4 mr-2" />
                   Export CSV
                 </Button>
               </div>
