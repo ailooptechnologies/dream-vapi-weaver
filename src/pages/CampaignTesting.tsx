@@ -40,7 +40,7 @@ const CampaignTesting = () => {
   const campaignData = localStorage.getItem('currentCampaign') 
     ? JSON.parse(localStorage.getItem('currentCampaign') || '{}')
     : { name: 'Test Campaign', agentId: '123' };
-  
+
   const form = useForm<TestFormValues>({
     resolver: zodResolver(testSchema),
     defaultValues: {
@@ -161,27 +161,49 @@ const CampaignTesting = () => {
       return;
     }
     
-    // Simulate saving data
-    setTimeout(() => {
-      // Save test results to localStorage
-      const testResults = {
-        campaignId: campaignData.id || 'test-campaign',
-        numbers: callCompleted,
-        feedback: form.getValues('reactions'),
-        testedAt: new Date().toISOString(),
-      };
+    // Create the final campaign data with test results
+    const testResults = {
+      testedNumbers: callCompleted,
+      feedback: form.getValues('reactions'),
+      testedAt: new Date().toISOString(),
+    };
+    
+    // Update campaign data with test results
+    const updatedCampaignData = {
+      ...campaignData,
+      testResults,
+      // Update bot configuration based on feedback
+      agentConfig: {
+        ...campaignData.agentConfig,
+        // Incorporate feedback into agent configuration
+        adjustedPrompt: generateAdjustedPrompt(form.getValues('reactions')),
+      },
+      status: 'draft', // Keep as draft until final review
+    };
+    
+    // Save the complete campaign with test results
+    localStorage.setItem('currentCampaign', JSON.stringify(updatedCampaignData));
+    
+    setIsSubmitting(false);
+    toast({
+      title: "Testing completed",
+      description: "Your campaign test feedback has been submitted successfully. Proceeding to final review.",
+    });
+    
+    // Navigate to campaign review
+    navigate("/campaign");
+  };
+  
+  // Helper function to adjust bot prompt based on feedback
+  const generateAdjustedPrompt = (reactions: Record<string, { rating: string; feedback?: string }>) => {
+    const feedbackPoints = Object.values(reactions)
+      .map(r => r.feedback)
+      .filter(Boolean)
+      .join('\n');
       
-      localStorage.setItem('campaignTestResults', JSON.stringify(testResults));
-      
-      setIsSubmitting(false);
-      toast({
-        title: "Testing completed",
-        description: "Your campaign test feedback has been submitted successfully",
-      });
-      
-      // Navigate to campaign page
-      navigate("/campaign");
-    }, 1500);
+    // Combine original prompt with feedback
+    const originalPrompt = campaignData.prompt || '';
+    return `${originalPrompt}\n\nAdjustments based on testing feedback:\n${feedbackPoints}`;
   };
 
   return (
@@ -435,4 +457,3 @@ const CampaignTesting = () => {
 };
 
 export default CampaignTesting;
-
