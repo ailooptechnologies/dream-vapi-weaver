@@ -1,5 +1,5 @@
 
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -18,8 +18,20 @@ import AuthGuard from "./components/AuthGuard";
 import TelephonyProviders from "./pages/TelephonyProviders";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import { useEffect } from "react";
 
 function App() {
+  // Initialize default organization if none exists
+  useEffect(() => {
+    const storedOrgs = localStorage.getItem('organizations');
+    if (!storedOrgs) {
+      const defaultOrg = { id: '1', name: 'Default Organization', isActive: true };
+      localStorage.setItem('organizations', JSON.stringify([defaultOrg]));
+      localStorage.setItem('currentOrganizationId', defaultOrg.id);
+      localStorage.setItem('currentOrganizationName', defaultOrg.name);
+    }
+  }, []);
+
   return (
     <Routes>
       <Route path="/" element={<Index />} />

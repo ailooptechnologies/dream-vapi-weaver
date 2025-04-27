@@ -2,15 +2,19 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-interface OrganizationFormValues {
-  name: string;
-  description: string;
-}
+const organizationSchema = z.object({
+  name: z.string().min(1, "Organization name is required"),
+  description: z.string().optional(),
+});
+
+type OrganizationFormValues = z.infer<typeof organizationSchema>;
 
 interface OrganizationDialogProps {
   open: boolean;
@@ -21,6 +25,7 @@ interface OrganizationDialogProps {
 const OrganizationDialog = ({ open, onOpenChange, onCreateOrganization }: OrganizationDialogProps) => {
   const { toast } = useToast();
   const form = useForm<OrganizationFormValues>({
+    resolver: zodResolver(organizationSchema),
     defaultValues: {
       name: '',
       description: '',
@@ -30,10 +35,6 @@ const OrganizationDialog = ({ open, onOpenChange, onCreateOrganization }: Organi
   const handleSubmit = (data: OrganizationFormValues) => {
     onCreateOrganization(data);
     form.reset();
-    toast({
-      title: "Organization created",
-      description: `${data.name} has been successfully created.`
-    });
   };
 
   return (
@@ -54,8 +55,9 @@ const OrganizationDialog = ({ open, onOpenChange, onCreateOrganization }: Organi
                 <FormItem>
                   <FormLabel>Organization Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. Acme Corp" required {...field} />
+                    <Input placeholder="e.g. Acme Corp" {...field} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -68,6 +70,7 @@ const OrganizationDialog = ({ open, onOpenChange, onCreateOrganization }: Organi
                   <FormControl>
                     <Input placeholder="Brief description of your organization" {...field} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />

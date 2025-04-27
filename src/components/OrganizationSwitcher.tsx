@@ -13,7 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Building, ChevronDown, Plus } from "lucide-react";
 import { Dialog } from "@/components/ui/dialog";
 import OrganizationDialog from './OrganizationDialog';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface Organization {
   id: string;
@@ -23,24 +24,35 @@ interface Organization {
 
 const OrganizationSwitcher = () => {
   const { toast } = useToast();
-  const [organizations, setOrganizations] = useState<Organization[]>([
-    { id: '1', name: 'Default Organization', isActive: true },
-    { id: '2', name: 'Marketing Team', isActive: false },
-    { id: '3', name: 'Sales Department', isActive: false },
-  ]);
+  const navigate = useNavigate();
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
+  // Load organizations from localStorage on component mount
+  useEffect(() => {
+    const storedOrgs = localStorage.getItem('organizations');
+    if (storedOrgs) {
+      setOrganizations(JSON.parse(storedOrgs));
+    } else {
+      // Set default organization if none exist
+      const defaultOrg = { id: '1', name: 'Default Organization', isActive: true };
+      setOrganizations([defaultOrg]);
+      localStorage.setItem('organizations', JSON.stringify([defaultOrg]));
+    }
+  }, []);
+
   const handleSwitchOrg = (orgId: string) => {
-    setOrganizations(orgs =>
-      orgs.map(org => ({
-        ...org,
-        isActive: org.id === orgId
-      }))
-    );
+    const updatedOrgs = organizations.map(org => ({
+      ...org,
+      isActive: org.id === orgId
+    }));
+    
+    setOrganizations(updatedOrgs);
+    localStorage.setItem('organizations', JSON.stringify(updatedOrgs));
 
     const org = organizations.find(o => o.id === orgId);
     if (org) {
-      // In a real app, this would switch the context to the selected organization
+      // Store current organization info
       localStorage.setItem('currentOrganizationId', orgId);
       localStorage.setItem('currentOrganizationName', org.name);
       
@@ -49,11 +61,8 @@ const OrganizationSwitcher = () => {
         description: `Switched to ${org.name}`
       });
       
-      // Force a page reload to refresh all data based on the new organization
-      // In a real app, you might use a context provider to avoid the full reload
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
+      // Force a navigation to refresh the UI with the new organization context
+      navigate(0);
     }
   };
 
@@ -63,7 +72,10 @@ const OrganizationSwitcher = () => {
       name: data.name,
       isActive: false
     };
-    setOrganizations([...organizations, newOrg]);
+    
+    const updatedOrgs = [...organizations, newOrg];
+    setOrganizations(updatedOrgs);
+    localStorage.setItem('organizations', JSON.stringify(updatedOrgs));
     setShowCreateDialog(false);
     
     toast({
@@ -72,7 +84,7 @@ const OrganizationSwitcher = () => {
     });
   };
 
-  const activeOrg = organizations.find(org => org.isActive);
+  const activeOrg = organizations.find(org => org.isActive) || organizations[0];
 
   return (
     <>
