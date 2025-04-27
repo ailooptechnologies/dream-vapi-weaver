@@ -27,9 +27,15 @@ const testSchema = z.object({
 
 type TestFormValues = z.infer<typeof testSchema>;
 
-// Define a consistent type for reactions
+// Define a consistent type for reactions that matches the form schema
 type ReactionType = {
   rating: string;
+  feedback?: string;
+};
+
+// Type for reactions in the form data which may have optional ratings
+type FormReactionType = {
+  rating?: string;
   feedback?: string;
 };
 
@@ -137,7 +143,7 @@ const CampaignTesting = () => {
     }
     
     // Initialize reactions for completed calls
-    const reactions = { ...form.getValues('reactions') } || {};
+    const reactions = form.getValues('reactions') || {};
     callCompleted.forEach(number => {
       const numberIndex = form.getValues('numbers').indexOf(number);
       if (!reactions[numberIndex]) {
@@ -202,7 +208,7 @@ const CampaignTesting = () => {
   };
   
   // Helper function to adjust bot prompt based on feedback
-  const generateAdjustedPrompt = (reactions: Record<string, ReactionType>) => {
+  const generateAdjustedPrompt = (reactions: Record<string, FormReactionType>) => {
     const feedbackPoints = Object.values(reactions)
       .filter(r => r && r.feedback) // Ensure the reaction exists and has feedback
       .map(r => r.feedback)
