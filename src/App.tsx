@@ -23,20 +23,27 @@ import { useEffect } from "react";
 function App() {
   // Initialize default organization if none exists
   useEffect(() => {
-    const storedOrgs = localStorage.getItem('organizations');
-    if (!storedOrgs) {
-      const defaultOrg = { id: '1', name: 'Default Organization', isActive: true };
-      localStorage.setItem('organizations', JSON.stringify([defaultOrg]));
-      localStorage.setItem('currentOrganizationId', defaultOrg.id);
-      localStorage.setItem('currentOrganizationName', defaultOrg.name);
-    } else {
-      // Ensure there's always a currentOrganizationId
-      const orgs = JSON.parse(storedOrgs);
-      const activeOrg = orgs.find((org: any) => org.isActive) || orgs[0];
-      if (activeOrg) {
-        localStorage.setItem('currentOrganizationId', activeOrg.id);
-        localStorage.setItem('currentOrganizationName', activeOrg.name);
+    try {
+      // Get stored organizations
+      const storedOrgs = localStorage.getItem('organizations');
+      
+      if (!storedOrgs) {
+        // Create and save default organization if none exists
+        const defaultOrg = { id: '1', name: 'Default Organization', isActive: true };
+        localStorage.setItem('organizations', JSON.stringify([defaultOrg]));
+        localStorage.setItem('currentOrganizationId', defaultOrg.id);
+        localStorage.setItem('currentOrganizationName', defaultOrg.name);
+      } else {
+        // Ensure there's always a currentOrganizationId
+        const orgs = JSON.parse(storedOrgs);
+        const activeOrg = orgs.find((org: any) => org.isActive) || orgs[0];
+        if (activeOrg) {
+          localStorage.setItem('currentOrganizationId', activeOrg.id);
+          localStorage.setItem('currentOrganizationName', activeOrg.name);
+        }
       }
+    } catch (error) {
+      console.error("Error initializing organization data:", error);
     }
   }, []);
 

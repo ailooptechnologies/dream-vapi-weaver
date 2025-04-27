@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Building, ChevronDown, Plus } from "lucide-react";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import OrganizationDialog from './OrganizationDialog';
 
@@ -27,7 +27,8 @@ const OrganizationSwitcher = () => {
   const navigate = useNavigate();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [dropdownKey, setDropdownKey] = useState(Date.now()); // Add a key to force re-render
+  const [refreshKey, setRefreshKey] = useState(Date.now());
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Load organizations from localStorage on component mount
   useEffect(() => {
@@ -42,7 +43,7 @@ const OrganizationSwitcher = () => {
       localStorage.setItem('currentOrganizationId', defaultOrg.id);
       localStorage.setItem('currentOrganizationName', defaultOrg.name);
     }
-  }, []);
+  }, [refreshKey]); // Re-run when refreshKey changes
 
   const handleSwitchOrg = (orgId: string) => {
     const updatedOrgs = organizations.map(org => ({
@@ -70,6 +71,7 @@ const OrganizationSwitcher = () => {
   };
 
   const handleCreateOrg = (data: { name: string; description: string }) => {
+    // Create the new organization
     const newOrg = {
       id: crypto.randomUUID(),
       name: data.name,
@@ -77,6 +79,7 @@ const OrganizationSwitcher = () => {
       isActive: false
     };
     
+    // Update organizations list
     const updatedOrgs = [...organizations, newOrg];
     setOrganizations(updatedOrgs);
     localStorage.setItem('organizations', JSON.stringify(updatedOrgs));
@@ -86,15 +89,18 @@ const OrganizationSwitcher = () => {
       description: `${data.name} has been created successfully.`
     });
     
-    // Force dropdown to re-render by updating key
-    setDropdownKey(Date.now());
+    // Force component to re-render completely
+    setRefreshKey(Date.now());
+    
+    // Close dialog
+    setShowCreateDialog(false);
   };
 
   const activeOrg = organizations.find(org => org.isActive) || organizations[0];
 
   return (
-    <>
-      <DropdownMenu key={dropdownKey}>
+    <div ref={dropdownRef}>
+      <DropdownMenu key={refreshKey}>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="w-full justify-start">
             <Building className="mr-2 h-4 w-4" />
@@ -118,7 +124,12 @@ const OrganizationSwitcher = () => {
             </DropdownMenuItem>
           ))}
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setShowCreateDialog(true)} className="cursor-pointer">
+          <DropdownMenuItem 
+            onClick={() => {
+              setShowCreateDialog(true);
+            }} 
+            className="cursor-pointer"
+          >
             <Plus className="mr-2 h-4 w-4" />
             New Organization
           </DropdownMenuItem>
@@ -130,7 +141,7 @@ const OrganizationSwitcher = () => {
         onOpenChange={setShowCreateDialog}
         onCreateOrganization={handleCreateOrg}
       />
-    </>
+    </div>
   );
 };
 

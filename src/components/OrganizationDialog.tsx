@@ -32,10 +32,16 @@ const OrganizationDialog = ({ open, onOpenChange, onCreateOrganization }: Organi
     },
   });
 
+  // Reset form when dialog opens/closes
+  React.useEffect(() => {
+    if (!open) {
+      form.reset();
+    }
+  }, [open, form]);
+
   const handleSubmit = (data: OrganizationFormValues) => {
     onCreateOrganization(data);
     form.reset();
-    onOpenChange(false);
   };
 
   return (
