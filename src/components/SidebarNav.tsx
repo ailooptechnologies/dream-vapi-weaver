@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -31,7 +30,6 @@ const SidebarNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [orgDialogOpen, setOrgDialogOpen] = useState(false);
   
   // Get user info from localStorage or use default
   const userEmail = localStorage.getItem('userEmail') || 'example@gmail.com';
@@ -43,14 +41,9 @@ const SidebarNav = () => {
     });
   };
 
-  const handleCreateOrganization = (data: { name: string; description: string }) => {
-    // In a real app, this would create a new organization in the backend
-    localStorage.setItem('organizationName', data.name);
-    toast({
-      title: "Organization created",
-      description: `Switched to ${data.name}`
-    });
-    setOrgDialogOpen(false);
+  const handleCreateOrganization = () => {
+    // We don't need this function anymore as the OrganizationDialog component 
+    // handles the organization creation internally
   };
 
   const handleLogout = () => {
@@ -59,6 +52,13 @@ const SidebarNav = () => {
     toast({
       title: "Logged out",
       description: "You have been successfully logged out"
+    });
+  };
+
+  const handleOrgCreated = () => {
+    toast({
+      title: "Organization created",
+      description: "Your new organization has been created successfully."
     });
   };
 
@@ -222,11 +222,8 @@ const SidebarNav = () => {
         </button>
       </div>
       
-      <OrganizationDialog 
-        open={orgDialogOpen} 
-        onOpenChange={setOrgDialogOpen} 
-        onCreateOrganization={handleCreateOrganization} 
-      />
+      {/* Update the way we're using OrganizationDialog to match its API */}
+      <OrganizationDialog onOrgCreated={handleOrgCreated} />
     </div>
   );
 };
