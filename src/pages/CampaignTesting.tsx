@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -155,7 +154,7 @@ const CampaignTesting = () => {
     setShowFeedback(true);
   };
   
-  const handleSubmit = (data: TestFormValues) => {
+  const handleSubmit = async (data: TestFormValues) => {
     setIsSubmitting(true);
     
     // Check if all completed calls have feedback
@@ -174,37 +173,65 @@ const CampaignTesting = () => {
       return;
     }
     
-    // Create the final campaign data with test results
-    const testResults = {
-      testedNumbers: callCompleted,
-      feedback: form.getValues('reactions'),
-      testedAt: new Date().toISOString(),
-    };
-    
-    // Update campaign data with test results
-    const updatedCampaignData = {
-      ...campaignData,
-      testResults,
-      // Update bot configuration based on feedback
-      agentConfig: {
-        ...campaignData.agentConfig,
-        // Incorporate feedback into agent configuration
-        adjustedPrompt: generateAdjustedPrompt(form.getValues('reactions') || {}),
-      },
-      status: 'draft', // Keep as draft until final review
-    };
-    
-    // Save the complete campaign with test results
-    localStorage.setItem('currentCampaign', JSON.stringify(updatedCampaignData));
-    
-    setIsSubmitting(false);
-    toast({
-      title: "Testing completed",
-      description: "Your campaign test feedback has been submitted successfully. Proceeding to final review.",
-    });
-    
-    // Navigate to campaign review
-    navigate("/campaign");
+    try {
+      // First, collect all feedback for AI training
+      const trainingFeedback = callCompleted.map(number => {
+        const numberIndex = form.getValues('numbers').indexOf(number);
+        return {
+          callNumber: number,
+          rating: form.getValues(`reactions.${numberIndex}.rating`),
+          feedback: form.getValues(`reactions.${numberIndex}.feedback`),
+        };
+      });
+
+      // Create the final campaign data with test results and adjusted AI configuration
+      const testResults = {
+        testedNumbers: callCompleted,
+        feedback: form.getValues('reactions'),
+        testedAt: new Date().toISOString(),
+      };
+
+      // Get the original campaign data
+      const campaignData = localStorage.getItem('currentCampaign') 
+        ? JSON.parse(localStorage.getItem('currentCampaign') || '{}')
+        : { name: 'Test Campaign', agentId: '123' };
+
+      // Adjust the AI configuration based on feedback
+      const adjustedPrompt = generateAdjustedPrompt(form.getValues('reactions') || {});
+      
+      // Update campaign data with test results and adjusted AI configuration
+      const updatedCampaignData = {
+        ...campaignData,
+        status: 'active', // Change status to active since testing is complete
+        testResults,
+        agentConfig: {
+          ...campaignData.agentConfig,
+          adjustedPrompt,
+          trainingFeedback, // Store the feedback for reference
+          lastTrained: new Date().toISOString(),
+        },
+      };
+      
+      // Save the complete campaign
+      localStorage.setItem('currentCampaign', JSON.stringify(updatedCampaignData));
+      
+      toast({
+        title: "Campaign launched",
+        description: "Your campaign has been created and is now active. The AI has been trained with your feedback.",
+      });
+      
+      setIsSubmitting(false);
+      navigate("/campaign");
+      
+    } catch (error) {
+      console.error('Error creating campaign:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create campaign. Please try again.",
+        variant: "destructive"
+      });
+      setIsSubmitting(false);
+    }
   };
   
   // Helper function to adjust bot prompt based on feedback
