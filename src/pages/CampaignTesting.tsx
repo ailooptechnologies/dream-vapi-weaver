@@ -14,6 +14,7 @@ import { z } from "zod";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useNavigate } from "react-router-dom";
+import VoiceAgent from '@/components/VoiceAgent';
 
 // Define the schema for test numbers
 const testSchema = z.object({
@@ -119,6 +120,25 @@ const CampaignTesting = () => {
       return;
     }
     
+    // Ensure at least one call has been completed
+    if (callCompleted.length === 0) {
+      toast({
+        title: "No calls made",
+        description: "Please test at least one phone number before proceeding",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Initialize reactions for completed calls
+    const reactions = { ...form.getValues('reactions') };
+    callCompleted.forEach((number, idx) => {
+      if (!reactions[idx]) {
+        reactions[idx] = { rating: "average" };
+      }
+    });
+    form.setValue('reactions', reactions);
+    
     setShowFeedback(true);
   };
   
@@ -126,7 +146,7 @@ const CampaignTesting = () => {
     setIsSubmitting(true);
     
     // Check if all completed calls have feedback
-    const allFeedbackProvided = callCompleted.every(number => {
+    const allFeedbackProvided = callCompleted.every((number, idx) => {
       const numberIndex = form.getValues('numbers').indexOf(number);
       return form.getValues(`reactions.${numberIndex}.rating`);
     });
@@ -286,113 +306,128 @@ const CampaignTesting = () => {
             </CardContent>
           </Card>
         ) : (
-          <Card>
-            <CardHeader>
-              <CardTitle>Provide Feedback</CardTitle>
-              <CardDescription>Rate the performance of the AI agent in each test call</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-                  {callCompleted.map((number, index) => {
-                    const numberIndex = form.getValues('numbers').indexOf(number);
-                    return (
-                      <div key={number} className="p-4 border rounded-md">
-                        <div className="flex items-center gap-2 mb-4">
-                          <Smartphone className="h-4 w-4" />
-                          <h3 className="font-medium">{number}</h3>
+          <>
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>AI Agent Preview</CardTitle>
+                <CardDescription>This is the AI agent that made the test calls</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <VoiceAgent 
+                  name={campaignData.agentName || "Test AI Agent"}
+                  description={campaignData.agentDescription || "AI voice agent for automated calling"}
+                />
+              </CardContent>
+            </Card>
+          
+            <Card>
+              <CardHeader>
+                <CardTitle>Provide Feedback</CardTitle>
+                <CardDescription>Rate the performance of the AI agent in each test call</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+                    {callCompleted.map((number, idx) => {
+                      const numberIndex = form.getValues('numbers').indexOf(number);
+                      return (
+                        <div key={number} className="p-4 border rounded-md">
+                          <div className="flex items-center gap-2 mb-4">
+                            <Smartphone className="h-4 w-4" />
+                            <h3 className="font-medium">{number}</h3>
+                          </div>
+                          
+                          <FormField
+                            control={form.control}
+                            name={`reactions.${numberIndex}.rating`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>How was the call quality?</FormLabel>
+                                <FormControl>
+                                  <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="flex flex-col space-y-1"
+                                  >
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                      <FormControl>
+                                        <RadioGroupItem value="excellent" />
+                                      </FormControl>
+                                      <FormLabel className="font-normal">
+                                        Excellent - The AI was perfect
+                                      </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                      <FormControl>
+                                        <RadioGroupItem value="good" />
+                                      </FormControl>
+                                      <FormLabel className="font-normal">
+                                        Good - The AI was mostly on point
+                                      </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                      <FormControl>
+                                        <RadioGroupItem value="average" />
+                                      </FormControl>
+                                      <FormLabel className="font-normal">
+                                        Average - The AI was acceptable
+                                      </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                      <FormControl>
+                                        <RadioGroupItem value="poor" />
+                                      </FormControl>
+                                      <FormLabel className="font-normal">
+                                        Poor - The AI needs improvement
+                                      </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                      <FormControl>
+                                        <RadioGroupItem value="terrible" />
+                                      </FormControl>
+                                      <FormLabel className="font-normal">
+                                        Terrible - The AI was unusable
+                                      </FormLabel>
+                                    </FormItem>
+                                  </RadioGroup>
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={form.control}
+                            name={`reactions.${numberIndex}.feedback`}
+                            render={({ field }) => (
+                              <FormItem className="mt-4">
+                                <FormLabel>Additional feedback (optional)</FormLabel>
+                                <FormControl>
+                                  <Textarea 
+                                    placeholder="Provide any specific feedback to improve the AI agent" 
+                                    className="resize-none"
+                                    {...field}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
                         </div>
-                        
-                        <FormField
-                          control={form.control}
-                          name={`reactions.${numberIndex}.rating`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>How was the call quality?</FormLabel>
-                              <FormControl>
-                                <RadioGroup
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                  className="flex flex-col space-y-1"
-                                >
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="excellent" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      Excellent - The AI was perfect
-                                    </FormLabel>
-                                  </FormItem>
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="good" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      Good - The AI was mostly on point
-                                    </FormLabel>
-                                  </FormItem>
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="average" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      Average - The AI was acceptable
-                                    </FormLabel>
-                                  </FormItem>
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="poor" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      Poor - The AI needs improvement
-                                    </FormLabel>
-                                  </FormItem>
-                                  <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <RadioGroupItem value="terrible" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                      Terrible - The AI was unusable
-                                    </FormLabel>
-                                  </FormItem>
-                                </RadioGroup>
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
-                          name={`reactions.${numberIndex}.feedback`}
-                          render={({ field }) => (
-                            <FormItem className="mt-4">
-                              <FormLabel>Additional feedback (optional)</FormLabel>
-                              <FormControl>
-                                <Textarea 
-                                  placeholder="Provide any specific feedback to improve the AI agent" 
-                                  className="resize-none"
-                                  {...field}
-                                />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    );
-                  })}
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full flex items-center gap-2 justify-center"
-                    disabled={isSubmitting}
-                  >
-                    <Save className="h-4 w-4" />
-                    {isSubmitting ? "Submitting..." : "Submit Feedback & Complete Testing"}
-                  </Button>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
+                      );
+                    })}
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full flex items-center gap-2 justify-center"
+                      disabled={isSubmitting}
+                    >
+                      <Save className="h-4 w-4" />
+                      {isSubmitting ? "Submitting..." : "Submit Feedback & Complete Testing"}
+                    </Button>
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
+          </>
         )}
       </div>
     </div>
@@ -400,3 +435,4 @@ const CampaignTesting = () => {
 };
 
 export default CampaignTesting;
+
