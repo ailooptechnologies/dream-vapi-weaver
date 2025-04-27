@@ -27,6 +27,12 @@ const testSchema = z.object({
 
 type TestFormValues = z.infer<typeof testSchema>;
 
+// Define a consistent type for reactions
+type ReactionType = {
+  rating: string;
+  feedback?: string;
+};
+
 const CampaignTesting = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -131,10 +137,11 @@ const CampaignTesting = () => {
     }
     
     // Initialize reactions for completed calls
-    const reactions = { ...form.getValues('reactions') };
-    callCompleted.forEach((number, idx) => {
-      if (!reactions[idx]) {
-        reactions[idx] = { rating: "average" };
+    const reactions = { ...form.getValues('reactions') } || {};
+    callCompleted.forEach(number => {
+      const numberIndex = form.getValues('numbers').indexOf(number);
+      if (!reactions[numberIndex]) {
+        reactions[numberIndex] = { rating: "average" };
       }
     });
     form.setValue('reactions', reactions);
@@ -146,7 +153,7 @@ const CampaignTesting = () => {
     setIsSubmitting(true);
     
     // Check if all completed calls have feedback
-    const allFeedbackProvided = callCompleted.every((number, idx) => {
+    const allFeedbackProvided = callCompleted.every(number => {
       const numberIndex = form.getValues('numbers').indexOf(number);
       return form.getValues(`reactions.${numberIndex}.rating`);
     });
@@ -176,7 +183,7 @@ const CampaignTesting = () => {
       agentConfig: {
         ...campaignData.agentConfig,
         // Incorporate feedback into agent configuration
-        adjustedPrompt: generateAdjustedPrompt(form.getValues('reactions')),
+        adjustedPrompt: generateAdjustedPrompt(form.getValues('reactions') || {}),
       },
       status: 'draft', // Keep as draft until final review
     };
@@ -195,8 +202,9 @@ const CampaignTesting = () => {
   };
   
   // Helper function to adjust bot prompt based on feedback
-  const generateAdjustedPrompt = (reactions: Record<string, { rating: string; feedback?: string }>) => {
+  const generateAdjustedPrompt = (reactions: Record<string, ReactionType>) => {
     const feedbackPoints = Object.values(reactions)
+      .filter(r => r && r.feedback) // Ensure the reaction exists and has feedback
       .map(r => r.feedback)
       .filter(Boolean)
       .join('\n');
@@ -350,7 +358,7 @@ const CampaignTesting = () => {
               <CardContent>
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-                    {callCompleted.map((number, idx) => {
+                    {callCompleted.map((number) => {
                       const numberIndex = form.getValues('numbers').indexOf(number);
                       return (
                         <div key={number} className="p-4 border rounded-md">
