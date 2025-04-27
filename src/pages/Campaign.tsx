@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -418,414 +417,416 @@ const Campaign = () => {
       </Sheet>
 
       <div className="flex-1 p-6">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold">Campaigns</h1>
             <p className="text-muted-foreground">Manage your calling campaigns</p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Create Campaign
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>{editingCampaignId ? "Edit Campaign" : "Create New Campaign"}</DialogTitle>
-                <DialogDescription>
-                  {editingCampaignId ? "Update your campaign details." : "Set up a new calling campaign."}
-                </DialogDescription>
-              </DialogHeader>
-              
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <Tabs defaultValue="basic" className="w-full">
-                    <TabsList className="grid w-full grid-cols-4 mb-4">
-                      <TabsTrigger value="basic">Basic Info</TabsTrigger>
-                      <TabsTrigger value="agents">Agents & Contacts</TabsTrigger>
-                      <TabsTrigger value="settings">Settings</TabsTrigger>
-                      <TabsTrigger value="training">Training</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="basic" className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Campaign Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="e.g., Q2 Sales Outreach" {...field} required />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
+          <div className="mt-4 md:mt-0">
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
+                  Create Campaign
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>{editingCampaignId ? "Edit Campaign" : "Create New Campaign"}</DialogTitle>
+                  <DialogDescription>
+                    {editingCampaignId ? "Update your campaign details." : "Set up a new calling campaign."}
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <Tabs defaultValue="basic" className="w-full">
+                      <TabsList className="grid w-full grid-cols-4 mb-4">
+                        <TabsTrigger value="basic">Basic Info</TabsTrigger>
+                        <TabsTrigger value="agents">Agents & Contacts</TabsTrigger>
+                        <TabsTrigger value="settings">Settings</TabsTrigger>
+                        <TabsTrigger value="training">Training</TabsTrigger>
+                      </TabsList>
                       
-                      <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Description</FormLabel>
-                            <FormControl>
-                              <Textarea placeholder="Describe the campaign purpose..." {...field} />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="prompt"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>AI Agent Prompt</FormLabel>
-                            <FormControl>
-                              <Textarea 
-                                placeholder="Provide context and instructions for the AI agent..." 
-                                className="min-h-[150px]"
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormDescription>
-                              This prompt instructs the AI how to handle the calls
-                            </FormDescription>
-                          </FormItem>
-                        )}
-                      />
-                    </TabsContent>
-                    
-                    <TabsContent value="agents" className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="agents"
-                        render={() => (
-                          <FormItem>
-                            <div className="mb-4">
-                              <FormLabel>Select AI Agents</FormLabel>
-                              <FormDescription>
-                                Choose which AI agents will handle calls in this campaign
-                              </FormDescription>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                              {agents.map((agent) => (
-                                <FormField
-                                  key={agent.id}
-                                  control={form.control}
-                                  name="agents"
-                                  render={({ field }) => {
-                                    return (
-                                      <FormItem
-                                        key={agent.id}
-                                        className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4"
-                                      >
-                                        <FormControl>
-                                          <Checkbox
-                                            checked={field.value?.includes(agent.id)}
-                                            onCheckedChange={(checked) => {
-                                              return checked
-                                                ? field.onChange([...field.value, agent.id])
-                                                : field.onChange(
-                                                    field.value?.filter(
-                                                      (value) => value !== agent.id
-                                                    )
-                                                  )
-                                            }}
-                                          />
-                                        </FormControl>
-                                        <div className="space-y-1 leading-none">
-                                          <FormLabel className="text-sm font-medium">
-                                            {agent.name}
-                                          </FormLabel>
-                                        </div>
-                                      </FormItem>
-                                    )
-                                  }}
-                                />
-                              ))}
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="phoneGroups"
-                        render={() => (
-                          <FormItem>
-                            <div className="mb-4">
-                              <FormLabel>Select Contact Groups</FormLabel>
-                              <FormDescription>
-                                Choose which contact groups to target in this campaign
-                              </FormDescription>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                              {phoneGroups.map((group) => (
-                                <FormField
-                                  key={group.id}
-                                  control={form.control}
-                                  name="phoneGroups"
-                                  render={({ field }) => {
-                                    return (
-                                      <FormItem
-                                        key={group.id}
-                                        className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4"
-                                      >
-                                        <FormControl>
-                                          <Checkbox
-                                            checked={field.value?.includes(group.id)}
-                                            onCheckedChange={(checked) => {
-                                              return checked
-                                                ? field.onChange([...field.value, group.id])
-                                                : field.onChange(
-                                                    field.value?.filter(
-                                                      (value) => value !== group.id
-                                                    )
-                                                  )
-                                            }}
-                                          />
-                                        </FormControl>
-                                        <div className="space-y-1 leading-none">
-                                          <FormLabel className="text-sm font-medium">
-                                            {group.name}
-                                          </FormLabel>
-                                        </div>
-                                      </FormItem>
-                                    )
-                                  }}
-                                />
-                              ))}
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-                    </TabsContent>
-                    
-                    <TabsContent value="settings" className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <TabsContent value="basic" className="space-y-4">
                         <FormField
                           control={form.control}
-                          name="maxCallDuration"
+                          name="name"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Max Call Duration (seconds)</FormLabel>
+                              <FormLabel>Campaign Name</FormLabel>
                               <FormControl>
-                                <Input type="number" min="60" {...field} />
+                                <Input placeholder="e.g., Q2 Sales Outreach" {...field} required />
                               </FormControl>
-                              <FormDescription>
-                                Maximum duration for each call
-                              </FormDescription>
                             </FormItem>
                           )}
                         />
                         
                         <FormField
                           control={form.control}
-                          name="maxConcurrentCalls"
+                          name="description"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Max Concurrent Calls</FormLabel>
+                              <FormLabel>Description</FormLabel>
                               <FormControl>
-                                <Input type="number" min="1" max="100" {...field} />
+                                <Textarea placeholder="Describe the campaign purpose..." {...field} />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="prompt"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>AI Agent Prompt</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Provide context and instructions for the AI agent..." 
+                                  className="min-h-[150px]"
+                                  {...field} 
+                                />
                               </FormControl>
                               <FormDescription>
-                                How many calls can run simultaneously
+                                This prompt instructs the AI how to handle the calls
                               </FormDescription>
                             </FormItem>
                           )}
                         />
-                      </div>
+                      </TabsContent>
                       
-                      <FormField
-                        control={form.control}
-                        name="schedule"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Schedule</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select schedule" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="immediate">Start Immediately</SelectItem>
-                                <SelectItem value="scheduled">Schedule for Later</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormDescription>
-                              When should this campaign begin
-                            </FormDescription>
-                          </FormItem>
-                        )}
-                      />
+                      <TabsContent value="agents" className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="agents"
+                          render={() => (
+                            <FormItem>
+                              <div className="mb-4">
+                                <FormLabel>Select AI Agents</FormLabel>
+                                <FormDescription>
+                                  Choose which AI agents will handle calls in this campaign
+                                </FormDescription>
+                              </div>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                {agents.map((agent) => (
+                                  <FormField
+                                    key={agent.id}
+                                    control={form.control}
+                                    name="agents"
+                                    render={({ field }) => {
+                                      return (
+                                        <FormItem
+                                          key={agent.id}
+                                          className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4"
+                                        >
+                                          <FormControl>
+                                            <Checkbox
+                                              checked={field.value?.includes(agent.id)}
+                                              onCheckedChange={(checked) => {
+                                                return checked
+                                                  ? field.onChange([...field.value, agent.id])
+                                                  : field.onChange(
+                                                      field.value?.filter(
+                                                        (value) => value !== agent.id
+                                                      )
+                                                    )
+                                              }}
+                                            />
+                                          </FormControl>
+                                          <div className="space-y-1 leading-none">
+                                            <FormLabel className="text-sm font-medium">
+                                              {agent.name}
+                                            </FormLabel>
+                                          </div>
+                                        </FormItem>
+                                      )
+                                    }}
+                                  />
+                                ))}
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="phoneGroups"
+                          render={() => (
+                            <FormItem>
+                              <div className="mb-4">
+                                <FormLabel>Select Contact Groups</FormLabel>
+                                <FormDescription>
+                                  Choose which contact groups to target in this campaign
+                                </FormDescription>
+                              </div>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                {phoneGroups.map((group) => (
+                                  <FormField
+                                    key={group.id}
+                                    control={form.control}
+                                    name="phoneGroups"
+                                    render={({ field }) => {
+                                      return (
+                                        <FormItem
+                                          key={group.id}
+                                          className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4"
+                                        >
+                                          <FormControl>
+                                            <Checkbox
+                                              checked={field.value?.includes(group.id)}
+                                              onCheckedChange={(checked) => {
+                                                return checked
+                                                  ? field.onChange([...field.value, group.id])
+                                                  : field.onChange(
+                                                      field.value?.filter(
+                                                        (value) => value !== group.id
+                                                      )
+                                                    )
+                                              }}
+                                            />
+                                          </FormControl>
+                                          <div className="space-y-1 leading-none">
+                                            <FormLabel className="text-sm font-medium">
+                                              {group.name}
+                                            </FormLabel>
+                                          </div>
+                                        </FormItem>
+                                      )
+                                    }}
+                                  />
+                                ))}
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+                      </TabsContent>
                       
-                      {scheduleType === 'scheduled' && (
+                      <TabsContent value="settings" className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <FormField
                             control={form.control}
-                            name="scheduledDate"
+                            name="maxCallDuration"
                             render={({ field }) => (
-                              <FormItem className="flex flex-col">
-                                <FormLabel>Date</FormLabel>
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <FormControl>
-                                      <Button
-                                        variant={"outline"}
-                                        className={cn(
-                                          "w-full pl-3 text-left font-normal",
-                                          !field.value && "text-muted-foreground"
-                                        )}
-                                      >
-                                        {field.value ? (
-                                          format(field.value, "PPP")
-                                        ) : (
-                                          <span>Pick a date</span>
-                                        )}
-                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                      </Button>
-                                    </FormControl>
-                                  </PopoverTrigger>
-                                  <PopoverContent className="w-auto p-0" align="start">
-                                    <Calendar
-                                      mode="single"
-                                      selected={field.value}
-                                      onSelect={(date) => {
-                                        field.onChange(date);
-                                        form.setValue('scheduledDate', date);
-                                      }}
-                                      disabled={(date) => date < new Date()}
-                                      initialFocus
-                                      className={cn("p-3 pointer-events-auto")}
-                                    />
-                                  </PopoverContent>
-                                </Popover>
+                              <FormItem>
+                                <FormLabel>Max Call Duration (seconds)</FormLabel>
+                                <FormControl>
+                                  <Input type="number" min="60" {...field} />
+                                </FormControl>
                                 <FormDescription>
-                                  The date to start the campaign
+                                  Maximum duration for each call
                                 </FormDescription>
                               </FormItem>
                             )}
                           />
-
+                          
                           <FormField
                             control={form.control}
-                            name="scheduledTime"
+                            name="maxConcurrentCalls"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Time</FormLabel>
+                                <FormLabel>Max Concurrent Calls</FormLabel>
                                 <FormControl>
-                                  <Input type="time" {...field} />
+                                  <Input type="number" min="1" max="100" {...field} />
                                 </FormControl>
                                 <FormDescription>
-                                  The time to start the campaign
+                                  How many calls can run simultaneously
                                 </FormDescription>
                               </FormItem>
                             )}
                           />
                         </div>
-                      )}
-                    </TabsContent>
+                        
+                        <FormField
+                          control={form.control}
+                          name="schedule"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Schedule</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select schedule" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="immediate">Start Immediately</SelectItem>
+                                  <SelectItem value="scheduled">Schedule for Later</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormDescription>
+                                When should this campaign begin
+                              </FormDescription>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        {scheduleType === 'scheduled' && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name="scheduledDate"
+                              render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                  <FormLabel>Date</FormLabel>
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <FormControl>
+                                        <Button
+                                          variant={"outline"}
+                                          className={cn(
+                                            "w-full pl-3 text-left font-normal",
+                                            !field.value && "text-muted-foreground"
+                                          )}
+                                        >
+                                          {field.value ? (
+                                            format(field.value, "PPP")
+                                          ) : (
+                                            <span>Pick a date</span>
+                                          )}
+                                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                        </Button>
+                                      </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                      <Calendar
+                                        mode="single"
+                                        selected={field.value}
+                                        onSelect={(date) => {
+                                          field.onChange(date);
+                                          form.setValue('scheduledDate', date);
+                                        }}
+                                        disabled={(date) => date < new Date()}
+                                        initialFocus
+                                        className={cn("p-3 pointer-events-auto")}
+                                      />
+                                    </PopoverContent>
+                                  </Popover>
+                                  <FormDescription>
+                                    The date to start the campaign
+                                  </FormDescription>
+                                </FormItem>
+                              )}
+                            />
 
-                    <TabsContent value="training" className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="script"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Campaign Script</FormLabel>
-                            <FormControl>
-                              <Textarea 
-                                placeholder="Enter the script for AI agents..."
-                                className="min-h-[200px]"
-                                {...field}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="trainingData"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Training Data</FormLabel>
-                            <FormControl>
-                              <Textarea 
-                                placeholder="Enter training data and context..."
-                                className="min-h-[150px]"
-                                {...field}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="trainingUrls"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Training URLs</FormLabel>
-                            <FormControl>
-                              <Textarea 
-                                placeholder="Enter URLs (one per line) for additional training data..."
-                                className="min-h-[100px]"
-                                value={Array.isArray(field.value) ? field.value.join('\n') : ''}
-                                onChange={(e) => field.onChange(e.target.value.split('\n').filter(Boolean))}
-                              />
-                            </FormControl>
-                            <FormDescription>
-                              Enter one URL per line for additional training materials
-                            </FormDescription>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormItem>
-                        <FormLabel>Upload Training Files</FormLabel>
-                        <FileUpload onFilesSelected={handleFileSelect} />
-                        {selectedFiles.length > 0 && (
-                          <div className="mt-2 space-y-1">
-                            {selectedFiles.map((file, index) => (
-                              <div key={index} className="flex items-center justify-between text-sm">
-                                <span>{file.name}</span>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    const newFiles = selectedFiles.filter((_, i) => i !== index);
-                                    setSelectedFiles(newFiles);
-                                    form.setValue('trainingFiles', newFiles);
-                                  }}
-                                >
-                                  Remove
-                                </Button>
-                              </div>
-                            ))}
+                            <FormField
+                              control={form.control}
+                              name="scheduledTime"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Time</FormLabel>
+                                  <FormControl>
+                                    <Input type="time" {...field} />
+                                  </FormControl>
+                                  <FormDescription>
+                                    The time to start the campaign
+                                  </FormDescription>
+                                </FormItem>
+                              )}
+                            />
                           </div>
                         )}
-                        <FormDescription>
-                          Upload PDFs, documents, images, or videos to train the AI agent
-                        </FormDescription>
-                      </FormItem>
-                    </TabsContent>
-                  </Tabs>
-                  
-                  <DialogFooter>
-                    <Button type="button" variant="outline" onClick={resetAndCloseDialog}>
-                      Cancel
-                    </Button>
-                    <Button type="submit">
-                      {editingCampaignId ? "Update Campaign" : "Create Campaign"}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
+                      </TabsContent>
+
+                      <TabsContent value="training" className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="script"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Campaign Script</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Enter the script for AI agents..."
+                                  className="min-h-[200px]"
+                                  {...field}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="trainingData"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Training Data</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Enter training data and context..."
+                                  className="min-h-[150px]"
+                                  {...field}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="trainingUrls"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Training URLs</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Enter URLs (one per line) for additional training data..."
+                                  className="min-h-[100px]"
+                                  value={Array.isArray(field.value) ? field.value.join('\n') : ''}
+                                  onChange={(e) => field.onChange(e.target.value.split('\n').filter(Boolean))}
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                Enter one URL per line for additional training materials
+                              </FormDescription>
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormItem>
+                          <FormLabel>Upload Training Files</FormLabel>
+                          <FileUpload onFilesSelected={handleFileSelect} />
+                          {selectedFiles.length > 0 && (
+                            <div className="mt-2 space-y-1">
+                              {selectedFiles.map((file, index) => (
+                                <div key={index} className="flex items-center justify-between text-sm">
+                                  <span>{file.name}</span>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      const newFiles = selectedFiles.filter((_, i) => i !== index);
+                                      setSelectedFiles(newFiles);
+                                      form.setValue('trainingFiles', newFiles);
+                                    }}
+                                  >
+                                    Remove
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          <FormDescription>
+                            Upload PDFs, documents, images, or videos to train the AI agent
+                          </FormDescription>
+                        </FormItem>
+                      </TabsContent>
+                    </Tabs>
+                    
+                    <DialogFooter>
+                      <Button type="button" variant="outline" onClick={resetAndCloseDialog}>
+                        Cancel
+                      </Button>
+                      <Button type="submit">
+                        {editingCampaignId ? "Update Campaign" : "Create Campaign"}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         {campaigns.length > 0 ? (
@@ -1007,7 +1008,7 @@ const Campaign = () => {
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Statuses</SelectItem>
+                    <SelectItem value="all">All Statuses</SelectItem>
                     <SelectItem value="connected">Connected</SelectItem>
                     <SelectItem value="disconnected">Disconnected</SelectItem>
                     <SelectItem value="busy">Busy</SelectItem>
@@ -1023,7 +1024,7 @@ const Campaign = () => {
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Agents</SelectItem>
+                    <SelectItem value="all">All Agents</SelectItem>
                     {agents.map(agent => (
                       <SelectItem key={agent.id} value={agent.id}>
                         {agent.name}
