@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bot, Headphones, MessageCircle, Speech } from "lucide-react";
@@ -72,11 +71,9 @@ const Index = () => {
                   >
                     {demoActive ? 'Stop Demo' : 'Start Demo'}
                   </Button>
-                  {typeof window !== 'undefined' && (
-                    <div className="w-24">
-                      <SoundWaveAnimation isActive={demoActive} barCount={4} />
-                    </div>
-                  )}
+                  <div className="w-24">
+                    <SoundWaveAnimation isActive={demoActive} barCount={4} />
+                  </div>
                 </div>
                 <div className="absolute -bottom-6 -right-6 h-24 w-24 bg-primary/10 rounded-full blur-xl"></div>
               </div>
