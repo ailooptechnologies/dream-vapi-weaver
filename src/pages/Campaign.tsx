@@ -60,7 +60,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import FileUpload from '@/components/FileUpload';
 import { useNavigate } from 'react-router-dom';
@@ -936,4 +936,4 @@ const Campaign = () => {
                           </div>
                         ))}
                         {!campaign.agents?.length && (
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-sm text-muted-foreground">No agents
