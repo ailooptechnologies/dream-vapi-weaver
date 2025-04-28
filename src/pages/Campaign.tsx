@@ -935,4 +935,4 @@ const Campaign = () => {
                             <span>{agents.find(a => a.id === agentId)?.name || agentId}</span>
                           </div>
                         ))}
-                        {!campaign.agents?.length && <span className="text-sm text-muted-foreground">No agents selected</span>}
+                        {!campaign.agents?.length && <span className="text-sm text-muted-foreground">No agents
