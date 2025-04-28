@@ -221,9 +221,6 @@ const SidebarNav = () => {
           <span className="text-sm">Logout</span>
         </button>
       </div>
-      
-      {/* Update the way we're using OrganizationDialog to match its API */}
-      <OrganizationDialog onOrgCreated={handleOrgCreated} />
     </div>
   );
 };
