@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -936,4 +937,294 @@ const Campaign = () => {
                           </div>
                         ))}
                         {!campaign.agents?.length && (
-                          <span className="text-sm text-muted-foreground">No agents
+                          <span className="text-sm text-muted-foreground">No agents selected</span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium text-muted-foreground mb-2">Contact Groups</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {campaign.phoneGroups?.map((groupId: string) => (
+                          <div key={groupId} className="flex items-center gap-1 px-2 py-1 bg-secondary rounded-md text-xs">
+                            <User className="h-3 w-3" />
+                            <span>{phoneGroups.find(g => g.id === groupId)?.name || groupId}</span>
+                          </div>
+                        ))}
+                        {!campaign.phoneGroups?.length && (
+                          <span className="text-sm text-muted-foreground">No groups selected</span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium text-muted-foreground mb-2">Campaign Stats</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="bg-secondary/30 rounded-md p-2 text-center">
+                          <div className="text-xs text-muted-foreground">Total</div>
+                          <div className="font-medium">{campaign.stats?.total || 0}</div>
+                        </div>
+                        <div className="bg-secondary/30 rounded-md p-2 text-center">
+                          <div className="text-xs text-muted-foreground">Completed</div>
+                          <div className="font-medium">{campaign.stats?.completed || 0}</div>
+                        </div>
+                        <div className="bg-secondary/30 rounded-md p-2 text-center">
+                          <div className="text-xs text-muted-foreground">In Progress</div>
+                          <div className="font-medium">{campaign.stats?.inProgress || 0}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {renderTestResults(campaign)}
+                  
+                  <div className="flex flex-wrap gap-3 mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                      onClick={() => handleEdit(campaign.id)}
+                    >
+                      <Pencil className="h-3 w-3" />
+                      Edit
+                    </Button>
+                    
+                    {campaign.status === 'active' ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2"
+                        onClick={() => handleStatusChange(campaign.id, 'paused')}
+                      >
+                        <Pause className="h-3 w-3" />
+                        Pause
+                      </Button>
+                    ) : campaign.status === 'paused' || campaign.status === 'draft' ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2 text-green-600 hover:text-green-700"
+                        onClick={() => handleStatusChange(campaign.id, 'active')}
+                      >
+                        <Play className="h-3 w-3" />
+                        Activate
+                      </Button>
+                    ) : null}
+                    
+                    {campaign.status !== 'completed' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2"
+                        onClick={() => handleStatusChange(campaign.id, 'completed')}
+                      >
+                        <CheckCircle className="h-3 w-3" />
+                        Mark Complete
+                      </Button>
+                    )}
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                      onClick={() => handleViewLogs(campaign.id)}
+                    >
+                      <List className="h-3 w-3" />
+                      View Logs
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2 text-red-600 hover:text-red-700"
+                      onClick={() => handleDeleteClick(campaign.id)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                      Delete
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center p-12 border rounded-lg bg-muted/20">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-full border bg-background mb-4">
+              <Phone className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-medium mb-2">No campaigns</h3>
+            <p className="text-muted-foreground mb-4">Create your first campaign to start making AI-powered calls</p>
+            <Button onClick={() => setIsDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Campaign
+            </Button>
+          </div>
+        )}
+      </div>
+      
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the campaign and all of its data. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      {/* Call logs dialog */}
+      <Dialog open={showCallLogsDialog} onOpenChange={setShowCallLogsDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Call Logs</DialogTitle>
+            <DialogDescription>
+              View and filter call logs for this campaign
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-3 justify-between">
+              <div className="flex flex-1 gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    placeholder="Search logs..." 
+                    className="pl-8" 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <SelectTrigger className="w-[130px]">
+                    <SelectValue placeholder="Filter status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="connected">Connected</SelectItem>
+                    <SelectItem value="disconnected">Disconnected</SelectItem>
+                    <SelectItem value="busy">Busy</SelectItem>
+                    <SelectItem value="no-answer">No Answer</SelectItem>
+                    <SelectItem value="failed">Failed</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select value={filterBot} onValueChange={setFilterBot}>
+                  <SelectTrigger className="w-[130px]">
+                    <SelectValue placeholder="Filter agent" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Agents</SelectItem>
+                    {agents.map(agent => (
+                      <SelectItem key={agent.id} value={agent.id}>{agent.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <Button variant="outline" className="shrink-0" onClick={exportCallLogs}>
+                <FileText className="mr-2 h-4 w-4" />
+                Export CSV
+              </Button>
+            </div>
+            
+            <div className="border rounded-md">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Agent</TableHead>
+                    <TableHead>Phone Number</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Duration</TableHead>
+                    <TableHead>Date & Time</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredLogs.length > 0 ? (
+                    filteredLogs.map((log) => (
+                      <TableRow key={log.id}>
+                        <TableCell className="font-medium">{log.botName}</TableCell>
+                        <TableCell>{log.phoneNumber}</TableCell>
+                        <TableCell>
+                          <Badge variant={getBadgeVariant(log.status)}>
+                            {log.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {log.status !== 'no-answer' && log.status !== 'busy' 
+                            ? formatDuration(log.duration) 
+                            : '—'
+                          }
+                        </TableCell>
+                        <TableCell>{format(log.timestamp, "MMM d, yyyy h:mm a")}</TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="sm" onClick={() => viewCallSummary(log)}>
+                            View Summary
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} className="h-24 text-center">
+                        No call logs match your filters
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Call summary dialog */}
+      <Dialog open={showSummaryDialog} onOpenChange={setShowSummaryDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Call Summary</DialogTitle>
+            <DialogDescription>
+              {selectedLog?.phoneNumber} • {selectedLog && format(selectedLog.timestamp, "MMM d, yyyy h:mm a")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <h4 className="text-sm font-medium mb-1">Agent</h4>
+              <p>{selectedLog?.botName}</p>
+            </div>
+            <div>
+              <h4 className="text-sm font-medium mb-1">Status</h4>
+              <Badge variant={selectedLog ? getBadgeVariant(selectedLog.status) : 'default'}>
+                {selectedLog?.status}
+              </Badge>
+            </div>
+            <div>
+              <h4 className="text-sm font-medium mb-1">Duration</h4>
+              <p>
+                {selectedLog?.status !== 'no-answer' && selectedLog?.status !== 'busy' 
+                  ? formatDuration(selectedLog?.duration || 0) 
+                  : '—'
+                }
+              </p>
+            </div>
+            <div>
+              <h4 className="text-sm font-medium mb-1">Summary</h4>
+              <p className="text-sm text-muted-foreground">{selectedLog?.summary}</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default Campaign;
