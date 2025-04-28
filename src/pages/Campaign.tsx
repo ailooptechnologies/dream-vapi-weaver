@@ -614,7 +614,7 @@ const Campaign = () => {
                                             </FormLabel>
                                           </div>
                                         </FormItem>
-                                      )
+                                      );
                                     }}
                                   />
                                 ))}
@@ -666,7 +666,7 @@ const Campaign = () => {
                                             </FormLabel>
                                           </div>
                                         </FormItem>
-                                      )
+                                      );
                                     }}
                                   />
                                 ))}
