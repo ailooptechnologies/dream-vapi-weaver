@@ -20,6 +20,7 @@ import TelephonyProviders from "./pages/TelephonyProviders";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import { useEffect } from "react";
+import ElectronWindowControls from "./components/ElectronWindowControls";
 
 function App() {
   // Initialize default organization if none exists
@@ -49,26 +50,29 @@ function App() {
   }, []);
 
   return (
-    <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/features" element={<Features />} />
-      <Route path="/pricing" element={<Pricing />} />
-      <Route path="/contact-us" element={<ContactUs />} />
-      <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />
-      <Route path="/ai-agents" element={<AuthGuard><AIAgents /></AuthGuard>} />
-      <Route path="/phone-numbers" element={<AuthGuard><PhoneNumbers /></AuthGuard>} />
-      <Route path="/custom-models" element={<AuthGuard><CustomModels /></AuthGuard>} />
-      <Route path="/provider-keys" element={<AuthGuard><ProviderKeys /></AuthGuard>} />
-      <Route path="/campaign" element={<AuthGuard><Campaign /></AuthGuard>} />
-      <Route path="/campaign/testing" element={<AuthGuard><CampaignTesting /></AuthGuard>} />
-      <Route path="/telephony-providers" element={<AuthGuard><TelephonyProviders /></AuthGuard>} />
-      <Route path="/help" element={<AuthGuard><Help /></AuthGuard>} />
-      <Route path="/profile" element={<AuthGuard><Profile /></AuthGuard>} />
-      <Route path="/settings" element={<AuthGuard><Settings /></AuthGuard>} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <>
+      <ElectronWindowControls />
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/features" element={<Features />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/contact-us" element={<ContactUs />} />
+        <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />
+        <Route path="/ai-agents" element={<AuthGuard><AIAgents /></AuthGuard>} />
+        <Route path="/phone-numbers" element={<AuthGuard><PhoneNumbers /></AuthGuard>} />
+        <Route path="/custom-models" element={<AuthGuard><CustomModels /></AuthGuard>} />
+        <Route path="/provider-keys" element={<AuthGuard><ProviderKeys /></AuthGuard>} />
+        <Route path="/campaign" element={<AuthGuard><Campaign /></AuthGuard>} />
+        <Route path="/campaign/testing" element={<AuthGuard><CampaignTesting /></AuthGuard>} />
+        <Route path="/telephony-providers" element={<AuthGuard><TelephonyProviders /></AuthGuard>} />
+        <Route path="/help" element={<AuthGuard><Help /></AuthGuard>} />
+        <Route path="/profile" element={<AuthGuard><Profile /></AuthGuard>} />
+        <Route path="/settings" element={<AuthGuard><Settings /></AuthGuard>} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
   );
 }
 

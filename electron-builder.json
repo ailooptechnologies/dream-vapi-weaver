@@ -1,0 +1,26 @@
+
+{
+  "appId": "com.voiceai.app",
+  "productName": "VoiceAI",
+  "directories": {
+    "output": "electron-dist"
+  },
+  "files": [
+    "dist/**/*",
+    "electron/**/*"
+  ],
+  "mac": {
+    "category": "public.app-category.productivity",
+    "target": ["dmg", "zip"],
+    "icon": "public/favicon.ico"
+  },
+  "win": {
+    "target": ["nsis"],
+    "icon": "public/favicon.ico"
+  },
+  "linux": {
+    "target": ["AppImage", "deb"],
+    "icon": "public/favicon.ico",
+    "category": "Office"
+  }
+}

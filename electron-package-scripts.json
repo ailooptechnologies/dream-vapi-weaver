@@ -1,0 +1,8 @@
+
+{
+  "scripts": {
+    "dev:electron": "node electron-start.js",
+    "build:electron": "npm run build && electron-builder build",
+    "electron": "IS_ELECTRON=true electron electron/main.js"
+  }
+}
