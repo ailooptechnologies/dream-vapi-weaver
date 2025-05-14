@@ -53,9 +53,9 @@ const SidebarNav = () => {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-3 border-b">
-        <Link to="/dashboard" className="flex items-center gap-2">
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="p-2 border-b">
+        <Link to="/dashboard" className="flex items-center gap-2 p-1">
           <div className="relative h-8 w-8 rounded-md bg-teal-400 flex items-center justify-center">
             <svg viewBox="0 0 24 24" className="h-6 w-6 text-teal-900" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 4L12 20" />
@@ -69,11 +69,11 @@ const SidebarNav = () => {
         </Link>
       </div>
 
-      <div className="p-3 border-b">
-        <h2 className="text-sm font-semibold text-muted-foreground">ORGANIZATION</h2>
+      <div className="py-2 px-2 border-b">
+        <h2 className="text-xs font-semibold text-muted-foreground mb-1 px-1">ORGANIZATION</h2>
         <div className="flex flex-col">
           <OrganizationSwitcher />
-          <div className="px-2 py-1 text-xs text-muted-foreground">{userEmail}</div>
+          <div className="px-2 py-1 text-xs text-muted-foreground truncate">{userEmail}</div>
         </div>
       </div>
 
@@ -84,8 +84,8 @@ const SidebarNav = () => {
             location.pathname === '/dashboard' ? 'bg-primary/10 text-primary' : ''
           }`}
         >
-          <Home className="h-4 w-4" />
-          <span className="text-sm">Overview</span>
+          <Home className="h-4 w-4 flex-shrink-0" />
+          <span className="text-sm truncate">Overview</span>
         </Link>
 
         <div className="mt-2">
@@ -98,15 +98,15 @@ const SidebarNav = () => {
           </button>
           
           {expandedSections.build && (
-            <div className="mt-1">
+            <div className="mt-1 space-y-0.5">
               <Link 
                 to="/campaign" 
                 className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${
                   location.pathname === '/campaign' ? 'bg-primary/10 text-primary' : ''
                 }`}
               >
-                <MessageSquare className="h-4 w-4" />
-                <span className="text-sm">Campaign</span>
+                <MessageSquare className="h-4 w-4 flex-shrink-0" />
+                <span className="text-sm truncate">Campaign</span>
               </Link>
               <Link 
                 to="/ai-agents" 
@@ -114,8 +114,8 @@ const SidebarNav = () => {
                   location.pathname === '/ai-agents' ? 'bg-primary/10 text-primary' : ''
                 }`}
               >
-                <Bot className="h-4 w-4" />
-                <span className="text-sm">AI Agents</span>
+                <Bot className="h-4 w-4 flex-shrink-0" />
+                <span className="text-sm truncate">AI Agents</span>
               </Link>
               <Link 
                 to="/phone-numbers" 
@@ -123,8 +123,8 @@ const SidebarNav = () => {
                   location.pathname === '/phone-numbers' ? 'bg-primary/10 text-primary' : ''
                 }`}
               >
-                <Phone className="h-4 w-4" />
-                <span className="text-sm">Phone Numbers</span>
+                <Phone className="h-4 w-4 flex-shrink-0" />
+                <span className="text-sm truncate">Phone Numbers</span>
               </Link>
               <Link 
                 to="/custom-models" 
@@ -132,8 +132,8 @@ const SidebarNav = () => {
                   location.pathname === '/custom-models' ? 'bg-primary/10 text-primary' : ''
                 }`}
               >
-                <Headphones className="h-4 w-4" />
-                <span className="text-sm">Custom Models</span>
+                <Headphones className="h-4 w-4 flex-shrink-0" />
+                <span className="text-sm truncate">Custom Models</span>
               </Link>
               <Link 
                 to="/provider-keys" 
@@ -141,8 +141,8 @@ const SidebarNav = () => {
                   location.pathname === '/provider-keys' ? 'bg-primary/10 text-primary' : ''
                 }`}
               >
-                <Key className="h-4 w-4" />
-                <span className="text-sm">Provider Keys</span>
+                <Key className="h-4 w-4 flex-shrink-0" />
+                <span className="text-sm truncate">Provider Keys</span>
               </Link>
               <Link 
                 to="/telephony-providers" 
@@ -150,8 +150,8 @@ const SidebarNav = () => {
                   location.pathname === '/telephony-providers' ? 'bg-primary/10 text-primary' : ''
                 }`}
               >
-                <Phone className="h-4 w-4" />
-                <span className="text-sm">Telephony Providers</span>
+                <Phone className="h-4 w-4 flex-shrink-0" />
+                <span className="text-sm truncate">Telephony Providers</span>
               </Link>
             </div>
           )}
@@ -168,15 +168,15 @@ const SidebarNav = () => {
           </button>
           
           {expandedSections.account && (
-            <div className="mt-1">
+            <div className="mt-1 space-y-0.5">
               <Link 
                 to="/profile" 
                 className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${
                   location.pathname === '/profile' ? 'bg-primary/10 text-primary' : ''
                 }`}
               >
-                <User className="h-4 w-4" />
-                <span className="text-sm">Profile</span>
+                <User className="h-4 w-4 flex-shrink-0" />
+                <span className="text-sm truncate">Profile</span>
               </Link>
               <Link 
                 to="/settings" 
@@ -184,8 +184,8 @@ const SidebarNav = () => {
                   location.pathname === '/settings' ? 'bg-primary/10 text-primary' : ''
                 }`}
               >
-                <Settings className="h-4 w-4" />
-                <span className="text-sm">Settings</span>
+                <Settings className="h-4 w-4 flex-shrink-0" />
+                <span className="text-sm truncate">Settings</span>
               </Link>
               <Link 
                 to="/activity" 
@@ -193,8 +193,8 @@ const SidebarNav = () => {
                   location.pathname === '/activity' ? 'bg-primary/10 text-primary' : ''
                 }`}
               >
-                <Activity className="h-4 w-4" />
-                <span className="text-sm">Activity</span>
+                <Activity className="h-4 w-4 flex-shrink-0" />
+                <span className="text-sm truncate">Activity</span>
               </Link>
             </div>
           )}
@@ -208,16 +208,16 @@ const SidebarNav = () => {
             location.pathname === '/help' ? 'bg-primary/10 text-primary' : ''
           }`}
         >
-          <HelpCircle className="h-4 w-4" />
-          <span className="text-sm">Help</span>
+          <HelpCircle className="h-4 w-4 flex-shrink-0" />
+          <span className="text-sm truncate">Help</span>
         </Link>
         
         <button 
           onClick={handleLogout}
           className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors w-full text-left"
         >
-          <LogOut className="h-4 w-4" />
-          <span className="text-sm">Logout</span>
+          <LogOut className="h-4 w-4 flex-shrink-0" />
+          <span className="text-sm truncate">Logout</span>
         </button>
       </div>
     </div>

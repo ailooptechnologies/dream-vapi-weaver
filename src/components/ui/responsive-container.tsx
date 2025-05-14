@@ -6,7 +6,7 @@ interface ResponsiveContainerProps extends React.HTMLAttributes<HTMLDivElement> 
   children: React.ReactNode;
   className?: string;
   maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "full";
-  padding?: "none" | "sm" | "md" | "lg";
+  padding?: "none" | "xs" | "sm" | "md" | "lg";
 }
 
 const ResponsiveContainer = ({
@@ -27,9 +27,10 @@ const ResponsiveContainer = ({
 
   const paddingClasses = {
     none: "px-0",
-    sm: "px-4 sm:px-6",
+    xs: "px-2 sm:px-3",
+    sm: "px-3 sm:px-4",
     md: "px-4 sm:px-6 md:px-8",
-    lg: "px-4 sm:px-8 md:px-12 lg:px-16",
+    lg: "px-4 sm:px-6 md:px-8 lg:px-12",
   };
 
   return (
