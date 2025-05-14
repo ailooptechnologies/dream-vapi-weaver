@@ -15,7 +15,8 @@ import {
   Plus,
   Building,
   User,
-  Settings
+  Settings,
+  Activity
 } from 'lucide-react';
 import OrganizationDialog from './OrganizationDialog';
 import { Button } from '@/components/ui/button';
@@ -69,8 +70,8 @@ const SidebarNav = () => {
       </div>
 
       <div className="p-3 border-b">
-        <h2 className="text-sm font-semibold text-muted-foreground mb-1">ORGANIZATION</h2>
-        <div className="flex flex-col space-y-1">
+        <h2 className="text-sm font-semibold text-muted-foreground">ORGANIZATION</h2>
+        <div className="flex flex-col">
           <OrganizationSwitcher />
           <div className="px-2 py-1 text-xs text-muted-foreground">{userEmail}</div>
         </div>
@@ -87,17 +88,17 @@ const SidebarNav = () => {
           <span className="text-sm">Overview</span>
         </Link>
 
-        <div className="mt-3">
+        <div className="mt-2">
           <button 
             onClick={() => toggleSection('build')} 
-            className="flex items-center justify-between w-full px-2 py-1.5"
+            className="flex items-center justify-between w-full px-2 py-1"
           >
             <span className="text-xs font-semibold text-muted-foreground">BUILD</span>
             <ChevronDown className={`h-3.5 w-3.5 transform transition-transform ${expandedSections.build ? 'rotate-180' : ''}`} />
           </button>
           
           {expandedSections.build && (
-            <div className="space-y-1 mt-1">
+            <div className="mt-1">
               <Link 
                 to="/campaign" 
                 className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${
@@ -157,17 +158,17 @@ const SidebarNav = () => {
         </div>
         
         {/* Account Section */}
-        <div className="mt-3">
+        <div className="mt-2">
           <button 
             onClick={() => toggleSection('account')} 
-            className="flex items-center justify-between w-full px-2 py-1.5"
+            className="flex items-center justify-between w-full px-2 py-1"
           >
             <span className="text-xs font-semibold text-muted-foreground">ACCOUNT</span>
             <ChevronDown className={`h-3.5 w-3.5 transform transition-transform ${expandedSections.account ? 'rotate-180' : ''}`} />
           </button>
           
           {expandedSections.account && (
-            <div className="space-y-1 mt-1">
+            <div className="mt-1">
               <Link 
                 to="/profile" 
                 className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${
@@ -185,6 +186,15 @@ const SidebarNav = () => {
               >
                 <Settings className="h-4 w-4" />
                 <span className="text-sm">Settings</span>
+              </Link>
+              <Link 
+                to="/activity" 
+                className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${
+                  location.pathname === '/activity' ? 'bg-primary/10 text-primary' : ''
+                }`}
+              >
+                <Activity className="h-4 w-4" />
+                <span className="text-sm">Activity</span>
               </Link>
             </div>
           )}
@@ -204,7 +214,7 @@ const SidebarNav = () => {
         
         <button 
           onClick={handleLogout}
-          className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors w-full text-left mt-1"
+          className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors w-full text-left"
         >
           <LogOut className="h-4 w-4" />
           <span className="text-sm">Logout</span>

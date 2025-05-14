@@ -445,7 +445,17 @@ const Dashboard = () => {
               </div>
             </CardContent>
             <CardFooter className="flex justify-center py-2 border-t">
-              <Button variant="ghost" size="sm" className="button-hover-effect">View All Activity</Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="button-hover-effect group"
+                asChild
+              >
+                <Link to="/activity" className="flex items-center">
+                  View All Activity
+                  <Activity className="ml-2 h-3.5 w-3.5 opacity-70 group-hover:opacity-100 transition-all group-hover:translate-x-0.5" />
+                </Link>
+              </Button>
             </CardFooter>
           </Card>
         </div>

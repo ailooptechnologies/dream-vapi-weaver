@@ -20,6 +20,7 @@ import TelephonyProviders from "./pages/TelephonyProviders";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import ApiDocs from "./pages/ApiDocs";
+import Activity from "./pages/Activity";
 import { useEffect } from "react";
 import ElectronWindowControls from "./components/ElectronWindowControls";
 
@@ -72,6 +73,7 @@ function App() {
         <Route path="/profile" element={<AuthGuard><Profile /></AuthGuard>} />
         <Route path="/settings" element={<AuthGuard><Settings /></AuthGuard>} />
         <Route path="/api-docs" element={<AuthGuard><ApiDocs /></AuthGuard>} />
+        <Route path="/activity" element={<AuthGuard><Activity /></AuthGuard>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
