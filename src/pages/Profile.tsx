@@ -1,18 +1,19 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, User, Mail, Building, Phone, Save, Image } from "lucide-react";
+import { Menu, User, Mail, Building, Phone, Save, Image, Upload } from "lucide-react";
 import SidebarNav from '@/components/SidebarNav';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PhoneInput } from '@/components/PhoneInput';
 
 interface ProfileFormValues {
   firstName: string;
@@ -34,6 +35,7 @@ const Profile = () => {
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Get profile data from localStorage or use defaults
   useEffect(() => {
@@ -114,18 +116,33 @@ const Profile = () => {
     }, 1000);
   };
 
-  const simulateUpload = () => {
-    setUploading(true);
-    setTimeout(() => {
-      setUploading(false);
-      const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${profileForm.getValues('firstName')}-${Date.now()}`;
-      profileForm.setValue('avatarUrl', avatarUrl);
-      localStorage.setItem('userAvatar', avatarUrl);
-      toast({
-        title: "Avatar uploaded",
-        description: "Your profile picture has been updated."
-      });
-    }, 1500);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setUploading(true);
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      
+      reader.onloadend = () => {
+        // Use the file data as a base64 string for the avatar
+        if (typeof reader.result === 'string') {
+          profileForm.setValue('avatarUrl', reader.result);
+          localStorage.setItem('userAvatar', reader.result);
+          setUploading(false);
+          toast({
+            title: "Avatar uploaded",
+            description: "Your profile picture has been updated."
+          });
+        }
+      };
+      
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
   return (
@@ -173,12 +190,19 @@ const Profile = () => {
                   </AvatarFallback>
                 </Avatar>
                 <div>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
                   <Button 
-                    onClick={simulateUpload} 
+                    onClick={triggerFileInput} 
                     disabled={uploading}
                     className="flex gap-2"
                   >
-                    <Image className="h-4 w-4" />
+                    <Upload className="h-4 w-4" />
                     {uploading ? "Uploading..." : "Upload Picture"}
                   </Button>
                   <p className="text-sm text-muted-foreground mt-2">
@@ -243,7 +267,7 @@ const Profile = () => {
                         <FormItem>
                           <FormLabel>Phone Number</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <PhoneInput value={field.value} onChange={field.onChange} />
                           </FormControl>
                         </FormItem>
                       )}
@@ -339,6 +363,7 @@ const Profile = () => {
                           <FormControl>
                             <Input type="password" {...field} />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
