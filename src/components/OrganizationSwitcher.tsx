@@ -46,10 +46,10 @@ const OrganizationSwitcher = () => {
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <Select value={selectedOrg} onValueChange={handleOrgChange}>
-        <SelectTrigger className="w-[200px]">
-          <SelectValue placeholder="Select organization" />
+    <div className="flex items-center gap-2 max-w-full">
+      <Select value={selectedOrg} onValueChange={handleOrgChange} className="flex-1 min-w-0">
+        <SelectTrigger className="w-full max-w-full truncate">
+          <SelectValue placeholder="Select organization" className="truncate" />
         </SelectTrigger>
         <SelectContent>
           {organizations.map((org) => (

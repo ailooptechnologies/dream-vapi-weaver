@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   ChevronDown, 
@@ -22,7 +22,6 @@ import OrganizationDialog from './OrganizationDialog';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import OrganizationSwitcher from './OrganizationSwitcher';
-import { ScrollArea } from './ui/scroll-area';
 
 const SidebarNav = () => {
   const [expandedSections, setExpandedSections] = useState({
@@ -36,6 +35,14 @@ const SidebarNav = () => {
   
   // Get user info from localStorage or use default
   const userEmail = localStorage.getItem('userEmail') || 'example@gmail.com';
+
+  // Auto-expand account section if on an account page
+  useEffect(() => {
+    const accountPages = ['/profile', '/settings', '/activity'];
+    if (accountPages.some(page => location.pathname === page)) {
+      setExpandedSections(prev => ({ ...prev, account: true }));
+    }
+  }, [location.pathname]);
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections({
@@ -59,7 +66,7 @@ const SidebarNav = () => {
   };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full">
       <div className="p-2 border-b">
         <Link to="/dashboard" className="flex items-center gap-2 p-1">
           <div className="relative h-8 w-8 rounded-md bg-teal-400 flex items-center justify-center">
@@ -83,8 +90,7 @@ const SidebarNav = () => {
         </div>
       </div>
 
-      {/* Use ScrollArea only when content exceeds available space */}
-      <nav className="flex-1 p-2">
+      <nav className="flex-1 p-2 flex flex-col">
         <Link 
           to="/dashboard" 
           className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${
@@ -206,27 +212,27 @@ const SidebarNav = () => {
             </div>
           )}
         </div>
-      </nav>
 
-      <div className="p-2 mt-auto border-t">
-        <Link 
-          to="/help" 
-          className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${
-            isActive('/help') ? 'bg-primary/10 text-primary' : ''
-          }`}
-        >
-          <HelpCircle className="h-4 w-4 flex-shrink-0" />
-          <span className="text-sm truncate">Help</span>
-        </Link>
-        
-        <button 
-          onClick={handleLogout}
-          className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors w-full text-left"
-        >
-          <LogOut className="h-4 w-4 flex-shrink-0" />
-          <span className="text-sm truncate">Logout</span>
-        </button>
-      </div>
+        <div className="mt-auto pt-2 border-t">
+          <Link 
+            to="/help" 
+            className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${
+              isActive('/help') ? 'bg-primary/10 text-primary' : ''
+            }`}
+          >
+            <HelpCircle className="h-4 w-4 flex-shrink-0" />
+            <span className="text-sm truncate">Help</span>
+          </Link>
+          
+          <button 
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors w-full text-left"
+          >
+            <LogOut className="h-4 w-4 flex-shrink-0" />
+            <span className="text-sm truncate">Logout</span>
+          </button>
+        </div>
+      </nav>
     </div>
   );
 };

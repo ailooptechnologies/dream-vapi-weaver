@@ -1,0 +1,104 @@
+
+import React from 'react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
+import { Button } from './ui/button';
+import { Edit, Trash2, MoreVertical, UserPlus, Phone } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+interface ContactActionsProps {
+  contactId: string;
+  contactName: string;
+  contactPhone?: string;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
+  onCall?: (phone: string) => void;
+}
+
+const ContactActions = ({ 
+  contactId, 
+  contactName, 
+  contactPhone,
+  onEdit,
+  onDelete,
+  onCall
+}: ContactActionsProps) => {
+  const { toast } = useToast();
+
+  const handleEdit = () => {
+    if (onEdit) {
+      onEdit(contactId);
+    } else {
+      toast({
+        title: "Edit Contact",
+        description: `Editing contact: ${contactName}`
+      });
+    }
+  };
+
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete(contactId);
+    } else {
+      toast({
+        title: "Contact Deleted",
+        description: `${contactName} has been deleted.`
+      });
+    }
+  };
+
+  const handleCall = () => {
+    if (contactPhone && onCall) {
+      onCall(contactPhone);
+    } else if (contactPhone) {
+      toast({
+        title: "Calling Contact",
+        description: `Initiating call to ${contactName} at ${contactPhone}`
+      });
+    } else {
+      toast({
+        title: "Cannot Call",
+        description: `No phone number available for ${contactName}`,
+        variant: "destructive"
+      });
+    }
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <MoreVertical className="h-4 w-4" />
+          <span className="sr-only">Open menu</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={handleEdit}>
+          <Edit className="h-4 w-4 mr-2" />
+          Edit
+        </DropdownMenuItem>
+        {contactPhone && (
+          <DropdownMenuItem onClick={handleCall}>
+            <Phone className="h-4 w-4 mr-2" />
+            Call
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem 
+          className="text-destructive focus:text-destructive"
+          onClick={handleDelete}
+        >
+          <Trash2 className="h-4 w-4 mr-2" />
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+export default ContactActions;
