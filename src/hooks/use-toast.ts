@@ -1,8 +1,12 @@
 
 import { toast as sonnerToast } from "sonner";
 
-export { toast };
-export { useToast } from "sonner";
+// Create a custom hook for toast functionality
+const useToast = () => {
+  return {
+    toast
+  };
+};
 
 type ToastOptions = {
   title?: string;
@@ -21,11 +25,13 @@ const toast = ({
   duration = 5000,
   ...props
 }: ToastOptions) => {
-  return sonnerToast({
-    title,
+  // Sonner expects different parameters format
+  return sonnerToast(title as string, {
     description,
     action,
     duration,
     ...props,
   });
 };
+
+export { useToast, toast };
