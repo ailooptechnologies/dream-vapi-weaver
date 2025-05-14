@@ -1,12 +1,11 @@
 
-import { toast as sonnerToast, Toast, useToast as useSonnerToast } from '@/components/ui/toast';
+import { Toast, ToastTitle, ToastDescription, ToastProvider, ToastViewport } from '@/components/ui/toast';
+import { Toaster as SonnerToaster } from 'sonner';
 
 export { useToast, toast };
 
-const useToast = useSonnerToast;
-
 type ToastProps = React.ComponentProps<typeof Toast>;
-type ToastActionElement = React.ReactElement<typeof Toast['Action']>;
+type ToastActionElement = React.ReactElement;
 
 type ToastOptions = {
   title?: string;
@@ -16,20 +15,30 @@ type ToastOptions = {
   duration?: number;
 };
 
+const useToast = () => {
+  const toasts: any[] = [];
+  
+  return {
+    toasts,
+    toast: (options: ToastOptions) => toast(options),
+    dismiss: (id: string) => {},
+  };
+};
+
 const toast = ({
   title,
   description,
   action,
-  variant,
+  variant = "default",
   duration = 5000,
   ...props
 }: ToastOptions) => {
-  return sonnerToast({
+  // Use the Sonner toast from the sonner package directly
+  return window.toast({
     title,
     description,
     action,
     duration,
     ...props,
-    variant: variant as "default" | "destructive" | undefined,
   });
 };
