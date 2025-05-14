@@ -22,6 +22,7 @@ import OrganizationDialog from './OrganizationDialog';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import OrganizationSwitcher from './OrganizationSwitcher';
+import { ScrollArea } from './ui/scroll-area';
 
 const SidebarNav = () => {
   const [expandedSections, setExpandedSections] = useState({
@@ -52,6 +53,11 @@ const SidebarNav = () => {
     });
   };
 
+  // Helper to check if link is active
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="p-2 border-b">
@@ -77,11 +83,12 @@ const SidebarNav = () => {
         </div>
       </div>
 
-      <nav className="flex-1 overflow-y-auto p-2">
+      {/* Use ScrollArea only when content exceeds available space */}
+      <nav className="flex-1 p-2">
         <Link 
           to="/dashboard" 
           className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${
-            location.pathname === '/dashboard' ? 'bg-primary/10 text-primary' : ''
+            isActive('/dashboard') ? 'bg-primary/10 text-primary' : ''
           }`}
         >
           <Home className="h-4 w-4 flex-shrink-0" />
@@ -102,7 +109,7 @@ const SidebarNav = () => {
               <Link 
                 to="/campaign" 
                 className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${
-                  location.pathname === '/campaign' ? 'bg-primary/10 text-primary' : ''
+                  isActive('/campaign') ? 'bg-primary/10 text-primary' : ''
                 }`}
               >
                 <MessageSquare className="h-4 w-4 flex-shrink-0" />
@@ -111,7 +118,7 @@ const SidebarNav = () => {
               <Link 
                 to="/ai-agents" 
                 className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${
-                  location.pathname === '/ai-agents' ? 'bg-primary/10 text-primary' : ''
+                  isActive('/ai-agents') ? 'bg-primary/10 text-primary' : ''
                 }`}
               >
                 <Bot className="h-4 w-4 flex-shrink-0" />
@@ -120,7 +127,7 @@ const SidebarNav = () => {
               <Link 
                 to="/phone-numbers" 
                 className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${
-                  location.pathname === '/phone-numbers' ? 'bg-primary/10 text-primary' : ''
+                  isActive('/phone-numbers') ? 'bg-primary/10 text-primary' : ''
                 }`}
               >
                 <Phone className="h-4 w-4 flex-shrink-0" />
@@ -129,7 +136,7 @@ const SidebarNav = () => {
               <Link 
                 to="/custom-models" 
                 className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${
-                  location.pathname === '/custom-models' ? 'bg-primary/10 text-primary' : ''
+                  isActive('/custom-models') ? 'bg-primary/10 text-primary' : ''
                 }`}
               >
                 <Headphones className="h-4 w-4 flex-shrink-0" />
@@ -138,7 +145,7 @@ const SidebarNav = () => {
               <Link 
                 to="/provider-keys" 
                 className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${
-                  location.pathname === '/provider-keys' ? 'bg-primary/10 text-primary' : ''
+                  isActive('/provider-keys') ? 'bg-primary/10 text-primary' : ''
                 }`}
               >
                 <Key className="h-4 w-4 flex-shrink-0" />
@@ -147,7 +154,7 @@ const SidebarNav = () => {
               <Link 
                 to="/telephony-providers" 
                 className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${
-                  location.pathname === '/telephony-providers' ? 'bg-primary/10 text-primary' : ''
+                  isActive('/telephony-providers') ? 'bg-primary/10 text-primary' : ''
                 }`}
               >
                 <Phone className="h-4 w-4 flex-shrink-0" />
@@ -172,7 +179,7 @@ const SidebarNav = () => {
               <Link 
                 to="/profile" 
                 className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${
-                  location.pathname === '/profile' ? 'bg-primary/10 text-primary' : ''
+                  isActive('/profile') ? 'bg-primary/10 text-primary' : ''
                 }`}
               >
                 <User className="h-4 w-4 flex-shrink-0" />
@@ -181,7 +188,7 @@ const SidebarNav = () => {
               <Link 
                 to="/settings" 
                 className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${
-                  location.pathname === '/settings' ? 'bg-primary/10 text-primary' : ''
+                  isActive('/settings') ? 'bg-primary/10 text-primary' : ''
                 }`}
               >
                 <Settings className="h-4 w-4 flex-shrink-0" />
@@ -190,7 +197,7 @@ const SidebarNav = () => {
               <Link 
                 to="/activity" 
                 className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${
-                  location.pathname === '/activity' ? 'bg-primary/10 text-primary' : ''
+                  isActive('/activity') ? 'bg-primary/10 text-primary' : ''
                 }`}
               >
                 <Activity className="h-4 w-4 flex-shrink-0" />
@@ -205,7 +212,7 @@ const SidebarNav = () => {
         <Link 
           to="/help" 
           className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${
-            location.pathname === '/help' ? 'bg-primary/10 text-primary' : ''
+            isActive('/help') ? 'bg-primary/10 text-primary' : ''
           }`}
         >
           <HelpCircle className="h-4 w-4 flex-shrink-0" />
