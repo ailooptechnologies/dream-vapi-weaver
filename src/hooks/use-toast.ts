@@ -1,30 +1,18 @@
 
-import { Toast, ToastTitle, ToastDescription, ToastProvider, ToastViewport } from '@/components/ui/toast';
-import { Toaster as SonnerToaster } from 'sonner';
+import { toast as sonnerToast } from "sonner";
 
-export { useToast, toast };
-
-type ToastProps = React.ComponentProps<typeof Toast>;
-type ToastActionElement = React.ReactElement;
+export { toast };
+export { useToast } from "sonner";
 
 type ToastOptions = {
   title?: string;
   description?: React.ReactNode;
-  action?: ToastActionElement;
+  action?: React.ReactElement;
   variant?: "default" | "destructive";
   duration?: number;
 };
 
-const useToast = () => {
-  const toasts: any[] = [];
-  
-  return {
-    toasts,
-    toast: (options: ToastOptions) => toast(options),
-    dismiss: (id: string) => {},
-  };
-};
-
+// Wrapper function for consistent toast API
 const toast = ({
   title,
   description,
@@ -33,8 +21,7 @@ const toast = ({
   duration = 5000,
   ...props
 }: ToastOptions) => {
-  // Use the Sonner toast from the sonner package directly
-  return window.toast({
+  return sonnerToast({
     title,
     description,
     action,
