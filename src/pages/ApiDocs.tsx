@@ -669,13 +669,15 @@ const ApiDocs = () => {
           {/* Sidebar/Navigation */}
           <div className="lg:col-span-3 border rounded-lg bg-card">
             <div className="p-4 border-b">
-              <Input 
-                placeholder="Search APIs..." 
-                value={searchTerm} 
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full"
-                prefix={<Search className="h-4 w-4 text-muted-foreground" />}
-              />
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Search APIs..." 
+                  value={searchTerm} 
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-8"
+                />
+              </div>
             </div>
             
             <div className="p-4 space-y-2 max-h-[70vh] overflow-auto">
