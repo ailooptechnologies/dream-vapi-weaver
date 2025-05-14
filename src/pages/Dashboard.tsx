@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, ChevronDown, ExternalLink, Play, MessageSquare, PenTool, Phone, Bot, Volume2, Mic, Key } from "lucide-react";
+import { Menu, ChevronDown, ExternalLink, Play, MessageSquare, PenTool, Phone, Bot, Volume2, Mic, Key, BarChart, TrendingUp, Users } from "lucide-react";
 import SidebarNav from '@/components/SidebarNav';
 import AssistantCard from '@/components/AssistantCard';
 import ConfigSection from '@/components/ConfigSection';
@@ -65,6 +65,14 @@ const Dashboard = () => {
     reachedContacts: 980,
     conversionRate: '12.5%',
   };
+  
+  // Performance metrics
+  const performanceMetrics = {
+    callCompleted: 245,
+    avgDuration: '2m 35s',
+    conversionRate: '18.3%',
+    customerSatisfaction: '4.7/5'
+  };
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
@@ -85,86 +93,168 @@ const Dashboard = () => {
         </SheetContent>
       </Sheet>
       
-      <div className="flex-1 p-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">Overview of your AI calling operations</p>
+      <div className="flex-1 p-4 sm:p-6 overflow-auto">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-1">Welcome to Your Dashboard</h1>
+          <p className="text-muted-foreground">Your AI calling operations at a glance</p>
+        </div>
+        
+        {/* Key Metrics Overview - Responsive Grid */}
+        <div className="mb-6 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+            <CardContent className="p-4 flex flex-col items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mb-2">
+                <Phone className="h-5 w-5 text-primary" />
+              </div>
+              <p className="text-xs sm:text-sm text-muted-foreground">Total Calls</p>
+              <h3 className="text-xl sm:text-2xl font-bold">{performanceMetrics.callCompleted}</h3>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
+            <CardContent className="p-4 flex flex-col items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center mb-2">
+                <BarChart className="h-5 w-5 text-secondary" />
+              </div>
+              <p className="text-xs sm:text-sm text-muted-foreground">Avg Duration</p>
+              <h3 className="text-xl sm:text-2xl font-bold">{performanceMetrics.avgDuration}</h3>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
+            <CardContent className="p-4 flex flex-col items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center mb-2">
+                <TrendingUp className="h-5 w-5 text-accent" />
+              </div>
+              <p className="text-xs sm:text-sm text-muted-foreground">Conversion</p>
+              <h3 className="text-xl sm:text-2xl font-bold">{performanceMetrics.conversionRate}</h3>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-br from-primary/10 to-accent/5 border-primary/20">
+            <CardContent className="p-4 flex flex-col items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mb-2">
+                <Users className="h-5 w-5 text-primary" />
+              </div>
+              <p className="text-xs sm:text-sm text-muted-foreground">Satisfaction</p>
+              <h3 className="text-xl sm:text-2xl font-bold">{performanceMetrics.customerSatisfaction}</h3>
+            </CardContent>
+          </Card>
         </div>
         
         {/* Campaign Stats */}
         <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-4">Campaign Performance</h2>
+          <h2 className="text-xl font-semibold mb-4 px-1">Campaign Performance</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Card>
+            <Card className="border-l-4 border-l-primary transform transition-transform hover:scale-[1.01] hover:shadow-md">
               <CardHeader className="pb-2">
-                <CardDescription>Campaigns</CardDescription>
+                <CardDescription className="text-sm">Campaigns</CardDescription>
                 <CardTitle className="text-3xl">{campaignStats.total}</CardTitle>
               </CardHeader>
               <CardContent className="pb-2">
-                <div className="flex justify-between text-sm">
-                  <div className="text-muted-foreground">Active</div>
-                  <div>{campaignStats.active}</div>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <div className="text-muted-foreground">Completed</div>
-                  <div>{campaignStats.completed}</div>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <div className="text-muted-foreground">Draft</div>
-                  <div>{campaignStats.draft}</div>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <div className="text-muted-foreground flex items-center gap-1">
+                      <span className="h-2 w-2 rounded-full bg-green-400"></span>
+                      <span>Active</span>
+                    </div>
+                    <div>{campaignStats.active}</div>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <div className="text-muted-foreground flex items-center gap-1">
+                      <span className="h-2 w-2 rounded-full bg-blue-400"></span>
+                      <span>Completed</span>
+                    </div>
+                    <div>{campaignStats.completed}</div>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <div className="text-muted-foreground flex items-center gap-1">
+                      <span className="h-2 w-2 rounded-full bg-gray-400"></span>
+                      <span>Draft</span>
+                    </div>
+                    <div>{campaignStats.draft}</div>
+                  </div>
                 </div>
               </CardContent>
               <CardFooter className="pt-0">
-                <Button variant="ghost" size="sm" className="w-full" asChild>
-                  <Link to="/campaign">View Campaigns</Link>
+                <Button variant="outline" size="sm" className="w-full group" asChild>
+                  <Link to="/campaign" className="flex items-center justify-center">
+                    View Campaigns
+                    <ExternalLink className="ml-2 h-3 w-3 opacity-70 group-hover:opacity-100 transition-opacity" />
+                  </Link>
                 </Button>
               </CardFooter>
             </Card>
             
-            <Card>
+            <Card className="border-l-4 border-l-secondary transform transition-transform hover:scale-[1.01] hover:shadow-md">
               <CardHeader className="pb-2">
-                <CardDescription>AI Agents</CardDescription>
+                <CardDescription className="text-sm">AI Agents</CardDescription>
                 <CardTitle className="text-3xl">{agentStats.total}</CardTitle>
               </CardHeader>
               <CardContent className="pb-2">
-                <div className="flex justify-between text-sm">
-                  <div className="text-muted-foreground">Active</div>
-                  <div>{agentStats.active}</div>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <div className="text-muted-foreground">Top Performer</div>
-                  <div className="truncate max-w-[100px]">{agentStats.topPerformer}</div>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <div className="text-muted-foreground flex items-center gap-1">
+                      <span className="h-2 w-2 rounded-full bg-green-400"></span>
+                      <span>Active</span>
+                    </div>
+                    <div>{agentStats.active}</div>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <div className="text-muted-foreground flex items-center gap-1">
+                      <span className="h-2 w-2 rounded-full bg-purple-400"></span>
+                      <span>Top Performer</span>
+                    </div>
+                    <div className="truncate max-w-[120px]">{agentStats.topPerformer}</div>
+                  </div>
                 </div>
               </CardContent>
               <CardFooter className="pt-0">
-                <Button variant="ghost" size="sm" className="w-full" asChild>
-                  <Link to="/ai-agents">Manage Agents</Link>
+                <Button variant="outline" size="sm" className="w-full group" asChild>
+                  <Link to="/ai-agents" className="flex items-center justify-center">
+                    Manage Agents
+                    <ExternalLink className="ml-2 h-3 w-3 opacity-70 group-hover:opacity-100 transition-opacity" />
+                  </Link>
                 </Button>
               </CardFooter>
             </Card>
             
-            <Card>
+            <Card className="border-l-4 border-l-accent transform transition-transform hover:scale-[1.01] hover:shadow-md">
               <CardHeader className="pb-2">
-                <CardDescription>Contacts</CardDescription>
-                <CardTitle className="text-3xl">{contactStats.totalContacts}</CardTitle>
+                <CardDescription className="text-sm">Contacts</CardDescription>
+                <CardTitle className="text-3xl">{contactStats.totalContacts.toLocaleString()}</CardTitle>
               </CardHeader>
               <CardContent className="pb-2">
-                <div className="flex justify-between text-sm">
-                  <div className="text-muted-foreground">Groups</div>
-                  <div>{contactStats.totalGroups}</div>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <div className="text-muted-foreground">Reached</div>
-                  <div>{contactStats.reachedContacts}</div>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <div className="text-muted-foreground">Conversion Rate</div>
-                  <div>{contactStats.conversionRate}</div>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <div className="text-muted-foreground flex items-center gap-1">
+                      <span className="h-2 w-2 rounded-full bg-blue-400"></span>
+                      <span>Groups</span>
+                    </div>
+                    <div>{contactStats.totalGroups}</div>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <div className="text-muted-foreground flex items-center gap-1">
+                      <span className="h-2 w-2 rounded-full bg-yellow-400"></span>
+                      <span>Reached</span>
+                    </div>
+                    <div>{contactStats.reachedContacts.toLocaleString()}</div>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <div className="text-muted-foreground flex items-center gap-1">
+                      <span className="h-2 w-2 rounded-full bg-green-400"></span>
+                      <span>Conversion</span>
+                    </div>
+                    <div>{contactStats.conversionRate}</div>
+                  </div>
                 </div>
               </CardContent>
               <CardFooter className="pt-0">
-                <Button variant="ghost" size="sm" className="w-full" asChild>
-                  <Link to="/phone-numbers">Manage Contacts</Link>
+                <Button variant="outline" size="sm" className="w-full group" asChild>
+                  <Link to="/phone-numbers" className="flex items-center justify-center">
+                    Manage Contacts
+                    <ExternalLink className="ml-2 h-3 w-3 opacity-70 group-hover:opacity-100 transition-opacity" />
+                  </Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -173,12 +263,12 @@ const Dashboard = () => {
         
         {/* Quick Actions */}
         <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+          <h2 className="text-xl font-semibold mb-4 px-1">Quick Actions</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <Card>
+            <Card className="bg-gradient-to-r from-background to-muted/30 hover:shadow-md transition-shadow">
               <CardHeader className="pb-2 flex flex-row items-center space-y-0">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                  <Phone className="h-5 w-5 text-primary" />
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mr-3">
+                  <Phone className="h-6 w-6 text-primary" />
                 </div>
                 <div>
                   <CardTitle className="text-lg">Start Campaign</CardTitle>
@@ -192,10 +282,10 @@ const Dashboard = () => {
               </CardFooter>
             </Card>
             
-            <Card>
+            <Card className="bg-gradient-to-r from-background to-muted/30 hover:shadow-md transition-shadow">
               <CardHeader className="pb-2 flex flex-row items-center space-y-0">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                  <Bot className="h-5 w-5 text-primary" />
+                <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center mr-3">
+                  <Bot className="h-6 w-6 text-secondary" />
                 </div>
                 <div>
                   <CardTitle className="text-lg">Create Agent</CardTitle>
@@ -209,10 +299,10 @@ const Dashboard = () => {
               </CardFooter>
             </Card>
             
-            <Card>
+            <Card className="bg-gradient-to-r from-background to-muted/30 hover:shadow-md transition-shadow">
               <CardHeader className="pb-2 flex flex-row items-center space-y-0">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                  <Key className="h-5 w-5 text-primary" />
+                <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mr-3">
+                  <Key className="h-6 w-6 text-accent" />
                 </div>
                 <div>
                   <CardTitle className="text-lg">Provider Keys</CardTitle>
