@@ -8,30 +8,16 @@ const useToast = () => {
   };
 };
 
-type ToastOptions = {
-  title?: string;
+// Wrapper function for consistent toast API
+const toast = (title: string, options?: {
   description?: React.ReactNode;
   action?: React.ReactElement;
   variant?: "default" | "destructive";
   duration?: number;
-};
-
-// Wrapper function for consistent toast API
-const toast = ({
-  title,
-  description,
-  action,
-  variant = "default",
-  duration = 5000,
-  ...props
-}: ToastOptions) => {
-  // Sonner expects different parameters format
-  return sonnerToast(title as string, {
-    description,
-    action,
-    duration,
-    ...props,
-  });
+  [key: string]: any;
+}) => {
+  // Sonner expects title as first parameter, options as second
+  return sonnerToast(title, options);
 };
 
 export { useToast, toast };
