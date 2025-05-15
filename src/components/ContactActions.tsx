@@ -9,7 +9,7 @@ import {
 } from './ui/dropdown-menu';
 import { Button } from './ui/button';
 import { Edit, Trash2, MoreVertical, Phone } from 'lucide-react';
-import { toast } from "sonner";
+import { toast } from '@/hooks/use-toast';
 
 interface ContactActionsProps {
   contactId: string;

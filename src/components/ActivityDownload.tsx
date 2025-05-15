@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from './ui/button';
 import { Download } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 interface ActivityDownloadProps {
   activityId: string;
@@ -11,8 +11,6 @@ interface ActivityDownloadProps {
 }
 
 const ActivityDownload = ({ activityId, fileName, onDownload }: ActivityDownloadProps) => {
-  const { toast } = useToast();
-
   const handleDownload = () => {
     if (onDownload) {
       onDownload(activityId);

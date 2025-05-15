@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { PhoneInput } from './ui/phone-input';
 import { Loader2, Camera } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar';
@@ -21,7 +22,6 @@ const ProfileUpdateForm = ({ initialData = { name: '', email: '', phone: '' } }:
   const [data, setData] = useState(initialData);
   const [isLoading, setIsLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialData.profileUrl || null);
-  const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (key: string, value: string) => {

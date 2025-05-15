@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -20,7 +21,7 @@ import {
 } from 'lucide-react';
 import OrganizationDialog from './OrganizationDialog';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast';
 import OrganizationSwitcher from './OrganizationSwitcher';
 
 const SidebarNav = () => {
@@ -31,7 +32,6 @@ const SidebarNav = () => {
   
   const location = useLocation();
   const navigate = useNavigate();
-  const { toast } = useToast();
   
   // Get user info from localStorage or use default
   const userEmail = localStorage.getItem('userEmail') || 'example@gmail.com';

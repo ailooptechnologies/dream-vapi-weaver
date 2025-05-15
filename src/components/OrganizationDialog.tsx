@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 interface OrganizationFormValues {
   name: string;
@@ -13,7 +14,6 @@ interface OrganizationFormValues {
 
 const OrganizationDialog = ({ onOrgCreated }: { onOrgCreated?: () => void }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { toast } = useToast();
   
   const form = useForm<OrganizationFormValues>({
     defaultValues: {

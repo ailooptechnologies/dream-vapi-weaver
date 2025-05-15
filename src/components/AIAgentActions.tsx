@@ -19,7 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from './ui/alert-dialog';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 interface AgentActionsProps {
   agentId: string;
@@ -30,7 +30,6 @@ interface AgentActionsProps {
 
 const AIAgentActions = ({ agentId, agentName, onEdit, onDelete }: AgentActionsProps) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-  const { toast } = useToast();
 
   const handleDelete = () => {
     onDelete(agentId);

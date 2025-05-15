@@ -1,13 +1,11 @@
 
 import { toast as sonnerToast } from "sonner";
 
-type ToastVariant = "default" | "destructive";
-
 // Define the types for toast parameters based on Sonner API
 interface ToastOptions {
   description?: React.ReactNode;
-  action?: React.ReactElement;
-  variant?: ToastVariant;
+  action?: React.ReactNode;
+  variant?: "default" | "destructive";
   duration?: number;
   [key: string]: any;
 }

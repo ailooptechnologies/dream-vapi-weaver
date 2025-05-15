@@ -4,11 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAssistantStore } from '@/store/useAssistantStore';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 const AssistantConfig: React.FC = () => {
   const { selectedAssistant, updateAssistant } = useAssistantStore();
-  const { toast } = useToast();
 
   const handleFirstMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (!selectedAssistant) return;
