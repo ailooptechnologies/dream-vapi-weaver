@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { 
   Menu, ChevronDown, ExternalLink, Play, MessageSquare, 
   PenTool, Phone, Bot, Volume2, Mic, Key, BarChart, 
-  TrendingUp, Users, Zap, Activity, ArrowUp, ArrowDown 
+  TrendingUp, Users, Zap, Activity, ArrowUp, ArrowDown, Headphones
 } from "lucide-react";
 import SidebarNav from '@/components/SidebarNav';
 import { useAssistantStore } from '@/store/useAssistantStore';
