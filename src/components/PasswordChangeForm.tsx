@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -22,8 +21,7 @@ const PasswordChangeForm = () => {
     
     // Validate password match
     if (newPassword !== confirmPassword) {
-      toast({
-        title: "Passwords do not match",
+      toast("Passwords do not match", {
         description: "New password and confirm password must match.",
         variant: "destructive"
       });
@@ -32,8 +30,7 @@ const PasswordChangeForm = () => {
     
     // Validate password length
     if (newPassword.length < 8) {
-      toast({
-        title: "Password too short",
+      toast("Password too short", {
         description: "Password must be at least 8 characters long.",
         variant: "destructive"
       });
@@ -45,8 +42,7 @@ const PasswordChangeForm = () => {
     // In a real app, this would be an API call
     setTimeout(() => {
       setIsLoading(false);
-      toast({
-        title: "Password Updated",
+      toast("Password Updated", {
         description: "Your password has been successfully changed."
       });
       

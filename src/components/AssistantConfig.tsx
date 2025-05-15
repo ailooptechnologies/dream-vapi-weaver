@@ -4,16 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAssistantStore } from '@/store/useAssistantStore';
-import { toast } from "@/hooks/use-toast";
+import { useToast } from '@/hooks/use-toast';
 
 const AssistantConfig: React.FC = () => {
   const { selectedAssistant, updateAssistant } = useAssistantStore();
+  const { toast } = useToast();
 
   const handleFirstMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (!selectedAssistant) return;
     updateAssistant(selectedAssistant.id, { firstMessage: e.target.value });
-    toast({
-      title: "First message updated",
+    toast("First message updated", {
       description: "The assistant's first message has been updated successfully."
     });
   };

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -42,8 +41,7 @@ const ProfileUpdateForm = ({ initialData = { name: '', email: '', phone: '' } }:
       }
       
       setIsLoading(false);
-      toast({
-        title: "Profile Updated",
+      toast("Profile Updated", {
         description: "Your profile information has been successfully updated."
       });
     }, 1000);
@@ -54,8 +52,7 @@ const ProfileUpdateForm = ({ initialData = { name: '', email: '', phone: '' } }:
     if (!file) return;
     
     if (file.size > 5 * 1024 * 1024) { // 5MB
-      toast({ 
-        title: "File too large",
+      toast("File too large", { 
         description: "Please select an image under 5MB",
         variant: "destructive"
       });

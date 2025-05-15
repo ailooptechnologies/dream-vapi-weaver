@@ -32,8 +32,7 @@ ${activityId},${new Date().toISOString()},Export,Completed,Activity export data`
       URL.revokeObjectURL(url);
       document.body.removeChild(a);
       
-      toast({
-        title: "Download Started",
+      toast("Download Started", {
         description: `Activity data is being downloaded.`
       });
     }

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -37,9 +36,8 @@ const OrganizationDialog = ({ onOrgCreated }: { onOrgCreated?: () => void }) => 
     // Set as current organization
     localStorage.setItem('currentOrganization', JSON.stringify(newOrg));
     
-    toast({
-      title: 'Organization created',
-      description: 'Your new organization has been created successfully.',
+    toast("Organization created", {
+      description: 'Your new organization has been created successfully.'
     });
     
     // Reset form and close dialog

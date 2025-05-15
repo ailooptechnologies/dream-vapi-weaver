@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   DropdownMenu,
@@ -35,8 +34,7 @@ const AIAgentActions = ({ agentId, agentName, onEdit, onDelete }: AgentActionsPr
   const handleDelete = () => {
     onDelete(agentId);
     setDeleteDialogOpen(false);
-    toast({
-      title: "Agent Deleted",
+    toast("Agent Deleted", {
       description: `${agentName} has been successfully deleted.`
     });
   };

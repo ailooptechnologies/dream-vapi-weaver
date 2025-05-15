@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from './ui/card';
 import { Button } from './ui/button';
@@ -52,8 +51,7 @@ const CallTransferSystem = ({
   const handleAnswer = () => {
     if (inboundCall) {
       onAnswer?.(inboundCall.id);
-      toast({
-        title: "Call Answered",
+      toast("Call Answered", {
         description: `Connected to ${inboundCall.phoneNumber}`
       });
     }
@@ -63,8 +61,7 @@ const CallTransferSystem = ({
   const handleReject = () => {
     if (inboundCall) {
       onReject?.(inboundCall.id);
-      toast({
-        title: "Call Rejected",
+      toast("Call Rejected", {
         description: `Call from ${inboundCall.phoneNumber} was rejected`
       });
     }
@@ -82,8 +79,7 @@ const CallTransferSystem = ({
       onTransfer?.(inboundCall.id, selectedAgent);
       
       const agent = mockHumanAgents.find(a => a.id === selectedAgent);
-      toast({
-        title: "Call Transferred",
+      toast("Call Transferred", {
         description: `Call transferred to ${agent?.name}`
       });
     }, 2000);
@@ -93,8 +89,7 @@ const CallTransferSystem = ({
   const handleEndCall = () => {
     if (inboundCall) {
       onEnd?.(inboundCall.id);
-      toast({
-        title: "Call Ended",
+      toast("Call Ended", {
         description: `Call with ${inboundCall.phoneNumber} has ended`
       });
     }
