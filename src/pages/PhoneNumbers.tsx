@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu, Phone, Upload, Plus, Trash2, Edit, Check, X, Search } from "lucide-react";
 import SidebarNav from '@/components/SidebarNav';
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { 
   Table, 
   TableBody, 
@@ -42,6 +42,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import ContactActions from "@/components/ContactActions";
 
 // Types for our data structures
 type ContactGroup = {
@@ -112,6 +113,19 @@ const PhoneNumbers = () => {
   // State for editing
   const [editingGroup, setEditingGroup] = useState<ContactGroup | null>(null);
   const [editingBatch, setEditingBatch] = useState<ContactBatch | null>(null);
+  
+  // Add new state for contact editing
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  
+  // Contact form
+  const contactForm = useForm({
+    defaultValues: {
+      name: '',
+      phoneNumber: '',
+      email: '',
+    }
+  });
   
   // CRUD operations for Groups
   const handleCreateGroup = (data: { name: string; description: string }) => {
@@ -260,6 +274,57 @@ const PhoneNumbers = () => {
     }
     
     toast.success("Contact deleted successfully");
+  };
+  
+  // Handle editing contact
+  const handleEditContact = (batchId: string, contactId: string) => {
+    if (selectedBatch && selectedBatch.id === batchId) {
+      const contact = selectedBatch.contacts.find(c => c.id === contactId);
+      if (contact) {
+        setEditingContact(contact);
+        contactForm.reset({
+          name: contact.name,
+          phoneNumber: contact.phoneNumber,
+          email: contact.email || '',
+        });
+        setContactDialogOpen(true);
+      }
+    }
+  };
+  
+  // Handle update contact
+  const handleUpdateContact = (data: { name: string; phoneNumber: string; email: string }) => {
+    if (!editingContact || !selectedBatch) return;
+    
+    const updatedBatches = contactBatches.map(batch => {
+      if (batch.id === selectedBatch.id) {
+        const updatedContacts = batch.contacts.map(contact => 
+          contact.id === editingContact.id 
+            ? { 
+                ...contact, 
+                name: data.name, 
+                phoneNumber: data.phoneNumber, 
+                email: data.email || undefined 
+              } 
+            : contact
+        );
+        return { ...batch, contacts: updatedContacts };
+      }
+      return batch;
+    });
+    
+    setContactBatches(updatedBatches);
+    
+    // Update selected batch
+    const updatedBatch = updatedBatches.find(b => b.id === selectedBatch.id);
+    if (updatedBatch) {
+      setSelectedBatch(updatedBatch);
+    }
+    
+    setEditingContact(null);
+    contactForm.reset();
+    setContactDialogOpen(false);
+    toast.success("Contact updated successfully");
   };
   
   // UI helpers
@@ -674,6 +739,64 @@ const PhoneNumbers = () => {
               </div>
             </div>
             
+            {/* Contact Edit Dialog */}
+            <Dialog open={contactDialogOpen} onOpenChange={setContactDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Edit Contact</DialogTitle>
+                  <DialogDescription>
+                    Update the contact information.
+                  </DialogDescription>
+                </DialogHeader>
+                <Form {...contactForm}>
+                  <form onSubmit={contactForm.handleSubmit(handleUpdateContact)} className="space-y-4">
+                    <FormField
+                      control={contactForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Contact name..." {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={contactForm.control}
+                      name="phoneNumber"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone Number</FormLabel>
+                          <FormControl>
+                            <PhoneInput 
+                              value={field.value} 
+                              onChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={contactForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email (Optional)</FormLabel>
+                          <FormControl>
+                            <Input type="email" placeholder="Contact email..." {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <DialogFooter>
+                      <Button type="submit">Update Contact</Button>
+                    </DialogFooter>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+            
             {paginatedContacts.length > 0 ? (
               <>
                 <Table>
@@ -692,35 +815,44 @@ const PhoneNumbers = () => {
                         <TableCell>{contact.phoneNumber}</TableCell>
                         <TableCell>{contact.email || '-'}</TableCell>
                         <TableCell className="text-right">
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button 
-                                variant="ghost" 
-                                size="icon"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-4">
-                              <p className="mb-2">Are you sure you want to delete this contact?</p>
-                              <div className="flex justify-end gap-2">
+                          <div className="flex justify-end items-center space-x-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditContact(selectedBatch.id, contact.id)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Popover>
+                              <PopoverTrigger asChild>
                                 <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => {/* Close popover */}}
+                                  variant="ghost" 
+                                  size="icon"
                                 >
-                                  Cancel
+                                  <Trash2 className="h-4 w-4" />
                                 </Button>
-                                <Button 
-                                  variant="destructive" 
-                                  size="sm"
-                                  onClick={() => handleDeleteContact(selectedBatch.id, contact.id)}
-                                >
-                                  Delete
-                                </Button>
-                              </div>
-                            </PopoverContent>
-                          </Popover>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-4">
+                                <p className="mb-2">Are you sure you want to delete this contact?</p>
+                                <div className="flex justify-end gap-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => {/* Close popover */}}
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button 
+                                    variant="destructive" 
+                                    size="sm"
+                                    onClick={() => handleDeleteContact(selectedBatch.id, contact.id)}
+                                  >
+                                    Delete
+                                  </Button>
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}

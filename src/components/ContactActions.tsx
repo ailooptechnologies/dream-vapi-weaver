@@ -9,7 +9,7 @@ import {
 } from './ui/dropdown-menu';
 import { Button } from './ui/button';
 import { Edit, Trash2, MoreVertical, Phone } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from "sonner";
 
 interface ContactActionsProps {
   contactId: string;
@@ -28,7 +28,6 @@ const ContactActions = ({
   onDelete,
   onCall
 }: ContactActionsProps) => {
-  const { toast } = useToast();
 
   const handleEdit = () => {
     if (onEdit) {
