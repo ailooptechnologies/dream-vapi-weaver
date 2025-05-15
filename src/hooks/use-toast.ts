@@ -1,4 +1,3 @@
-
 import { toast as sonnerToast } from "sonner";
 
 // Define the types for toast parameters based on Sonner API
@@ -11,11 +10,19 @@ interface ToastOptions {
 }
 
 /**
- * A wrapper function for the sonner toast that maintains the same API
- * Title is the first parameter, options object is the second parameter
+ * A wrapper function for the sonner toast that supports both:
+ * 1. toast(message: string, options?: ToastOptions)
+ * 2. toast({ title: string, description?: string, variant?: string, ... })
  */
-const toast = (title: string, options?: ToastOptions) => {
-  return sonnerToast(title, options);
+function toast(message: string | ToastOptions, options?: ToastOptions) {
+  // If first argument is an object with title, treat it as the options object
+  if (typeof message === 'object' && message !== null && 'title' in message) {
+    const { title, ...restOptions } = message;
+    return sonnerToast(title as string, restOptions);
+  }
+  
+  // Otherwise use the traditional method
+  return sonnerToast(message as string, options);
 };
 
 // Create a custom hook for toast functionality
