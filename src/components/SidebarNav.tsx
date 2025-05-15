@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -55,8 +54,7 @@ const SidebarNav = () => {
   const handleLogout = () => {
     localStorage.removeItem('isLoggedIn');
     navigate('/login');
-    toast({
-      title: "Logged out",
+    toast("Logged out", {
       description: "You have been successfully logged out"
     });
   };

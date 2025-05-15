@@ -12,17 +12,19 @@ interface ToastOptions {
   [key: string]: any;
 }
 
+/**
+ * A wrapper function for the sonner toast that maintains the same API
+ * Title is the first parameter, options object is the second parameter
+ */
+const toast = (title: string, options?: ToastOptions) => {
+  return sonnerToast(title, options);
+};
+
 // Create a custom hook for toast functionality
 const useToast = () => {
   return {
     toast
   };
-};
-
-// Wrapper function for consistent toast API that matches Sonner's API
-const toast = (title: string, options?: ToastOptions) => {
-  // Sonner expects title as first parameter, options as second
-  return sonnerToast(title, options);
 };
 
 export { useToast, toast };

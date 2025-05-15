@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,8 +33,7 @@ const ContactUs = () => {
 
   const onSubmit = (data: ContactFormValues) => {
     console.log('Contact form submitted:', data);
-    toast({
-      title: "Message sent",
+    toast("Message sent", {
       description: "We'll get back to you as soon as possible."
     });
     form.reset();

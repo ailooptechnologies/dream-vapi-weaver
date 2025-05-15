@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -31,8 +30,7 @@ const Register = () => {
 
   const handleRegister = (data: RegisterFormValues) => {
     if (data.password !== data.confirmPassword) {
-      toast({
-        title: "Error",
+      toast("Error", {
         description: "Passwords do not match"
       });
       return;
@@ -42,8 +40,7 @@ const Register = () => {
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('userEmail', data.email);
     
-    toast({
-      title: "Registration successful",
+    toast("Registration successful", {
       description: "Welcome to VoiceAI!"
     });
     
