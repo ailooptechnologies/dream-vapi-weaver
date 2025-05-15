@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -396,16 +395,16 @@ const Dashboard = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <CardHeader className="pb-2 flex flex-row items-center space-y-0">
                 <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform group-hover:bg-accent/20">
-                  <Key className="h-6 w-6 text-accent" />
+                  <Headphones className="h-6 w-6 text-accent" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">API Access</CardTitle>
-                  <CardDescription>View API documentation</CardDescription>
+                  <CardTitle className="text-lg">Custom Model</CardTitle>
+                  <CardDescription>Create a new custom voice model</CardDescription>
                 </div>
               </CardHeader>
               <CardFooter className="pt-2">
                 <Button size="sm" className="w-full group-hover:bg-accent/90 button-hover-effect" asChild>
-                  <Link to="/api-docs">View API Docs</Link>
+                  <Link to="/custom-models">Create Model</Link>
                 </Button>
               </CardFooter>
             </Card>

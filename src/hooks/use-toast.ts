@@ -1,12 +1,12 @@
-import { toast as sonnerToast } from "sonner";
+import { toast as sonnerToast, ToastOptions as SonnerToastOptions } from "sonner";
 
 // Define the types for toast parameters based on Sonner API
 interface ToastOptions {
-  description?: React.ReactNode;
-  action?: React.ReactNode;
-  variant?: "default" | "destructive";
+  description?: string;
+  variant?: "default" | "destructive" | "success";
   duration?: number;
-  [key: string]: any;
+  action?: React.ReactNode;
+  [key: string]: any; // Allow extra properties
 }
 
 /**
@@ -23,13 +23,11 @@ function toast(message: string | ToastOptions, options?: ToastOptions) {
   
   // Otherwise use the traditional method
   return sonnerToast(message as string, options);
-};
+}
 
 // Create a custom hook for toast functionality
 const useToast = () => {
-  return {
-    toast
-  };
+  return { toast };
 };
 
 export { useToast, toast };

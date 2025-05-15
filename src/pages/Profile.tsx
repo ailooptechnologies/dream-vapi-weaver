@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import SidebarNav from '@/components/SidebarNav';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -31,7 +32,6 @@ interface SecurityFormValues {
 }
 
 const Profile = () => {
-  const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -84,8 +84,7 @@ const Profile = () => {
       }
       
       setSaving(false);
-      toast({
-        title: "Profile updated",
+      toast("Profile updated", {
         description: "Your profile has been updated successfully."
       });
     }, 1000);
@@ -94,8 +93,7 @@ const Profile = () => {
   const handleSecuritySubmit = (data: SecurityFormValues) => {
     // Validate passwords match
     if (data.newPassword !== data.confirmPassword) {
-      toast({
-        title: "Passwords don't match",
+      toast("Passwords don't match", {
         description: "New password and confirm password must match.",
         variant: "destructive"
       });
@@ -107,8 +105,7 @@ const Profile = () => {
     // Simulate API call
     setTimeout(() => {
       setSaving(false);
-      toast({
-        title: "Password updated",
+      toast("Password updated", {
         description: "Your password has been updated successfully."
       });
       
@@ -125,8 +122,7 @@ const Profile = () => {
     if (!file) return;
     
     if (file.size > 1024 * 1024) { // 1MB
-      toast({
-        title: "File too large",
+      toast("File too large", {
         description: "Please select an image under 1MB",
         variant: "destructive"
       });
@@ -142,15 +138,13 @@ const Profile = () => {
       const result = e.target?.result as string;
       profileForm.setValue('avatarUrl', result);
       localStorage.setItem('userAvatar', result);
-      toast({
-        title: "Avatar uploaded",
+      toast("Avatar uploaded", {
         description: "Your profile picture has been updated."
       });
     };
     reader.onerror = () => {
       setUploading(false);
-      toast({
-        title: "Upload failed",
+      toast("Upload failed", {
         description: "Failed to upload image. Please try again.",
         variant: "destructive"
       });

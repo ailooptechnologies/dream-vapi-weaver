@@ -212,7 +212,7 @@ const SidebarNav = () => {
           )}
         </div>
 
-        <div className="mt-auto pt-2 border-t">
+        <div className="mt-2">
           <Link 
             to="/help" 
             className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${
