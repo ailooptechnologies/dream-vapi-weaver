@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from './ui/button';
-import { DownloadIcon } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ActivityDownloadProps {
@@ -41,7 +41,7 @@ ${activityId},${new Date().toISOString()},Export,Completed,Activity export data`
 
   return (
     <Button onClick={handleDownload} size="sm" variant="outline">
-      <DownloadIcon className="h-4 w-4 mr-1" />
+      <Download className="h-4 w-4 mr-1" />
       Download
     </Button>
   );

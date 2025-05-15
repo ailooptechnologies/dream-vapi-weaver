@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { Button } from './ui/button';
-import { Edit, Trash2, MoreVertical, UserPlus, Phone } from 'lucide-react';
+import { Edit, Trash2, MoreVertical, Phone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ContactActionsProps {

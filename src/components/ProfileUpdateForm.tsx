@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -23,7 +23,7 @@ const ProfileUpdateForm = ({ initialData = { name: '', email: '', phone: '' } }:
   const [isLoading, setIsLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialData.profileUrl || null);
   const { toast } = useToast();
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (key: string, value: string) => {
     setData(prev => ({ ...prev, [key]: value }));
@@ -63,8 +63,8 @@ const ProfileUpdateForm = ({ initialData = { name: '', email: '', phone: '' } }:
     }
     
     const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
       setPreviewUrl(result);
     };
     reader.readAsDataURL(file);

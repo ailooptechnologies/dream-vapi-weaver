@@ -16,7 +16,8 @@ import {
   Building,
   User,
   Settings,
-  Activity
+  Activity,
+  FilePlus
 } from 'lucide-react';
 import OrganizationDialog from './OrganizationDialog';
 import { Button } from '@/components/ui/button';
@@ -145,7 +146,7 @@ const SidebarNav = () => {
                   isActive('/custom-models') ? 'bg-primary/10 text-primary' : ''
                 }`}
               >
-                <Headphones className="h-4 w-4 flex-shrink-0" />
+                <FilePlus className="h-4 w-4 flex-shrink-0" />
                 <span className="text-sm truncate">Custom Models</span>
               </Link>
               <Link 

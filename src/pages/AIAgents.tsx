@@ -10,7 +10,7 @@ import SidebarNav from '@/components/SidebarNav';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from '@/hooks/use-toast';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -63,6 +63,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import AIAgentActions from '@/components/AIAgentActions';
 
 interface AIAgentFormData {
   name: string;
@@ -235,21 +236,12 @@ const AIAgents = () => {
     }
   };
 
-  const handleDeleteClick = (agentId: string) => {
-    setSelectedAgentForDeletion(agentId);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleDeleteConfirm = () => {
-    if (selectedAgentForDeletion) {
-      setAgents(agents.filter(a => a.id !== selectedAgentForDeletion));
-      toast({
-        title: "AI Agent deleted",
-        description: "The AI Agent has been removed."
-      });
-      setDeleteDialogOpen(false);
-      setSelectedAgentForDeletion(null);
-    }
+  const handleDelete = (agentId: string) => {
+    setAgents(agents.filter(a => a.id !== agentId));
+    toast({
+      title: "AI Agent deleted",
+      description: "The AI Agent has been removed."
+    });
   };
 
   const handleStatusChange = (agentId: string, newStatus: string) => {
@@ -631,36 +623,16 @@ const AIAgents = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button size="sm" variant="outline" onClick={() => handleEdit(agent.id)}>
-                          <Pencil className="h-4 w-4 mr-1" />
-                          Edit
-                        </Button>
+                        <AIAgentActions 
+                          agentId={agent.id} 
+                          agentName={agent.name} 
+                          onEdit={handleEdit}
+                          onDelete={handleDelete}
+                        />
                         <Button size="sm" variant="outline" onClick={() => handleDuplicate(agent.id)}>
                           <Copy className="h-4 w-4 mr-1" />
                           Duplicate
                         </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button size="sm" variant="outline" className="text-destructive">
-                              <Trash2 className="h-4 w-4 mr-1" />
-                              Delete
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the AI Agent.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteClick(agent.id)} className="bg-destructive text-destructive-foreground">
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
                         {agent.status === 'inactive' ? (
                           <Button size="sm" onClick={() => handleStatusChange(agent.id, 'active')}>
                             <CheckCircle className="h-4 w-4 mr-1" />

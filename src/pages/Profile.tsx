@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PhoneInput } from "@/components/ui/phone-input";
 
 interface ProfileFormValues {
   firstName: string;
@@ -34,6 +34,7 @@ const Profile = () => {
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   
   // Get profile data from localStorage or use defaults
   useEffect(() => {
@@ -41,6 +42,11 @@ const Profile = () => {
     if (savedProfile) {
       const profileData = JSON.parse(savedProfile);
       profileForm.reset(profileData);
+    }
+    
+    const savedAvatar = localStorage.getItem('userAvatar');
+    if (savedAvatar) {
+      profileForm.setValue('avatarUrl', savedAvatar);
     }
   }, []);
 
@@ -114,18 +120,46 @@ const Profile = () => {
     }, 1000);
   };
 
-  const simulateUpload = () => {
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    if (file.size > 1024 * 1024) { // 1MB
+      toast({
+        title: "File too large",
+        description: "Please select an image under 1MB",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setUploading(true);
-    setTimeout(() => {
+    
+    // Read file as data URL
+    const reader = new FileReader();
+    reader.onload = (e) => {
       setUploading(false);
-      const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${profileForm.getValues('firstName')}-${Date.now()}`;
-      profileForm.setValue('avatarUrl', avatarUrl);
-      localStorage.setItem('userAvatar', avatarUrl);
+      const result = e.target?.result as string;
+      profileForm.setValue('avatarUrl', result);
+      localStorage.setItem('userAvatar', result);
       toast({
         title: "Avatar uploaded",
         description: "Your profile picture has been updated."
       });
-    }, 1500);
+    };
+    reader.onerror = () => {
+      setUploading(false);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive"
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+  
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click();
   };
 
   return (
@@ -173,8 +207,15 @@ const Profile = () => {
                   </AvatarFallback>
                 </Avatar>
                 <div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
                   <Button 
-                    onClick={simulateUpload} 
+                    onClick={triggerFileUpload} 
                     disabled={uploading}
                     className="flex gap-2"
                   >
@@ -243,7 +284,10 @@ const Profile = () => {
                         <FormItem>
                           <FormLabel>Phone Number</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <PhoneInput 
+                              value={field.value} 
+                              onChange={field.onChange} 
+                            />
                           </FormControl>
                         </FormItem>
                       )}
