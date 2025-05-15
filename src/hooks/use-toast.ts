@@ -1,6 +1,7 @@
-import { toast as sonnerToast, ToastOptions as SonnerToastOptions } from "sonner";
 
-// Define the types for toast parameters based on Sonner API
+import { toast as sonnerToast } from "sonner";
+
+// Define our own ToastOptions interface rather than importing it from sonner
 interface ToastOptions {
   description?: string;
   variant?: "default" | "destructive" | "success";
