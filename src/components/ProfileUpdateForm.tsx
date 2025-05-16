@@ -42,7 +42,8 @@ const ProfileUpdateForm = ({ initialData = { name: '', email: '', phone: '' } }:
       
       setIsLoading(false);
       toast("Profile Updated", {
-        description: "Your profile information has been successfully updated."
+        description: "Your profile information has been successfully updated.",
+        variant: "success"
       });
     }, 1000);
   };

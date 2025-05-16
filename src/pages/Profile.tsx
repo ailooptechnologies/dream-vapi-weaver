@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu, User, Mail, Building, Phone, Save, Image } from "lucide-react";
@@ -85,7 +84,8 @@ const Profile = () => {
       
       setSaving(false);
       toast("Profile updated", {
-        description: "Your profile has been updated successfully."
+        description: "Your profile has been updated successfully.",
+        variant: "success"
       });
     }, 1000);
   };
@@ -106,7 +106,8 @@ const Profile = () => {
     setTimeout(() => {
       setSaving(false);
       toast("Password updated", {
-        description: "Your password has been updated successfully."
+        description: "Your password has been updated successfully.",
+        variant: "success"
       });
       
       securityForm.reset({
@@ -139,7 +140,8 @@ const Profile = () => {
       profileForm.setValue('avatarUrl', result);
       localStorage.setItem('userAvatar', result);
       toast("Avatar uploaded", {
-        description: "Your profile picture has been updated."
+        description: "Your profile picture has been updated.",
+        variant: "success"
       });
     };
     reader.onerror = () => {

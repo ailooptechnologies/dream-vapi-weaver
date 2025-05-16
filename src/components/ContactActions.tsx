@@ -34,7 +34,8 @@ const ContactActions = ({
       onEdit(contactId);
     } else {
       toast("Edit Contact", {
-        description: `Editing contact: ${contactName}`
+        description: `Editing contact: ${contactName}`,
+        variant: "success"
       });
     }
   };
@@ -44,7 +45,8 @@ const ContactActions = ({
       onDelete(contactId);
     } else {
       toast("Contact Deleted", {
-        description: `${contactName} has been deleted.`
+        description: `${contactName} has been deleted.`,
+        variant: "success"
       });
     }
   };
@@ -54,7 +56,8 @@ const ContactActions = ({
       onCall(contactPhone);
     } else if (contactPhone) {
       toast("Calling Contact", {
-        description: `Initiating call to ${contactName} at ${contactPhone}`
+        description: `Initiating call to ${contactName} at ${contactPhone}`,
+        variant: "success"
       });
     } else {
       toast("Cannot Call", {

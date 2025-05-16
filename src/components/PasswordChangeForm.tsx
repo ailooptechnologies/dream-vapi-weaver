@@ -43,7 +43,8 @@ const PasswordChangeForm = () => {
     setTimeout(() => {
       setIsLoading(false);
       toast("Password Updated", {
-        description: "Your password has been successfully changed."
+        description: "Your password has been successfully changed.",
+        variant: "success"
       });
       
       // Clear form
