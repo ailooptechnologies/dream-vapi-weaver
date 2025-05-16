@@ -18,8 +18,14 @@ interface ProfileUpdateFormProps {
   };
 }
 
-const ProfileUpdateForm = ({ initialData = { name: '', email: '', phone: '' } }: ProfileUpdateFormProps) => {
-  const [data, setData] = useState(initialData);
+const ProfileUpdateForm = ({ initialData = { name: '', email: '', phone: '+1 ' } }: ProfileUpdateFormProps) => {
+  // If the initialData doesn't have a phone, make sure it starts with +1
+  const defaultPhone = initialData.phone && initialData.phone.startsWith('+') ? initialData.phone : '+1 ' + (initialData.phone || '');
+  
+  const [data, setData] = useState({
+    ...initialData,
+    phone: defaultPhone
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialData.profileUrl || null);
   const [updateSuccess, setUpdateSuccess] = useState(false); 

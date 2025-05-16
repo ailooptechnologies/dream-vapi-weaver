@@ -75,7 +75,7 @@ const ContactActions = ({
           <span className="sr-only">Open menu</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48 md:w-56">
+      <DropdownMenuContent align="end" className="w-48 md:w-56 bg-popover">
         <DropdownMenuItem onClick={handleEdit} className="cursor-pointer">
           <Edit className="h-4 w-4 mr-2" />
           Edit

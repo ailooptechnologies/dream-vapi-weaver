@@ -48,14 +48,14 @@ const AIAgentActions = ({ agentId, agentName, onEdit, onDelete }: AgentActionsPr
             <span className="sr-only">Open menu</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => onEdit(agentId)}>
+        <DropdownMenuContent align="end" className="bg-popover">
+          <DropdownMenuItem onClick={() => onEdit(agentId)} className="cursor-pointer">
             <Edit className="h-4 w-4 mr-2" />
             Edit
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem 
-            className="text-destructive focus:text-destructive"
+            className="text-destructive focus:text-destructive cursor-pointer"
             onClick={() => setDeleteDialogOpen(true)}
           >
             <Trash2 className="h-4 w-4 mr-2" />

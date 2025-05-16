@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -43,6 +42,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { PhoneInput } from '@/components/ui/phone-input';
 
 interface TelephonyProviderFormValues {
   name: string;
@@ -81,7 +81,7 @@ const TelephonyProviders = () => {
       apiKey: '',
       apiSecret: '',
       region: '',
-      outboundNumber: '',
+      outboundNumber: '+1 ',
     }
   });
 
@@ -336,7 +336,11 @@ const TelephonyProviders = () => {
                           <FormItem>
                             <FormLabel>Default Outbound Number</FormLabel>
                             <FormControl>
-                              <Input placeholder="+1234567890" {...field} />
+                              <PhoneInput
+                                value={field.value}
+                                onChange={field.onChange}
+                                placeholder="Enter phone number"
+                              />
                             </FormControl>
                             <FormDescription>
                               Default number to use for outbound calls

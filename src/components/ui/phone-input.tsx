@@ -109,7 +109,7 @@ const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
       <div className={cn("flex items-stretch w-full", className)}>
         <Select 
           onValueChange={handleCountryCodeChange}
-          defaultValue={countryCode}
+          defaultValue="+1"
           value={countryCode}
           onOpenChange={handleOpenChange}
           disabled={disabled}
