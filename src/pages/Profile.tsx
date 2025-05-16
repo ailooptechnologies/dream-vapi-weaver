@@ -283,6 +283,7 @@ const Profile = () => {
                             <PhoneInput 
                               value={field.value} 
                               onChange={field.onChange} 
+                              placeholder="Enter phone number"
                             />
                           </FormControl>
                         </FormItem>

@@ -14,12 +14,12 @@ import { ChevronDown, X } from 'lucide-react';
 import { ScrollArea } from './scroll-area';
 import { cn } from '@/lib/utils';
 
-// List of common country codes
+// List of country codes
 const countryCodes = [
   { name: 'United States', code: 'US', dial: '+1' },
+  { name: 'Canada', code: 'CA', dial: '+1' },
   { name: 'India', code: 'IN', dial: '+91' },
   { name: 'United Kingdom', code: 'GB', dial: '+44' },
-  { name: 'Canada', code: 'CA', dial: '+1' },
   { name: 'Australia', code: 'AU', dial: '+61' },
   { name: 'Germany', code: 'DE', dial: '+49' },
   { name: 'France', code: 'FR', dial: '+33' },
@@ -48,7 +48,7 @@ interface PhoneInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElemen
 
 const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
   ({ value = '', onChange, className, inputClassName, disabled, ...props }, ref) => {
-    const [countryCode, setCountryCode] = useState('+1');
+    const [countryCode, setCountryCode] = useState('+1'); // Default to US (+1)
     const [phoneNumber, setPhoneNumber] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [isOpen, setIsOpen] = useState(false);
@@ -63,7 +63,9 @@ const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
           setCountryCode(code);
           setPhoneNumber(value.substring(code.length).trim());
         } else {
+          // If no country code is found, add the default +1 (US)
           setPhoneNumber(value);
+          onChange(`+1 ${value}`);
         }
       } else {
         setPhoneNumber('');
@@ -104,7 +106,7 @@ const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
     };
 
     return (
-      <div className={cn("flex items-stretch", className)}>
+      <div className={cn("flex items-stretch w-full", className)}>
         <Select 
           onValueChange={handleCountryCodeChange}
           defaultValue={countryCode}
@@ -112,10 +114,10 @@ const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
           onOpenChange={handleOpenChange}
           disabled={disabled}
         >
-          <SelectTrigger className="w-24 rounded-r-none border-r-0 focus:ring-offset-0">
+          <SelectTrigger className="w-24 md:w-28 rounded-r-none border-r-0 focus:ring-offset-0">
             <SelectValue placeholder={countryCode} />
           </SelectTrigger>
-          <SelectContent className="w-[280px]" position="popper">
+          <SelectContent className="w-[280px] max-h-[300px]" position="popper">
             <div className="p-2 sticky top-0 bg-popover z-10">
               <SearchInput
                 placeholder="Search country or code..."
@@ -135,7 +137,7 @@ const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
                 </Button>
               )}
             </div>
-            <ScrollArea className="max-h-[300px]">
+            <ScrollArea className="h-[240px]">
               {filteredCountries.map((country) => (
                 <SelectItem key={country.code} value={country.dial}>
                   <div className="flex justify-between">
@@ -157,7 +159,7 @@ const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
           type="tel"
           value={phoneNumber}
           onChange={handlePhoneNumberChange}
-          className={cn("rounded-l-none", inputClassName)}
+          className={cn("rounded-l-none flex-1", inputClassName)}
           disabled={disabled}
           {...props}
         />

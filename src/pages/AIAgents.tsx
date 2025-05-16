@@ -64,6 +64,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import AIAgentActions from '@/components/AIAgentActions';
+import { PhoneInput } from "@/components/ui/phone-input";
 
 interface AIAgentFormData {
   name: string;
@@ -140,7 +141,7 @@ const AIAgents = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      phoneNumber: '',
+      phoneNumber: '+1 ',
       description: '',
       sttProvider: '',
       ttsProvider: '',
@@ -339,22 +340,27 @@ const AIAgents = () => {
                         </FormItem>
                       )}
                     />
-                    
-                    <FormField
-                      control={form.control}
-                      name="phoneNumber"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone Number</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g., +15551234567" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
                   
+                  <FormField
+                    control={form.control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                          <PhoneInput
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="Enter phone number"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                
                   <FormField
                     control={form.control}
                     name="description"

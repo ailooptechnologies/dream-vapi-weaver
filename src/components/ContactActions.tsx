@@ -75,20 +75,20 @@ const ContactActions = ({
           <span className="sr-only">Open menu</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={handleEdit}>
+      <DropdownMenuContent align="end" className="w-48 md:w-56">
+        <DropdownMenuItem onClick={handleEdit} className="cursor-pointer">
           <Edit className="h-4 w-4 mr-2" />
           Edit
         </DropdownMenuItem>
         {contactPhone && (
-          <DropdownMenuItem onClick={handleCall}>
+          <DropdownMenuItem onClick={handleCall} className="cursor-pointer">
             <Phone className="h-4 w-4 mr-2" />
             Call
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem 
-          className="text-destructive focus:text-destructive"
+          className="text-destructive focus:text-destructive cursor-pointer"
           onClick={handleDelete}
         >
           <Trash2 className="h-4 w-4 mr-2" />
