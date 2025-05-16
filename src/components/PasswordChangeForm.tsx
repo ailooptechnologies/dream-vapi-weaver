@@ -15,6 +15,16 @@ const PasswordChangeForm = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [updateSuccess, setUpdateSuccess] = useState(false);
+
+  const handleChange = (
+    setter: React.Dispatch<React.SetStateAction<string>>,
+    value: string
+  ) => {
+    setter(value);
+    // Clear success message when form is being edited
+    if (updateSuccess) setUpdateSuccess(false);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +52,7 @@ const PasswordChangeForm = () => {
     // In a real app, this would be an API call
     setTimeout(() => {
       setIsLoading(false);
+      setUpdateSuccess(true);
       toast("Password Updated", {
         description: "Your password has been successfully changed.",
         variant: "success"
@@ -69,7 +80,7 @@ const PasswordChangeForm = () => {
                 id="current-password"
                 type={showCurrentPassword ? "text" : "password"}
                 value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
+                onChange={(e) => handleChange(setCurrentPassword, e.target.value)}
                 required
               />
               <Button
@@ -91,7 +102,7 @@ const PasswordChangeForm = () => {
                 id="new-password"
                 type={showNewPassword ? "text" : "password"}
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={(e) => handleChange(setNewPassword, e.target.value)}
                 required
               />
               <Button
@@ -113,7 +124,7 @@ const PasswordChangeForm = () => {
                 id="confirm-password"
                 type={showConfirmPassword ? "text" : "password"}
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => handleChange(setConfirmPassword, e.target.value)}
                 required
               />
               <Button
@@ -138,11 +149,17 @@ const PasswordChangeForm = () => {
             </ul>
           </div>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex flex-col items-end gap-4">
           <Button type="submit" className="ml-auto" disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Change Password
           </Button>
+          
+          {updateSuccess && (
+            <div className="w-full p-3 bg-green-50 text-green-700 border border-green-200 rounded-md text-sm">
+              Password successfully updated! Your new password is now active.
+            </div>
+          )}
         </CardFooter>
       </Card>
     </form>

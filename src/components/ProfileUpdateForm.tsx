@@ -22,10 +22,13 @@ const ProfileUpdateForm = ({ initialData = { name: '', email: '', phone: '' } }:
   const [data, setData] = useState(initialData);
   const [isLoading, setIsLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialData.profileUrl || null);
+  const [updateSuccess, setUpdateSuccess] = useState(false); 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (key: string, value: string) => {
     setData(prev => ({ ...prev, [key]: value }));
+    // Clear success message when form is being edited
+    if (updateSuccess) setUpdateSuccess(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -41,6 +44,7 @@ const ProfileUpdateForm = ({ initialData = { name: '', email: '', phone: '' } }:
       }
       
       setIsLoading(false);
+      setUpdateSuccess(true); // Set success state to true
       toast("Profile Updated", {
         description: "Your profile information has been successfully updated.",
         variant: "success"
@@ -139,11 +143,17 @@ const ProfileUpdateForm = ({ initialData = { name: '', email: '', phone: '' } }:
             </div>
           </div>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex flex-col items-end gap-4">
           <Button type="submit" className="ml-auto" disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Save Changes
           </Button>
+          
+          {updateSuccess && (
+            <div className="w-full p-3 bg-green-50 text-green-700 border border-green-200 rounded-md text-sm">
+              Profile successfully updated! Your changes have been saved.
+            </div>
+          )}
         </CardFooter>
       </Card>
     </form>
