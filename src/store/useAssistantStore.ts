@@ -8,6 +8,7 @@ interface Assistant {
   firstMessage: string;
   provider: string;
   model: string;
+  phone?: string; // Added phone property as optional
 }
 
 interface AssistantStore {
