@@ -1,5 +1,14 @@
+
 import React, { useState } from 'react';
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { 
+  Sheet, 
+  SheetContent, 
+  SheetTrigger,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu, Trash, Edit } from "lucide-react";
 import SidebarNav from '@/components/SidebarNav';
@@ -25,8 +34,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PhoneInput } from '@/components/ui/phone-input';
 
 const providerOptions = [
   { value: 'twilio', label: 'Twilio' },
@@ -61,9 +71,19 @@ const formSchema = z.object({
 
 interface TelephonyProviderFormValues extends z.infer<typeof formSchema> {}
 
+interface Provider {
+  id: string;
+  name: string;
+  provider: 'twilio' | 'plivo' | 'vonage' | 'telnyx';
+  apiKey: string;
+  apiSecret: string;
+  region: 'us-east-1' | 'us-west-2' | 'eu-west-1' | 'ap-southeast-2';
+  outboundNumber: string;
+}
+
 const TelephonyProviders = () => {
   const [open, setOpen] = useState(false);
-  const [providers, setProviders] = useState([
+  const [providers, setProviders] = useState<Provider[]>([
     {
       id: '1',
       name: 'Twilio Prod',
@@ -71,7 +91,7 @@ const TelephonyProviders = () => {
       apiKey: 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxx1',
       apiSecret: 'your_twilio_api_secret_1',
       region: 'us-east-1',
-      outboundNumber: '+15005550006',
+      outboundNumber: '+91 5005550006',
     },
     {
       id: '2',
@@ -80,7 +100,7 @@ const TelephonyProviders = () => {
       apiKey: 'MAxxxxxxxxxxxxxxxxxxxxxxxxxxxxx2',
       apiSecret: 'your_plivo_api_secret_2',
       region: 'us-west-2',
-      outboundNumber: '+14155550100',
+      outboundNumber: '+91 4155550100',
     },
   ]);
   const [editingProviderId, setEditingProviderId] = useState<string | null>(null);
@@ -92,22 +112,38 @@ const TelephonyProviders = () => {
       provider: 'twilio',
       apiKey: '',
       apiSecret: '',
-      region: '',
+      region: 'us-east-1', // Set a default region instead of empty string
       outboundNumber: '+91 ',
     }
   });
 
   const onSubmit = (data: TelephonyProviderFormValues) => {
     if (editingProviderId) {
-      // Update existing provider
-      setProviders(providers.map(p => p.id === editingProviderId ? { ...p, ...data } : p));
+      // Update existing provider - ensure all required fields are present
+      setProviders(providers.map(p => p.id === editingProviderId ? { 
+        ...p, 
+        name: data.name,
+        provider: data.provider,
+        apiKey: data.apiKey,
+        apiSecret: data.apiSecret,
+        region: data.region,
+        outboundNumber: data.outboundNumber
+      } : p));
       toast({
         title: "Provider Updated",
         description: `${data.name} has been updated successfully.`,
       });
     } else {
-      // Add new provider
-      const newProvider = { id: String(Date.now()), ...data };
+      // Add new provider - explicitly construct with all required fields
+      const newProvider: Provider = { 
+        id: String(Date.now()), 
+        name: data.name,
+        provider: data.provider,
+        apiKey: data.apiKey,
+        apiSecret: data.apiSecret,
+        region: data.region,
+        outboundNumber: data.outboundNumber
+      };
       setProviders([...providers, newProvider]);
       toast({
         title: "Provider Added",
@@ -124,10 +160,10 @@ const TelephonyProviders = () => {
     if (providerToEdit) {
       setEditingProviderId(id);
       form.setValue('name', providerToEdit.name);
-      form.setValue('provider', providerToEdit.provider as TelephonyProviderFormValues["provider"]);
+      form.setValue('provider', providerToEdit.provider);
       form.setValue('apiKey', providerToEdit.apiKey);
       form.setValue('apiSecret', providerToEdit.apiSecret);
-      form.setValue('region', providerToEdit.region as TelephonyProviderFormValues["region"]);
+      form.setValue('region', providerToEdit.region);
       form.setValue('outboundNumber', providerToEdit.outboundNumber);
       setOpen(true);
     }
@@ -327,7 +363,7 @@ const TelephonyProviders = () => {
                   <FormItem>
                     <FormLabel>Outbound Number</FormLabel>
                     <FormControl>
-                      <Input placeholder="+15005550006" {...field} />
+                      <PhoneInput placeholder="+91 5005550006" {...field} />
                     </FormControl>
                     <FormDescription>
                       Enter the outbound number you want to use for calls.
