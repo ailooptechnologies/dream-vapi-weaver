@@ -16,9 +16,9 @@ import { cn } from '@/lib/utils';
 
 // List of country codes
 const countryCodes = [
+  { name: 'India', code: 'IN', dial: '+91' },
   { name: 'United States', code: 'US', dial: '+1' },
   { name: 'Canada', code: 'CA', dial: '+1' },
-  { name: 'India', code: 'IN', dial: '+91' },
   { name: 'United Kingdom', code: 'GB', dial: '+44' },
   { name: 'Australia', code: 'AU', dial: '+61' },
   { name: 'Germany', code: 'DE', dial: '+49' },
@@ -48,7 +48,7 @@ interface PhoneInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElemen
 
 const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
   ({ value = '', onChange, className, inputClassName, disabled, ...props }, ref) => {
-    const [countryCode, setCountryCode] = useState('+1'); // Default to US (+1)
+    const [countryCode, setCountryCode] = useState('+91'); // Default to India (+91)
     const [phoneNumber, setPhoneNumber] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [isOpen, setIsOpen] = useState(false);
@@ -63,9 +63,9 @@ const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
           setCountryCode(code);
           setPhoneNumber(value.substring(code.length).trim());
         } else {
-          // If no country code is found, add the default +1 (US)
+          // If no country code is found, add the default +91 (India)
           setPhoneNumber(value);
-          onChange(`+1 ${value}`);
+          onChange(`+91 ${value}`);
         }
       } else {
         setPhoneNumber('');
@@ -109,7 +109,7 @@ const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
       <div className={cn("flex items-stretch w-full", className)}>
         <Select 
           onValueChange={handleCountryCodeChange}
-          defaultValue="+1"
+          defaultValue="+91"
           value={countryCode}
           onOpenChange={handleOpenChange}
           disabled={disabled}

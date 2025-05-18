@@ -18,9 +18,9 @@ interface ProfileUpdateFormProps {
   };
 }
 
-const ProfileUpdateForm = ({ initialData = { name: '', email: '', phone: '+1 ' } }: ProfileUpdateFormProps) => {
-  // If the initialData doesn't have a phone, make sure it starts with +1
-  const defaultPhone = initialData.phone && initialData.phone.startsWith('+') ? initialData.phone : '+1 ' + (initialData.phone || '');
+const ProfileUpdateForm = ({ initialData = { name: '', email: '', phone: '+91 ' } }: ProfileUpdateFormProps) => {
+  // If the initialData doesn't have a phone, make sure it starts with +91
+  const defaultPhone = initialData.phone && initialData.phone.startsWith('+') ? initialData.phone : '+91 ' + (initialData.phone || '');
   
   const [data, setData] = useState({
     ...initialData,
