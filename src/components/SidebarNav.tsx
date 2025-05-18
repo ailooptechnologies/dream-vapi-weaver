@@ -89,8 +89,8 @@ const SidebarNav = () => {
       </div>
 
       {/* Main navigation - scrollable section */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="p-2 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-2">
           <Link 
             to="/dashboard" 
             className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors ${

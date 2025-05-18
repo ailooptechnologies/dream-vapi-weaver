@@ -52,11 +52,15 @@ const ContactActions = ({
   };
 
   const handleCall = () => {
-    if (contactPhone && onCall) {
-      onCall(contactPhone);
-    } else if (contactPhone) {
+    // If no phone number prefix is present, add +91 (India) prefix
+    const formattedPhone = contactPhone && !contactPhone.startsWith('+') ? 
+                           `+91 ${contactPhone}` : contactPhone;
+    
+    if (formattedPhone && onCall) {
+      onCall(formattedPhone);
+    } else if (formattedPhone) {
       toast("Calling Contact", {
-        description: `Initiating call to ${contactName} at ${contactPhone}`,
+        description: `Initiating call to ${contactName} at ${formattedPhone}`,
         variant: "success"
       });
     } else {

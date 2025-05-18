@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { 
-  Menu, Calendar, Phone, Bot, MessageSquare, FileText, Clock, ArrowRight, 
-  ArrowUp, ArrowDown, Filter, Download, RefreshCcw, Search, XCircle
+  Menu, Calendar, Phone, Bot, MessageSquare, FileText, Clock, RefreshCcw, Search, XCircle
 } from "lucide-react";
 import SidebarNav from '@/components/SidebarNav';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -229,9 +228,6 @@ const Activity = () => {
                 </SelectContent>
               </Select>
               
-              <Button variant="outline" size="icon">
-                <Download className="h-4 w-4" />
-              </Button>
               
               <Button 
                 variant="outline" 

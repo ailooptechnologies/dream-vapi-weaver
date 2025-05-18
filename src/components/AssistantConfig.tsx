@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAssistantStore } from '@/store/useAssistantStore';
 import { toast } from '@/hooks/use-toast';
+import { PhoneInput } from "@/components/ui/phone-input";
 
 const AssistantConfig: React.FC = () => {
   const { selectedAssistant, updateAssistant } = useAssistantStore();
@@ -25,6 +26,11 @@ const AssistantConfig: React.FC = () => {
   const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (!selectedAssistant) return;
     updateAssistant(selectedAssistant.id, { model: e.target.value });
+  };
+
+  const handlePhoneChange = (value: string) => {
+    if (!selectedAssistant) return;
+    updateAssistant(selectedAssistant.id, { phone: value });
   };
 
   if (!selectedAssistant) return null;
@@ -64,6 +70,16 @@ const AssistantConfig: React.FC = () => {
           </select>
         </div>
       </div>
+      
+      {selectedAssistant.phone !== undefined && (
+        <div>
+          <label className="block text-sm font-medium mb-1">Phone Number</label>
+          <PhoneInput
+            value={selectedAssistant.phone || "+91 "}
+            onChange={handlePhoneChange}
+          />
+        </div>
+      )}
     </div>
   );
 };

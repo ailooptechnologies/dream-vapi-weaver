@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { Button } from './ui/button';
-import { Edit, Trash2, MoreVertical } from 'lucide-react';
+import { Edit, Trash2, MoreVertical, Phone } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,11 +24,20 @@ import { toast } from '@/hooks/use-toast';
 interface AgentActionsProps {
   agentId: string;
   agentName: string;
+  agentPhone?: string;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
+  onCall?: (phone: string) => void;
 }
 
-const AIAgentActions = ({ agentId, agentName, onEdit, onDelete }: AgentActionsProps) => {
+const AIAgentActions = ({ 
+  agentId, 
+  agentName, 
+  agentPhone,
+  onEdit, 
+  onDelete,
+  onCall 
+}: AgentActionsProps) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
 
   const handleDelete = () => {
@@ -37,6 +46,22 @@ const AIAgentActions = ({ agentId, agentName, onEdit, onDelete }: AgentActionsPr
     toast("Agent Deleted", {
       description: `${agentName} has been successfully deleted.`
     });
+  };
+  
+  const handleCall = () => {
+    if (!agentPhone) return;
+    
+    // If no phone number prefix is present, add +91 (India) prefix
+    const formattedPhone = agentPhone && !agentPhone.startsWith('+') ? 
+                          `+91 ${agentPhone}` : agentPhone;
+    
+    if (onCall && formattedPhone) {
+      onCall(formattedPhone);
+    } else {
+      toast("Agent Call", {
+        description: `Calling agent ${agentName} at ${formattedPhone || 'unknown number'}`
+      });
+    }
   };
 
   return (
@@ -53,6 +78,12 @@ const AIAgentActions = ({ agentId, agentName, onEdit, onDelete }: AgentActionsPr
             <Edit className="h-4 w-4 mr-2" />
             Edit
           </DropdownMenuItem>
+          {agentPhone && (
+            <DropdownMenuItem onClick={handleCall} className="cursor-pointer">
+              <Phone className="h-4 w-4 mr-2" />
+              Call
+            </DropdownMenuItem>
+          )}
           <DropdownMenuSeparator />
           <DropdownMenuItem 
             className="text-destructive focus:text-destructive cursor-pointer"
