@@ -3,7 +3,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { 
   Menu, Calendar, Phone, Bot, MessageSquare, FileText, Clock, ArrowRight, 
-  ArrowUp, ArrowDown, Filter, RefreshCcw, Search, XCircle
+  ArrowUp, ArrowDown, Filter, Download, RefreshCcw, Search, XCircle
 } from "lucide-react";
 import SidebarNav from '@/components/SidebarNav';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -229,7 +229,9 @@ const Activity = () => {
                 </SelectContent>
               </Select>
               
-              {/* Download button removed as requested */}
+              <Button variant="outline" size="icon">
+                <Download className="h-4 w-4" />
+              </Button>
               
               <Button 
                 variant="outline" 

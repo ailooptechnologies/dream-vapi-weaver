@@ -52,16 +52,11 @@ const ContactActions = ({
   };
 
   const handleCall = () => {
-    // Ensure phone number starts with India's country code
-    const formattedPhone = contactPhone && !contactPhone.startsWith('+') 
-      ? `+91 ${contactPhone}` 
-      : contactPhone;
-      
-    if (formattedPhone && onCall) {
-      onCall(formattedPhone);
-    } else if (formattedPhone) {
+    if (contactPhone && onCall) {
+      onCall(contactPhone);
+    } else if (contactPhone) {
       toast("Calling Contact", {
-        description: `Initiating call to ${contactName} at ${formattedPhone}`,
+        description: `Initiating call to ${contactName} at ${contactPhone}`,
         variant: "success"
       });
     } else {

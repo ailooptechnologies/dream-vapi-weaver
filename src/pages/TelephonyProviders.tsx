@@ -1,190 +1,189 @@
-
 import React, { useState } from 'react';
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetTrigger,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetFooter
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, Trash, Edit } from "lucide-react";
+import { Menu, Phone, Plus, Pencil, Trash2, CheckCircle, Globe } from "lucide-react";
 import SidebarNav from '@/components/SidebarNav';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "@/hooks/use-toast";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { PhoneInput } from '@/components/ui/phone-input';
 
-const providerOptions = [
-  { value: 'twilio', label: 'Twilio' },
-  { value: 'plivo', label: 'Plivo' },
-  { value: 'vonage', label: 'Vonage' },
-  { value: 'telnyx', label: 'Telnyx' },
-];
-
-const regionOptions = [
-  { value: 'us-east-1', label: 'US East (N. Virginia)' },
-  { value: 'us-west-2', label: 'US West (Oregon)' },
-  { value: 'eu-west-1', label: 'EU West (Ireland)' },
-  { value: 'ap-southeast-2', label: 'Asia Pacific (Sydney)' },
-];
-
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Provider name must be at least 2 characters.",
-  }),
-  provider: z.enum(['twilio', 'plivo', 'vonage', 'telnyx']),
-  apiKey: z.string().min(10, {
-    message: "API Key must be at least 10 characters.",
-  }),
-  apiSecret: z.string().min(10, {
-    message: "API Secret must be at least 10 characters.",
-  }),
-  region: z.enum(['us-east-1', 'us-west-2', 'eu-west-1', 'ap-southeast-2']),
-  outboundNumber: z.string().min(5, {
-    message: "Outbound number must be at least 5 characters.",
-  }),
-})
-
-interface TelephonyProviderFormValues extends z.infer<typeof formSchema> {}
-
-interface Provider {
-  id: string;
+interface TelephonyProviderFormValues {
   name: string;
-  provider: 'twilio' | 'plivo' | 'vonage' | 'telnyx';
-  apiKey: string;
-  apiSecret: string;
-  region: 'us-east-1' | 'us-west-2' | 'eu-west-1' | 'ap-southeast-2';
-  outboundNumber: string;
+  provider: string;
+  accountSid: string;
+  authToken: string;
+  apiKey?: string;
+  apiSecret?: string;
+  region?: string;
+  outboundNumber?: string;
 }
 
 const TelephonyProviders = () => {
-  const [open, setOpen] = useState(false);
-  const [providers, setProviders] = useState<Provider[]>([
-    {
-      id: '1',
-      name: 'Twilio Prod',
-      provider: 'twilio',
-      apiKey: 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxx1',
-      apiSecret: 'your_twilio_api_secret_1',
-      region: 'us-east-1',
-      outboundNumber: '+91 5005550006',
-    },
-    {
-      id: '2',
-      name: 'Plivo Stage',
-      provider: 'plivo',
-      apiKey: 'MAxxxxxxxxxxxxxxxxxxxxxxxxxxxxx2',
-      apiSecret: 'your_plivo_api_secret_2',
-      region: 'us-west-2',
-      outboundNumber: '+91 4155550100',
-    },
-  ]);
+  const { toast } = useToast();
+  const [providers, setProviders] = useState<any[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProviderId, setEditingProviderId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [providerToDelete, setProviderToDelete] = useState<string | null>(null);
+
+  const providerTypes = [
+    { value: 'twilio', label: 'Twilio' },
+    { value: 'aws-chime', label: 'AWS Chime' },
+    { value: 'plivo', label: 'Plivo' },
+    { value: 'telnyx', label: 'Telnyx' },
+    { value: 'vonage', label: 'Vonage (Nexmo)' },
+    { value: 'messagebird', label: 'MessageBird' },
+  ];
 
   const form = useForm<TelephonyProviderFormValues>({
-    resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      provider: 'twilio',
+      provider: '',
+      accountSid: '',
+      authToken: '',
       apiKey: '',
       apiSecret: '',
-      region: 'us-east-1', // Set a default region instead of empty string
-      outboundNumber: '+91 ',
+      region: '',
+      outboundNumber: '+1 ',
     }
   });
 
-  const onSubmit = (data: TelephonyProviderFormValues) => {
-    if (editingProviderId) {
-      // Update existing provider - ensure all required fields are present
-      setProviders(providers.map(p => p.id === editingProviderId ? { 
-        ...p, 
-        name: data.name,
-        provider: data.provider,
-        apiKey: data.apiKey,
-        apiSecret: data.apiSecret,
-        region: data.region,
-        outboundNumber: data.outboundNumber
-      } : p));
-      toast({
-        title: "Provider Updated",
-        description: `${data.name} has been updated successfully.`,
-      });
-    } else {
-      // Add new provider - explicitly construct with all required fields
-      const newProvider: Provider = { 
-        id: String(Date.now()), 
-        name: data.name,
-        provider: data.provider,
-        apiKey: data.apiKey,
-        apiSecret: data.apiSecret,
-        region: data.region,
-        outboundNumber: data.outboundNumber
-      };
-      setProviders([...providers, newProvider]);
-      toast({
-        title: "Provider Added",
-        description: `${data.name} has been added successfully.`,
-      });
-    }
-    setOpen(false);
+  // Watch provider type to show conditional fields
+  const providerType = form.watch('provider');
+
+  const resetAndCloseDialog = () => {
     form.reset();
+    setIsDialogOpen(false);
     setEditingProviderId(null);
   };
 
-  const handleEdit = (id: string) => {
-    const providerToEdit = providers.find(p => p.id === id);
-    if (providerToEdit) {
-      setEditingProviderId(id);
-      form.setValue('name', providerToEdit.name);
-      form.setValue('provider', providerToEdit.provider);
-      form.setValue('apiKey', providerToEdit.apiKey);
-      form.setValue('apiSecret', providerToEdit.apiSecret);
-      form.setValue('region', providerToEdit.region);
-      form.setValue('outboundNumber', providerToEdit.outboundNumber);
-      setOpen(true);
+  const onSubmit = (data: TelephonyProviderFormValues) => {
+    const providerLabel = providerTypes.find(p => p.value === data.provider)?.label || data.provider;
+    
+    if (editingProviderId) {
+      setProviders(providers.map(provider => 
+        provider.id === editingProviderId ? { 
+          ...provider, 
+          ...data, 
+          providerLabel,
+          status: provider.status,
+        } : provider
+      ));
+      toast({
+        title: "Provider updated",
+        description: "Telephony provider has been updated successfully."
+      });
+    } else {
+      const newProvider = {
+        id: crypto.randomUUID(),
+        ...data,
+        providerLabel,
+        status: 'active',
+        createdAt: new Date().toISOString(),
+      };
+      setProviders([...providers, newProvider]);
+      toast({
+        title: "Provider added",
+        description: "New telephony provider has been added successfully."
+      });
+    }
+    resetAndCloseDialog();
+  };
+
+  const handleEdit = (providerId: string) => {
+    const provider = providers.find(p => p.id === providerId);
+    if (provider) {
+      form.reset({
+        name: provider.name,
+        provider: provider.provider,
+        accountSid: provider.accountSid,
+        authToken: provider.authToken,
+        apiKey: provider.apiKey,
+        apiSecret: provider.apiSecret,
+        region: provider.region,
+        outboundNumber: provider.outboundNumber,
+      });
+      setEditingProviderId(providerId);
+      setIsDialogOpen(true);
     }
   };
 
-  const handleDelete = (id: string) => {
-    setProviders(providers.filter(p => p.id !== id));
-    toast({
-      title: "Provider Deleted",
-      description: "Telephony provider has been deleted successfully.",
-    });
+  const handleDeleteClick = (providerId: string) => {
+    setProviderToDelete(providerId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (providerToDelete) {
+      setProviders(providers.filter(p => p.id !== providerToDelete));
+      toast({
+        title: "Provider deleted",
+        description: "The telephony provider has been removed."
+      });
+      setDeleteDialogOpen(false);
+      setProviderToDelete(null);
+    }
+  };
+
+  const toggleProviderStatus = (providerId: string) => {
+    setProviders(providers.map(provider => {
+      if (provider.id === providerId) {
+        const newStatus = provider.status === 'active' ? 'inactive' : 'active';
+        toast({
+          title: `Provider ${newStatus}`,
+          description: `Provider has been ${newStatus === 'active' ? 'activated' : 'deactivated'}.`
+        });
+        return { ...provider, status: newStatus };
+      }
+      return provider;
+    }));
   };
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
-      {/* Desktop sidebar */}
-      <div className="hidden md:flex flex-col w-64 border-r bg-card">
+      {/* Desktop Sidebar */}
+      <div className="hidden md:flex flex-col w-64 bg-card border-r">
         <SidebarNav />
       </div>
 
-      {/* Mobile sidebar */}
+      {/* Mobile Sidebar */}
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon" className="md:hidden absolute top-4 left-4">
@@ -196,189 +195,284 @@ const TelephonyProviders = () => {
         </SheetContent>
       </Sheet>
 
-      {/* Main content */}
       <div className="flex-1 p-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">Telephony Providers</h1>
-          <p className="text-muted-foreground">
-            Manage your telephony provider settings
-          </p>
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-bold">Telephony Providers</h1>
+            <p className="text-muted-foreground">Manage your telephony service providers</p>
+          </div>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Add Provider
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>{editingProviderId ? "Edit Provider" : "Add New Provider"}</DialogTitle>
+                <DialogDescription>
+                  {editingProviderId ? "Update your telephony provider details." : "Connect a new telephony service provider."}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Display Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Production Twilio" {...field} required />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="provider"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Provider</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select provider" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {providerTypes.map(provider => (
+                              <SelectItem key={provider.value} value={provider.value}>
+                                {provider.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  {/* Show fields based on provider type */}
+                  {providerType && (
+                    <>
+                      <FormField
+                        control={form.control}
+                        name="accountSid"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Account SID</FormLabel>
+                            <FormControl>
+                              <Input type="password" {...field} required />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="authToken"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Auth Token</FormLabel>
+                            <FormControl>
+                              <Input type="password" {...field} required />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      {(providerType === 'twilio' || providerType === 'telnyx' || providerType === 'aws-chime') && (
+                        <FormField
+                          control={form.control}
+                          name="apiKey"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>API Key</FormLabel>
+                              <FormControl>
+                                <Input type="password" {...field} />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      )}
+                      
+                      {(providerType === 'twilio' || providerType === 'telnyx') && (
+                        <FormField
+                          control={form.control}
+                          name="apiSecret"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>API Secret</FormLabel>
+                              <FormControl>
+                                <Input type="password" {...field} />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      )}
+                      
+                      {providerType === 'aws-chime' && (
+                        <FormField
+                          control={form.control}
+                          name="region"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>AWS Region</FormLabel>
+                              <FormControl>
+                                <Input placeholder="e.g., us-east-1" {...field} />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      )}
+                      
+                      <FormField
+                        control={form.control}
+                        name="outboundNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Default Outbound Number</FormLabel>
+                            <FormControl>
+                              <PhoneInput
+                                value={field.value}
+                                onChange={field.onChange}
+                                placeholder="Enter phone number"
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Default number to use for outbound calls
+                            </FormDescription>
+                          </FormItem>
+                        )}
+                      />
+                    </>
+                  )}
+                  
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={resetAndCloseDialog}>
+                      Cancel
+                    </Button>
+                    <Button type="submit">
+                      {editingProviderId ? "Update Provider" : "Add Provider"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
         </div>
 
-        {/* Add provider button */}
-        <Button onClick={() => { setOpen(true); setEditingProviderId(null); form.reset() }}>Add Provider</Button>
-
-        {/* Providers list */}
-        <div className="mt-4 space-y-4">
-          {providers.map((provider) => (
-            <Card key={provider.id}>
-              <CardHeader>
-                <CardTitle>{provider.name}</CardTitle>
-                <CardDescription>
-                  {provider.provider} - {provider.region}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4">
-                <div className="flex items-center space-x-4">
-                  <Label>API Key:</Label>
-                  <span>{provider.apiKey}</span>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <Label>Outbound Number:</Label>
-                  <span>{provider.outboundNumber}</span>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-end gap-2">
-                <Button variant="outline" size="sm" onClick={() => handleEdit(provider.id)}>
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit
+        {providers.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {providers.map((provider) => (
+              <Card key={provider.id}>
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-1">
+                      <CardTitle>{provider.name}</CardTitle>
+                      <CardDescription>
+                        <div className="flex items-center gap-1">
+                          <Globe className="h-3 w-3" />
+                          <span>{provider.providerLabel}</span>
+                        </div>
+                      </CardDescription>
+                    </div>
+                    <Badge className={provider.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                      {provider.status === 'active' ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="pb-2">
+                  <div className="grid grid-cols-2 gap-y-2 text-sm">
+                    <div className="text-muted-foreground">Account SID</div>
+                    <div className="font-mono">••••••••••{provider.accountSid.slice(-4)}</div>
+                    
+                    <div className="text-muted-foreground">Auth Token</div>
+                    <div className="font-mono">••••••••••{provider.authToken.slice(-4)}</div>
+                    
+                    {provider.apiKey && (
+                      <>
+                        <div className="text-muted-foreground">API Key</div>
+                        <div className="font-mono">••••••••••{provider.apiKey.slice(-4)}</div>
+                      </>
+                    )}
+                    
+                    {provider.region && (
+                      <>
+                        <div className="text-muted-foreground">Region</div>
+                        <div>{provider.region}</div>
+                      </>
+                    )}
+                    
+                    {provider.outboundNumber && (
+                      <>
+                        <div className="text-muted-foreground">Outbound Number</div>
+                        <div>{provider.outboundNumber}</div>
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+                
+                <CardFooter className="border-t pt-4 flex justify-between">
+                  <div className="space-x-2">
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(provider.id)}>
+                      <Pencil className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
+                    <Button variant="outline" size="sm" className="text-destructive" onClick={() => handleDeleteClick(provider.id)}>
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Delete
+                    </Button>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    variant={provider.status === 'active' ? "outline" : "default"}
+                    onClick={() => toggleProviderStatus(provider.id)}
+                  >
+                    {provider.status === 'active' ? 'Deactivate' : 'Activate'}
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="border rounded-lg p-6 flex flex-col items-center justify-center text-center min-h-[200px]">
+            <Phone className="h-8 w-8 mb-4 text-muted-foreground" />
+            <h3 className="font-medium mb-2">No Telephony Providers</h3>
+            <p className="text-sm text-muted-foreground mb-4">Add your first telephony provider to start making calls</p>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Your First Provider
                 </Button>
-                <Button variant="destructive" size="sm" onClick={() => handleDelete(provider.id)}>
-                  <Trash className="h-4 w-4 mr-2" />
-                  Delete
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+              </DialogTrigger>
+            </Dialog>
+          </div>
+        )}
       </div>
 
-      {/* Add/Edit provider modal */}
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>{editingProviderId ? "Edit Provider" : "Add Provider"}</SheetTitle>
-            <SheetDescription>
-              {editingProviderId ? "Edit the telephony provider details." : "Add a new telephony provider to your account."}
-            </SheetDescription>
-          </SheetHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Provider Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="My Twilio Account" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      This is the name you'll use to identify this provider.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="provider"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Provider</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a provider" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {providerOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      Choose the telephony provider you want to use.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="apiKey"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>API Key</FormLabel>
-                    <FormControl>
-                      <Input placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      Enter the API key provided by your telephony provider.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="apiSecret"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>API Secret</FormLabel>
-                    <FormControl>
-                      <Input placeholder="YourAPISecretKey" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      Enter the API secret provided by your telephony provider.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="region"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Region</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a region" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {regionOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      Select the region where your telephony provider operates.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="outboundNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Outbound Number</FormLabel>
-                    <FormControl>
-                      <PhoneInput placeholder="+91 5005550006" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      Enter the outbound number you want to use for calls.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <SheetFooter>
-                <Button type="submit">{editingProviderId ? "Update Provider" : "Add Provider"}</Button>
-              </SheetFooter>
-            </form>
-          </Form>
-        </SheetContent>
-      </Sheet>
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This telephony provider will be permanently deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
