@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { authService } from '@/services/auth';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,17 +25,26 @@ const Login = () => {
     }
   });
 
-  const handleLogin = (data: LoginFormValues) => {
-    console.log('Login attempt:', data);
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userEmail', data.email);
-    
-    toast({
-      title: "Login successful",
-      description: "Welcome back!"
-    });
-    
-    navigate('/dashboard');
+  const handleLogin = async (data: LoginFormValues) => {
+    try {
+      const response = await authService.login(data.email, data.password);
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('userEmail', response.user.email);
+      
+      toast({
+        title: "Login successful",
+        description: "Welcome back!"
+      });
+      
+      navigate('/dashboard');
+    } catch (error: any) {
+      toast({
+        title: "Login failed",
+        description: error.response?.data?.message || "An error occurred",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
