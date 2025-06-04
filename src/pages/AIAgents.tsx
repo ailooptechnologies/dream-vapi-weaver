@@ -10,7 +10,8 @@ import SidebarNav from '@/components/SidebarNav';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from "@/hooks/use-toast";
+import { aiAgentService } from '@/services/aiAgents';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -89,6 +90,42 @@ const AIAgents = () => {
   const [editingAgentId, setEditingAgentId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedAgentForDeletion, setSelectedAgentForDeletion] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadAgents();
+  }, []);
+
+  const loadAgents = async () => {
+    try {
+      const data = await aiAgentService.getAgents();
+      setAgents(data);
+    } catch (error: any) {
+      toast({
+        title: "Error loading agents",
+        description: error.response?.data?.message || "Failed to load AI agents",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleAddKey = async (data: ProviderKeyFormValues) => {
+    try {
+      const response = await aiAgentService.createAgent(data);
+      setAgents([...agents, response]);
+      toast({
+        title: "Agent created",
+        description: "New AI agent has been created successfully."
+      });
+      setIsDialogOpen(false);
+      form.reset();
+    } catch (error: any) {
+      toast({
+        title: "Error creating agent",
+        description: error.response?.data?.message || "Failed to create agent",
+        variant: "destructive"
+      });
+    }
+  };
 
   // Sample data (in a real app, this would come from API calls)
   const sttProviders = [
